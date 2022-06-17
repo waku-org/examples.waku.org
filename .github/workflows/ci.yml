@@ -33,7 +33,7 @@ jobs:
         id: use-yarn
         shell: bash
         run: echo "::set-output name=lockfile::$(ls yarn.lock 2> /dev/null)"
-        working-directory: examples/${{ matrix.example }}
+        working-directory: ${{ matrix.example }}
 
       - name: (npm) Cache npm cache
         if: steps.use-yarn.outputs.lockfile != 'yarn.lock'
@@ -45,19 +45,19 @@ jobs:
       - name: (npm) ${{ matrix.example }} install using npm i
         if: steps.use-yarn.outputs.lockfile != 'yarn.lock'
         run: npm install
-        working-directory: examples/${{ matrix.example }}
+        working-directory: ${{ matrix.example }}
 
       - name: (npm) ${{ matrix.example }} test
         if: steps.use-yarn.outputs.lockfile != 'yarn.lock'
         run: npm run test
-        working-directory: examples/${{ matrix.example }}
+        working-directory: ${{ matrix.example }}
 
       - name: (yarn) ${{ matrix.example }} install using yarn
         if: steps.use-yarn.outputs.lockfile == 'yarn.lock'
         run: yarn install --frozen-lockfile
-        working-directory: examples/${{ matrix.example }}
+        working-directory: ${{ matrix.example }}
 
       - name: (yarn) ${{ matrix.example }} test
         if: steps.use-yarn.outputs.lockfile == 'yarn.lock'
         run: echo "test skipped" # yarn test; tracked with https://github.com/status-im/js-waku/issues/563
-        working-directory: examples/${{ matrix.example }}
+        working-directory: ${{ matrix.example }}
