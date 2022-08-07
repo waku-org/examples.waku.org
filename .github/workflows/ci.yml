@@ -49,6 +49,7 @@ jobs:
         with:
           node-version: "16"
           cache: ${{ steps.pm.outputs.pm }}
+          cache-dependency-path: "*/pnpm-lock.yaml"
 
       - name: (npm) ${{ matrix.example }} install using npm ci
         if: steps.pm.outputs.pm == 'npm'
