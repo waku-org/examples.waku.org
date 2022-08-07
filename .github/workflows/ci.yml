@@ -50,13 +50,6 @@ jobs:
           node-version: "16"
           cache: ${{ steps.pm.outputs.pm }}
 
-      - name: (npm) Cache npm cache
-        if: steps.pm.outputs.pm == 'npm'
-        uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: examples-node-v1-${{ hashFiles('**/package-lock.json') }}
-
       - name: (npm) ${{ matrix.example }} install using npm ci
         if: steps.pm.outputs.pm == 'npm'
         run: npm ci
