@@ -9,6 +9,7 @@ on:
 jobs:
   examples_build_and_test:
     strategy:
+      fail-fast: false
       matrix:
         example:
           [
