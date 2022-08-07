@@ -25,40 +25,53 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - uses: pnpm/action-setup@v2.2.2
+        with:
+          version: 7
+
+      - name: Check what package manager is used
+        id: pm
+        shell: bash
+        run: |
+          if [ -f yarn.lock ]; then
+            export PM="yarn"
+          elif [ -f pnpm-lock.yaml ]; then
+            export PM="pnpm"
+          elif [ -f package-lock.json ]; then
+            export PM="npm"
+          fi
+          echo "Package manager: ${PM}"
+          echo "::set-output name=pm::${PM}"
+        working-directory: ${{ matrix.example }}
+
       - name: Install NodeJS
         uses: actions/setup-node@v2
         with:
           node-version: "16"
-
-      - name: Check if `yarn` or `npm` is used.
-        id: use-yarn
-        shell: bash
-        run: echo "::set-output name=lockfile::$(ls yarn.lock 2> /dev/null)"
-        working-directory: ${{ matrix.example }}
+          cache: ${{ steps.pm.outputs.pm }}
 
       - name: (npm) Cache npm cache
-        if: steps.use-yarn.outputs.lockfile != 'yarn.lock'
+        if: steps.pm.outputs.pm == 'npm'
         uses: actions/cache@v2
         with:
           path: ~/.npm
           key: examples-node-v1-${{ hashFiles('**/package-lock.json') }}
 
       - name: (npm) ${{ matrix.example }} install using npm ci
-        if: steps.use-yarn.outputs.lockfile != 'yarn.lock'
+        if: steps.pm.outputs.pm == 'npm'
         run: npm ci
         working-directory: ${{ matrix.example }}
 
-      - name: (npm) ${{ matrix.example }} test
-        if: steps.use-yarn.outputs.lockfile != 'yarn.lock'
-        run: npm run test
-        working-directory: ${{ matrix.example }}
-
       - name: (yarn) ${{ matrix.example }} install using yarn
-        if: steps.use-yarn.outputs.lockfile == 'yarn.lock'
+        if: steps.pm.outputs.pm == 'yarn'
         run: yarn install --frozen-lockfile
         working-directory: ${{ matrix.example }}
 
-      - name: (yarn) ${{ matrix.example }} test
-        if: steps.use-yarn.outputs.lockfile == 'yarn.lock'
-        run: echo "test skipped" # yarn test; tracked with https://github.com/status-im/js-waku/issues/563
+      - name: (pnpm) ${{ matrix.example }} install using pnpm
+        if: steps.pm.outputs.pm == 'pnpm'
+        run: pnpm install --frozen-lockfile
+        working-directory: ${{ matrix.example }}
+
+      - name: ${{ matrix.example }} test
+        run: npm run test
         working-directory: ${{ matrix.example }}
