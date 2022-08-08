@@ -18,6 +18,7 @@ specifiers:
   assert: ^2.0.0
   buffer: ^6.0.3
   crypto-browserify: ^3.12.0
+  is-ci-cli: ^2.2.0
   jasmine-core: ~4.0.0
   js-waku: ^0.19.2
   karma: ~6.3.0
@@ -58,6 +59,7 @@ devDependencies:
   '@types/node': 17.0.45
   assert: 2.0.0
   buffer: 6.0.3
+  is-ci-cli: 2.2.0
   jasmine-core: 4.0.1
   karma: 6.3.20
   karma-chrome-launcher: 3.1.1
@@ -3035,6 +3037,10 @@ packages:
     engines: {node: '>=6.0'}
     dev: true
 
+  /ci-info/2.0.0:
+    resolution: {integrity: sha512-5tK7EtrZ0N+OLFMthtqOj4fI2Jeb88C4CAZPu25LDVUgXJ0A3Js4PMGqrn0JU1W0Mh1/Z8wZzYPxqUrXeBboCQ==}
+    dev: true
+
   /cipher-base/1.0.4:
     resolution: {integrity: sha512-Kkht5ye6ZGmwv40uUDZztayT2ThLQGfnj/T71N/XzeZeo3nf8foyW7zGTsPYkEya3m5f3cAypH+qe7YOrM1U2Q==}
     dependencies:
@@ -5044,6 +5050,22 @@ packages:
   /is-callable/1.2.4:
     resolution: {integrity: sha512-nsuwtxZfMX67Oryl9LCQ+upnC0Z0BgpwntpS89m1H/TLF0zNfzfLMV/9Wa/6MZsj0acpEjAO0KF1xT6ZdLl95w==}
     engines: {node: '>= 0.4'}
+    dev: true
+
+  /is-ci-cli/2.2.0:
+    resolution: {integrity: sha512-Xg97ZGDzU0a9gPTAli+TNegMk+PI3x0KLRYCfBa2LAboF1YyuA03Gwdc9vpu3VRNU+lFFNkvXnIQuJ0PgB120Q==}
+    engines: {node: '>=8'}
+    hasBin: true
+    dependencies:
+      cross-spawn: 7.0.3
+      is-ci: 2.0.0
+    dev: true
+
+  /is-ci/2.0.0:
+    resolution: {integrity: sha512-YfJT7rkpQB0updsdHLGWrvhBJfcfzNNawYDNIyQXJz0IViGf75O8EBPKSdvw2rF+LGCsX4FZ8tcr3b19LcZq4w==}
+    hasBin: true
+    dependencies:
+      ci-info: 2.0.0
     dev: true
 
   /is-core-module/2.10.0:
