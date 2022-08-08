@@ -9,6 +9,7 @@ specifiers:
   buffer: ^6.0.3
   cra-webpack-rewired: ^1.0.1
   js-waku: ^0.24.0
+  process: ^0.11.10
   protons: ^2.0.3
   react: ^18.1.0
   react-dom: ^18.1.0
@@ -34,6 +35,7 @@ dependencies:
 devDependencies:
   '@testing-library/dom': 8.16.1
   cra-webpack-rewired: 1.0.1
+  process: 0.11.10
   typescript: 4.7.4
 
 packages:
@@ -9244,6 +9246,11 @@ packages:
   /process-nextick-args/2.0.1:
     resolution: {integrity: sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==}
     dev: false
+
+  /process/0.11.10:
+    resolution: {integrity: sha512-cdGef/drWFoydD1JsMzuFf8100nZl+GT+yacc2bEced5f9Rjk4z+WtFUTBu9PhOi9j/jfmBPu0mMEY4wIdAF8A==}
+    engines: {node: '>= 0.6.0'}
+    dev: true
 
   /progress/2.0.3:
     resolution: {integrity: sha512-7PiHtLll5LdnKIMw100I+8xJXR5gW2QwWYkT6iJva0bXitZKa/XMrSbdmg3r2Xnaidz9Qumd0VPaMrZlF9V9sA==}
