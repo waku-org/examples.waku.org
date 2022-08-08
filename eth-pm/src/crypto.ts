@@ -17,7 +17,7 @@ export interface KeyPair {
 }
 
 /**
- * Generate new encryption keypair.
+ * Generate new encryption key pair.
  */
 export async function generateEncryptionKeyPair(): Promise<KeyPair> {
   const privateKey = generatePrivateKey();
