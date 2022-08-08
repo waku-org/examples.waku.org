@@ -5,7 +5,7 @@ updates:
     directory: "eth-pm"
     schedule:
       interval: "daily"
-    reviewers: [ "d4nte" ]
+    reviewers: [ "fryorcraken" ]
     ignore:
       - dependency-name: "*"
         update-types:
@@ -15,7 +15,7 @@ updates:
     directory: "eth-pm-wallet-encryption"
     schedule:
       interval: "daily"
-    reviewers: [ "d4nte" ]
+    reviewers: [ "fryorcraken" ]
     ignore:
       - dependency-name: "*"
         update-types:
@@ -25,7 +25,7 @@ updates:
     directory: "relay-angular-chat"
     schedule:
       interval: "daily"
-    reviewers: [ "d4nte" ]
+    reviewers: [ "fryorcraken" ]
     ignore:
       - dependency-name: "*"
         update-types:
@@ -35,7 +35,7 @@ updates:
     directory: "relay-reactjs-chat"
     schedule:
       interval: "daily"
-    reviewers: [ "d4nte" ]
+    reviewers: [ "fryorcraken" ]
     ignore:
       - dependency-name: "*"
         update-types:
@@ -45,7 +45,7 @@ updates:
     directory: "store-reactjs-chat"
     schedule:
       interval: "daily"
-    reviewers: [ "d4nte" ]
+    reviewers: [ "fryorcraken" ]
     ignore:
       - dependency-name: "*"
         update-types:
@@ -55,7 +55,7 @@ updates:
     directory: "web-chat"
     schedule:
       interval: "daily"
-    reviewers: [ "d4nte" ]
+    reviewers: [ "fryorcraken" ]
     ignore:
       - dependency-name: "*"
         update-types:
