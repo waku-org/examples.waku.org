@@ -13,12 +13,12 @@ jobs:
       matrix:
         example:
           [
-            web-chat,
-            eth-pm,
             eth-pm-wallet-encryption,
+            eth-pm,
+            relay-angular-chat,
             relay-reactjs-chat,
             store-reactjs-chat,
-            relay-angular-chat,
+            web-chat
           ]
     runs-on: ubuntu-latest
     steps:
