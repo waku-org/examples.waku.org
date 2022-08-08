@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "master"
+  pull_request:
+
+jobs:
+  examples_build_and_test:
+    strategy:
+      fail-fast: false
+      matrix:
+        example:
+          [
+            eth-pm-wallet-encryption,
+            eth-pm,
+            relay-angular-chat,
+            relay-reactjs-chat,
+            store-reactjs-chat,
+            web-chat
+          ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - uses: pnpm/action-setup@v2.2.2
+        with:
+          version: 7
+
+      - name: Install NodeJS
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+          cache: "pnpm"
+          cache-dependency-path: "*/pnpm-lock.yaml"
+
+      - name: install
+        run: pnpm install --frozen-lockfile
+        working-directory: ${{ matrix.example }}
+
+      - name: build
+        run: pnpm run build
+        working-directory: ${{ matrix.example }}
+
+      - name: test
+        run: pnpm --if-present test
+        working-directory: ${{ matrix.example }}

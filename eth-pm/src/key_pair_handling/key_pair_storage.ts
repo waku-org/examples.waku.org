@@ -2,7 +2,7 @@ import { KeyPair } from "../crypto";
 import { utils } from "js-waku";
 
 /**
- * Save keypair to storage, encrypted with password
+ * Save key pair to storage, encrypted with password
  */
 export async function saveKeyPairToStorage(
   EncryptionKeyPair: KeyPair,
@@ -20,7 +20,7 @@ export async function saveKeyPairToStorage(
 }
 
 /**
- * Load keypair from storage, decrypted using password
+ * Load key pair from storage, decrypted using password
  */
 export async function loadKeyPairFromStorage(
   password: string

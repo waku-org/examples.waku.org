@@ -4,6 +4,7 @@
   "private": true,
   "homepage": "/examples/eth-pm-wallet-encryption",
   "dependencies": {
+    "@ethersproject/providers": "^5.6.8",
     "@material-ui/core": "^4.12.3",
     "@material-ui/icons": "^4.11.2",
     "@testing-library/jest-dom": "^5.16.2",
@@ -18,7 +19,8 @@
     "js-waku": "^0.24.0",
     "protobufjs": "^6.11.2",
     "react": "^18.1.0",
-    "react-dom": "^18.1.0"
+    "react-dom": "^18.1.0",
+    "uint8arrays": "^3.1.0"
   },
   "scripts": {
     "start": "cra-webpack-rewired start",
@@ -29,7 +31,7 @@
     "test": "run-s build test:*",
     "test:lint": "eslint src --ext .ts --ext .tsx",
     "test:prettier": "prettier \"src/**/*.{ts,tsx}\" \"./*.json\" --list-different",
-    "test:spelling": "cspell \"{README.md,src/**/*.{ts,tsx},public/**/*.html}\" -c ../../.cspell.json",
+    "test:spelling": "cspell \"{README.md,src/**/*.{ts,tsx},public/**/*.html}\" -c ../.cspell.json",
     "fix:prettier": "prettier \"src/**/*.{ts,tsx}\" \"./*.json\" --write",
     "fix:lint": "eslint src --ext .ts --ext .tsx --fix"
   },
