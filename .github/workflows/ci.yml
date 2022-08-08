@@ -29,43 +29,17 @@ jobs:
         with:
           version: 7
 
-      - name: Check what package manager is used
-        id: pm
-        shell: bash
-        run: |
-          if [ -f yarn.lock ]; then
-            export PM="yarn"
-          elif [ -f pnpm-lock.yaml ]; then
-            export PM="pnpm"
-          elif [ -f package-lock.json ]; then
-            export PM="npm"
-          fi
-          echo "Package manager: ${PM}"
-          echo "::set-output name=pm::${PM}"
-        working-directory: ${{ matrix.example }}
-
       - name: Install NodeJS
         uses: actions/setup-node@v2
         with:
           node-version: "16"
-          cache: ${{ steps.pm.outputs.pm }}
+          cache: "pnpm"
           cache-dependency-path: "*/pnpm-lock.yaml"
 
-      - name: (npm) ${{ matrix.example }} install using npm ci
-        if: steps.pm.outputs.pm == 'npm'
-        run: npm ci
-        working-directory: ${{ matrix.example }}
-
-      - name: (yarn) ${{ matrix.example }} install using yarn
-        if: steps.pm.outputs.pm == 'yarn'
-        run: yarn install --frozen-lockfile
-        working-directory: ${{ matrix.example }}
-
-      - name: (pnpm) ${{ matrix.example }} install using pnpm
-        if: steps.pm.outputs.pm == 'pnpm'
+      - name: install
         run: pnpm install --frozen-lockfile
         working-directory: ${{ matrix.example }}
 
-      - name: ${{ matrix.example }} test
-        run: npm run test
+      - name: test
+        run: pnpm run test
         working-directory: ${{ matrix.example }}
