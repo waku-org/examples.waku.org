@@ -1,6 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
+  '@ethersproject/providers': ^5.6.8
   '@ethersproject/shims': ^5.5.0
   '@material-ui/core': ^4.12.3
   '@material-ui/icons': ^4.11.2
@@ -29,8 +30,10 @@ specifiers:
   react-scripts: 5.0.0
   stream-browserify: ^3.0.0
   typescript: ^4.5.5
+  uint8arrays: ^3.1.0
 
 dependencies:
+  '@ethersproject/providers': 5.6.8
   '@material-ui/core': 4.12.4_gmdara3347obbdyxwbfxx4kw6a
   '@material-ui/icons': 4.11.3_4hvmkc6hv4ioon7mjuzauwhuve
   '@testing-library/jest-dom': 5.16.5
@@ -46,6 +49,7 @@ dependencies:
   protobufjs: 6.11.3
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
+  uint8arrays: 3.1.0
 
 devDependencies:
   '@ethersproject/shims': 5.6.0
