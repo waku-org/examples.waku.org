@@ -27,6 +27,7 @@ specifiers:
   react-scripts: 5.0.0
   stream-browserify: ^3.0.0
   typescript: ^4.5.5
+  uint8arrays: ^3.1.0
 
 dependencies:
   '@ethersproject/providers': 5.6.8
@@ -39,6 +40,7 @@ dependencies:
   protobufjs: 6.11.3
   react: 17.0.2
   react-dom: 17.0.2_react@17.0.2
+  uint8arrays: 3.1.0
 
 devDependencies:
   '@ethersproject/shims': 5.6.0
@@ -54,7 +56,7 @@ devDependencies:
   npm-run-all: 4.1.5
   prettier: 2.7.1
   process: 0.11.10
-  react-scripts: 5.0.0_yogd765a4nbo65imtxeijpro7y
+  react-scripts: 5.0.0_gvvjj6sbvhexabfkitslmiwvqa
   stream-browserify: 3.0.0
   typescript: 4.7.4
 
@@ -3709,8 +3711,10 @@ packages:
       indent-string: 4.0.0
     dev: false
 
-  /ajv-formats/2.1.1:
+  /ajv-formats/2.1.1_ajv@8.11.0:
     resolution: {integrity: sha512-Wx0Kx52hxE7C18hkMEggYlEifqWZtYaRgouJor+WMdPnQyEK13vgEWyVNup7SoeeoLMsr4kf5h6dOW11I15MUA==}
+    peerDependencies:
+      ajv: ^8.0.0
     peerDependenciesMeta:
       ajv:
         optional: true
@@ -10674,6 +10678,12 @@ packages:
   /react-dev-utils/12.0.1_o76vzsp5j2es3tw47tgtdagf3m:
     resolution: {integrity: sha512-84Ivxmr17KjUupyqzFode6xKhjwuEJDROWKJy/BthkL7Wn6NJ8h4WE6k/exAv6ImS+0oZLRRW5j/aINMHyeGeQ==}
     engines: {node: '>=14'}
+    peerDependencies:
+      typescript: '>=2.7'
+      webpack: '>=4'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
     dependencies:
       '@babel/code-frame': 7.18.6
       address: 1.2.0
@@ -10699,12 +10709,12 @@ packages:
       shell-quote: 1.7.3
       strip-ansi: 6.0.1
       text-table: 0.2.0
+      typescript: 4.7.4
+      webpack: 5.74.0
     transitivePeerDependencies:
       - eslint
       - supports-color
-      - typescript
       - vue-template-compiler
-      - webpack
     dev: true
 
   /react-dom/17.0.2_react@17.0.2:
@@ -10743,11 +10753,12 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: true
 
-  /react-scripts/5.0.0_yogd765a4nbo65imtxeijpro7y:
+  /react-scripts/5.0.0_gvvjj6sbvhexabfkitslmiwvqa:
     resolution: {integrity: sha512-3i0L2CyIlROz7mxETEdfif6Sfhh9Lfpzi10CtcGs1emDQStmZfWjJbAIMtRD0opVUjQuFWqHZyRZ9PPzKCFxWg==}
     engines: {node: '>=14.0.0'}
     hasBin: true
     peerDependencies:
+      eslint: '*'
       react: '>= 16'
       typescript: ^3.2.1 || ^4
     peerDependenciesMeta:
@@ -10796,7 +10807,7 @@ packages:
       semver: 7.3.7
       source-map-loader: 3.0.1_webpack@5.74.0
       style-loader: 3.3.1_webpack@5.74.0
-      tailwindcss: 3.1.8
+      tailwindcss: 3.1.8_postcss@8.4.16
       terser-webpack-plugin: 5.3.3_webpack@5.74.0
       typescript: 4.7.4
       webpack: 5.74.0
@@ -11297,7 +11308,7 @@ packages:
     dependencies:
       '@types/json-schema': 7.0.11
       ajv: 8.11.0
-      ajv-formats: 2.1.1
+      ajv-formats: 2.1.1_ajv@8.11.0
       ajv-keywords: 5.1.0_ajv@8.11.0
     dev: true
 
@@ -11921,10 +11932,12 @@ packages:
       string-width: 3.1.0
     dev: true
 
-  /tailwindcss/3.1.8:
+  /tailwindcss/3.1.8_postcss@8.4.16:
     resolution: {integrity: sha512-YSneUCZSFDYMwk+TGq8qYFdCA3yfBRdBlS7txSq0LUmzyeqRe3a8fBQzbz9M3WS/iFT4BNf/nmw9mEzrnSaC0g==}
     engines: {node: '>=12.13.0'}
     hasBin: true
+    peerDependencies:
+      postcss: ^8.0.9
     dependencies:
       arg: 5.0.2
       chokidar: 3.5.3
