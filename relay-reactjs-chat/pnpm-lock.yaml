@@ -10,6 +10,7 @@ specifiers:
   react: ^18.2.0
   react-dom: ^18.2.0
   react-scripts: 5.0.1
+  typescript: ^4.7.4
 
 dependencies:
   '@testing-library/jest-dom': 5.16.5
@@ -23,6 +24,7 @@ dependencies:
 
 devDependencies:
   '@craco/craco': 7.0.0-alpha.7_6dh3mp4abgujcafyrw5alwgbbe
+  typescript: 4.7.4
 
 packages:
 
