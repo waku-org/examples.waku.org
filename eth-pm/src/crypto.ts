@@ -2,13 +2,12 @@ import "@ethersproject/shims";
 
 import { PublicKeyMessage } from "./messaging/wire";
 import { generatePrivateKey, getPublicKey, utils } from "js-waku";
-import * as sigUtil from "eth-sig-util";
 import { PublicKeyContentTopic } from "./waku";
-import { keccak256 } from "ethers/lib/utils";
+import { keccak256, _TypedDataEncoder, recoverAddress } from "ethers/lib/utils";
 import { equals } from "uint8arrays/equals";
 
 export const PublicKeyMessageEncryptionKey = utils.hexToBytes(
-  keccak256(Buffer.from(PublicKeyContentTopic, "utf-8"))
+  keccak256(utils.utf8ToBytes(PublicKeyContentTopic))
 );
 
 export interface KeyPair {
@@ -55,7 +54,7 @@ export async function createPublicKeyMessage(
 }
 
 function buildMsgParams(encryptionPublicKey: Uint8Array, fromAddress: string) {
-  return JSON.stringify({
+  return {
     domain: {
       name: "Ethereum Private Message over Waku",
       version: "1",
@@ -79,7 +78,7 @@ function buildMsgParams(encryptionPublicKey: Uint8Array, fromAddress: string) {
         { name: "ownerAddress", type: "string" },
       ],
     },
-  });
+  };
 }
 
 export async function signEncryptionKey(
@@ -91,7 +90,9 @@ export async function signEncryptionKey(
     from?: string;
   }) => Promise<any>
 ): Promise<Uint8Array> {
-  const msgParams = buildMsgParams(encryptionPublicKey, fromAddress);
+  const msgParams = JSON.stringify(
+    buildMsgParams(encryptionPublicKey, fromAddress)
+  );
 
   const result = await providerRequest({
     method: "eth_signTypedData_v4",
@@ -108,18 +109,25 @@ export async function signEncryptionKey(
  * Validate that the Encryption Public Key was signed by the holder of the given Ethereum address.
  */
 export function validatePublicKeyMessage(msg: PublicKeyMessage): boolean {
-  const recovered = sigUtil.recoverTypedSignature_v4({
-    data: JSON.parse(
-      buildMsgParams(
-        msg.encryptionPublicKey,
-        "0x" + utils.bytesToHex(msg.ethAddress)
-      )
-    ),
-    sig: "0x" + utils.bytesToHex(msg.signature),
-  });
+  const typedData = buildMsgParams(
+    msg.encryptionPublicKey,
+    "0x" + utils.bytesToHex(msg.ethAddress)
+  );
 
-  console.log("Recovered", recovered);
-  console.log("ethAddress", "0x" + utils.bytesToHex(msg.ethAddress));
+  const hash = _TypedDataEncoder.hash(
+    typedData.domain,
+    typedData.types,
+    typedData.message
+  );
 
-  return equals(utils.hexToBytes(recovered), msg.ethAddress);
+  try {
+    const recovered = recoverAddress(hash, msg.signature);
+    console.log("Recovered", recovered);
+    console.log("ethAddress", "0x" + utils.bytesToHex(msg.ethAddress));
+
+    return equals(utils.hexToBytes(recovered), msg.ethAddress);
+  } catch (e) {
+    console.error("Could not recover public key from signature");
+    return false;
+  }
 }

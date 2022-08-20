@@ -29,9 +29,7 @@ export class PublicKeyMessage {
     return PublicKeyMessage.Type.encode(message).finish();
   }
 
-  public static decode(
-    bytes: Uint8Array | Buffer
-  ): PublicKeyMessage | undefined {
+  public static decode(bytes: Uint8Array): PublicKeyMessage | undefined {
     const payload = PublicKeyMessage.Type.decode(
       bytes
     ) as unknown as PublicKeyMessagePayload;
@@ -80,7 +78,7 @@ export class PrivateMessage {
     return PrivateMessage.Type.encode(message).finish();
   }
 
-  public static decode(bytes: Uint8Array | Buffer): PrivateMessage | undefined {
+  public static decode(bytes: Uint8Array): PrivateMessage | undefined {
     const payload = PrivateMessage.Type.decode(
       bytes
     ) as unknown as PrivateMessagePayload;
