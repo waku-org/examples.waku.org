@@ -163,15 +163,12 @@ function App() {
     if (!waku) return;
 
     const interval = setInterval(async () => {
-      let lightPushPeers = 0;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      for await (const _peer of waku.store.peers) {
-        lightPushPeers++;
-      }
+      const lightPushPeers = await waku.store.peers();
+      const relayPeers = waku.relay.getMeshPeers();
 
       setPeerStats({
-        relayPeers: waku.relay.getPeers().size,
-        lightPushPeers,
+        relayPeers: relayPeers.length,
+        lightPushPeers: lightPushPeers.length,
       });
     }, 1000);
     return () => clearInterval(interval);

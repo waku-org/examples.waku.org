@@ -4,12 +4,13 @@ import { PrivateMessage, PublicKeyMessage } from "./messaging/wire";
 import { validatePublicKeyMessage } from "./crypto";
 import { Message } from "./messaging/Messages";
 import { equals } from "uint8arrays/equals";
+import { createWaku } from "js-waku/lib/create_waku";
 
 export const PublicKeyContentTopic = "/eth-pm/1/public-key/proto";
 export const PrivateMessageContentTopic = "/eth-pm/1/private-message/proto";
 
 export async function initWaku(): Promise<Waku> {
-  const waku = await Waku.create({ bootstrap: { default: true } });
+  const waku = await createWaku({ defaultBootstrap: true });
 
   // Wait to be connected to at least one peer
   await new Promise((resolve, reject) => {
@@ -17,7 +18,7 @@ export async function initWaku(): Promise<Waku> {
     // As we are not implementing connection management in this example
 
     setTimeout(reject, 10000);
-    waku.libp2p.connectionManager.on("peer:connect", () => {
+    waku.libp2p.connectionManager.addEventListener("peer:connect", () => {
       resolve(null);
     });
   });
