@@ -67,6 +67,10 @@ const useStyles = makeStyles({
 
 function App() {
   const [waku, setWaku] = useState<Waku>();
+  const [unsubscribePublicKeyMsg, setUnsubscribePublicKeyMsg] =
+    useState<() => Promise<void>>();
+  const [unsubscribePrivateMsg, setUnsubscribePrivateMsg] =
+    useState<() => Promise<void>>();
   const [provider, setProvider] = useState<Web3Provider>();
   const [encryptionKeyPair, setEncryptionKeyPair] = useState<
     KeyPair | undefined
@@ -77,10 +81,10 @@ function App() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [address, setAddress] = useState<string>();
   const [peerStats, setPeerStats] = useState<{
-    relayPeers: number;
+    filterPeers: number;
     lightPushPeers: number;
   }>({
-    relayPeers: 0,
+    filterPeers: 0,
     lightPushPeers: 0,
   });
 
@@ -88,15 +92,15 @@ function App() {
 
   // Waku initialization
   useEffect(() => {
-    if (waku) return;
-    initWaku()
-      .then((_waku) => {
-        console.log("waku: ready");
-        setWaku(_waku);
-      })
-      .catch((e) => {
-        console.error("Failed to initiate Waku", e);
-      });
+    (async () => {
+      if (waku) return;
+
+      const _waku = await initWaku();
+      console.log("waku: ready");
+      setWaku(_waku);
+    })().catch((e) => {
+      console.error("Failed to initiate Waku", e);
+    });
   }, [waku]);
 
   useEffect(() => {
@@ -108,30 +112,40 @@ function App() {
       setPublicKeys
     );
 
-    waku.relay.addDecryptionKey(PublicKeyMessageEncryptionKey);
-    waku.relay.addObserver(observerPublicKeyMessage, [PublicKeyContentTopic]);
+    waku.filter.addDecryptionKey(PublicKeyMessageEncryptionKey);
+    waku.filter
+      .subscribe(observerPublicKeyMessage, [PublicKeyContentTopic])
+      .then(
+        (unsubscribe) => {
+          setUnsubscribePublicKeyMsg(unsubscribe);
+        },
+        (e) => {
+          console.error("Failed to subscribe", e);
+        }
+      );
 
     return function cleanUp() {
       if (!waku) return;
+      if (!unsubscribePublicKeyMsg) return;
 
-      waku.relay.deleteDecryptionKey(PublicKeyMessageEncryptionKey);
-      waku.relay.deleteObserver(observerPublicKeyMessage, [
-        PublicKeyContentTopic,
-      ]);
+      waku.filter.deleteDecryptionKey(PublicKeyMessageEncryptionKey);
+      unsubscribePublicKeyMsg().catch((e) =>
+        console.error("Failed to unsubscribe", e)
+      );
     };
-  }, [waku, address]);
+  }, [waku, address, unsubscribePublicKeyMsg]);
 
   useEffect(() => {
     if (!waku) return;
     if (!encryptionKeyPair) return;
 
-    waku.relay.addDecryptionKey(encryptionKeyPair.privateKey);
+    waku.filter.addDecryptionKey(encryptionKeyPair.privateKey);
 
     return function cleanUp() {
       if (!waku) return;
       if (!encryptionKeyPair) return;
 
-      waku.relay.deleteDecryptionKey(encryptionKeyPair.privateKey);
+      waku.filter.deleteDecryptionKey(encryptionKeyPair.privateKey);
     };
   }, [waku, encryptionKeyPair]);
 
@@ -146,28 +160,35 @@ function App() {
       address
     );
 
-    waku.relay.addObserver(observerPrivateMessage, [
-      PrivateMessageContentTopic,
-    ]);
+    waku.filter
+      .subscribe(observerPrivateMessage, [PrivateMessageContentTopic])
+      .then(
+        (unsubscribe) => {
+          setUnsubscribePrivateMsg(unsubscribe);
+        },
+        (e) => {
+          console.error("Failed to subscribe", e);
+        }
+      );
 
     return function cleanUp() {
       if (!waku) return;
-      if (!observerPrivateMessage) return;
-      waku.relay.deleteObserver(observerPrivateMessage, [
-        PrivateMessageContentTopic,
-      ]);
+      if (!unsubscribePrivateMsg) return;
+      unsubscribePrivateMsg().catch((e) =>
+        console.error("Failed to unsubscribe", e)
+      );
     };
-  }, [waku, address, encryptionKeyPair]);
+  }, [waku, address, encryptionKeyPair, unsubscribePrivateMsg]);
 
   useEffect(() => {
     if (!waku) return;
 
     const interval = setInterval(async () => {
       const lightPushPeers = await waku.store.peers();
-      const relayPeers = waku.relay.getMeshPeers();
+      const filterPeers = await waku.filter.peers();
 
       setPeerStats({
-        relayPeers: relayPeers.length,
+        filterPeers: filterPeers.length,
         lightPushPeers: lightPushPeers.length,
       });
     }, 1000);
@@ -196,7 +217,7 @@ function App() {
               />
             </IconButton>
             <Typography className={classes.peers} aria-label="connected-peers">
-              Peers: {peerStats.relayPeers} relay, {peerStats.lightPushPeers}{" "}
+              Peers: {peerStats.filterPeers} filter, {peerStats.lightPushPeers}{" "}
               light push
             </Typography>
             <Typography variant="h6" className={classes.title}>

@@ -5,7 +5,8 @@
 - Private Messaging
 - React/TypeScript
 - Waku Light Push
-- Signature with Web3
+- Waku Filter
+- Signature with Web3 (EIP-712, sign typed data)
 - Asymmetric Encryption
 - Symmetric Encryption
 
