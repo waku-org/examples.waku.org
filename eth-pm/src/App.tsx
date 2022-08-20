@@ -67,10 +67,6 @@ const useStyles = makeStyles({
 
 function App() {
   const [waku, setWaku] = useState<Waku>();
-  const [unsubscribePublicKeyMsg, setUnsubscribePublicKeyMsg] =
-    useState<() => Promise<void>>();
-  const [unsubscribePrivateMsg, setUnsubscribePrivateMsg] =
-    useState<() => Promise<void>>();
   const [provider, setProvider] = useState<Web3Provider>();
   const [encryptionKeyPair, setEncryptionKeyPair] = useState<
     KeyPair | undefined
@@ -112,12 +108,15 @@ function App() {
       setPublicKeys
     );
 
+    let unsubscribe: undefined | (() => Promise<void>);
+
     waku.filter.addDecryptionKey(PublicKeyMessageEncryptionKey);
     waku.filter
       .subscribe(observerPublicKeyMessage, [PublicKeyContentTopic])
       .then(
-        (unsubscribe) => {
-          setUnsubscribePublicKeyMsg(unsubscribe);
+        (_unsubscribe) => {
+          console.log("subscribed to ", PublicKeyContentTopic);
+          unsubscribe = _unsubscribe;
         },
         (e) => {
           console.error("Failed to subscribe", e);
@@ -126,14 +125,16 @@ function App() {
 
     return function cleanUp() {
       if (!waku) return;
-      if (!unsubscribePublicKeyMsg) return;
-
       waku.filter.deleteDecryptionKey(PublicKeyMessageEncryptionKey);
-      unsubscribePublicKeyMsg().catch((e) =>
-        console.error("Failed to unsubscribe", e)
+      if (typeof unsubscribe === "undefined") return;
+      unsubscribe().then(
+        () => {
+          console.log("unsubscribed to ", PublicKeyContentTopic);
+        },
+        (e) => console.error("Failed to unsubscribe", e)
       );
     };
-  }, [waku, address, unsubscribePublicKeyMsg]);
+  }, [waku, address]);
 
   useEffect(() => {
     if (!waku) return;
@@ -160,11 +161,13 @@ function App() {
       address
     );
 
+    let unsubscribe: undefined | (() => Promise<void>);
+
     waku.filter
       .subscribe(observerPrivateMessage, [PrivateMessageContentTopic])
       .then(
-        (unsubscribe) => {
-          setUnsubscribePrivateMsg(unsubscribe);
+        (_unsubscribe) => {
+          unsubscribe = _unsubscribe;
         },
         (e) => {
           console.error("Failed to subscribe", e);
@@ -173,12 +176,10 @@ function App() {
 
     return function cleanUp() {
       if (!waku) return;
-      if (!unsubscribePrivateMsg) return;
-      unsubscribePrivateMsg().catch((e) =>
-        console.error("Failed to unsubscribe", e)
-      );
+      if (typeof unsubscribe === "undefined") return;
+      unsubscribe().catch((e) => console.error("Failed to unsubscribe", e));
     };
-  }, [waku, address, encryptionKeyPair, unsubscribePrivateMsg]);
+  }, [waku, address, encryptionKeyPair]);
 
   useEffect(() => {
     if (!waku) return;
