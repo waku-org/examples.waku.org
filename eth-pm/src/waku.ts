@@ -1,5 +1,11 @@
 import { Dispatch, SetStateAction } from "react";
-import { utils, Waku, WakuMessage } from "js-waku";
+import {
+  Protocols,
+  utils,
+  waitForRemotePeer,
+  Waku,
+  WakuMessage,
+} from "js-waku";
 import { PrivateMessage, PublicKeyMessage } from "./messaging/wire";
 import { validatePublicKeyMessage } from "./crypto";
 import { Message } from "./messaging/Messages";
@@ -11,17 +17,8 @@ export const PrivateMessageContentTopic = "/eth-pm/1/private-message/proto";
 
 export async function initWaku(): Promise<Waku> {
   const waku = await createWaku({ defaultBootstrap: true });
-
-  // Wait to be connected to at least one peer
-  await new Promise((resolve, reject) => {
-    // If we are not connected to any peer within 10sec let's just reject
-    // As we are not implementing connection management in this example
-
-    setTimeout(reject, 10000);
-    waku.libp2p.connectionManager.addEventListener("peer:connect", () => {
-      resolve(null);
-    });
-  });
+  await waku.start();
+  await waitForRemotePeer(waku, [Protocols.Filter, Protocols.LightPush]);
 
   return waku;
 }
