@@ -13,7 +13,6 @@ jobs:
       matrix:
         example:
           [
-            eth-pm-wallet-encryption,
             eth-pm,
             relay-angular-chat,
             relay-reactjs-chat,
