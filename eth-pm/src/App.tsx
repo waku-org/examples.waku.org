@@ -254,7 +254,7 @@ function App() {
                 address={address}
                 EncryptionKeyPair={encryptionKeyPair}
                 waku={waku}
-                providerRequest={provider?.provider?.request}
+                signer={provider?.getSigner()}
               />
             </fieldset>
             <fieldset>

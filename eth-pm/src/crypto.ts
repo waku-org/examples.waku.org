@@ -5,6 +5,7 @@ import { generatePrivateKey, getPublicKey, utils } from "js-waku";
 import { PublicKeyContentTopic } from "./waku";
 import { keccak256, _TypedDataEncoder, recoverAddress } from "ethers/lib/utils";
 import { equals } from "uint8arrays/equals";
+import type { TypedDataSigner } from "@ethersproject/abstract-signer";
 
 export const PublicKeyMessageEncryptionKey = utils.hexToBytes(
   keccak256(utils.utf8ToBytes(PublicKeyContentTopic))
@@ -32,15 +33,12 @@ export async function generateEncryptionKeyPair(): Promise<KeyPair> {
 export async function createPublicKeyMessage(
   address: string,
   encryptionPublicKey: Uint8Array,
-  providerRequest: (request: {
-    method: string;
-    params?: Array<any>;
-  }) => Promise<any>
+  signer: TypedDataSigner
 ): Promise<PublicKeyMessage> {
   const signature = await signEncryptionKey(
     encryptionPublicKey,
     address,
-    providerRequest
+    signer
   );
 
   console.log("Asking wallet to sign Public Key Message");
@@ -59,7 +57,7 @@ function buildMsgParams(encryptionPublicKey: Uint8Array, fromAddress: string) {
       name: "Ethereum Private Message over Waku",
       version: "1",
     },
-    message: {
+    value: {
       message:
         "By signing this message you certify that messages addressed to `ownerAddress` must be encrypted with `encryptionPublicKey`",
       encryptionPublicKey: utils.bytesToHex(encryptionPublicKey),
@@ -68,10 +66,6 @@ function buildMsgParams(encryptionPublicKey: Uint8Array, fromAddress: string) {
     // Refers to the keys of the *types* object below.
     primaryType: "PublishEncryptionPublicKey",
     types: {
-      EIP712Domain: [
-        { name: "name", type: "string" },
-        { name: "version", type: "string" },
-      ],
       PublishEncryptionPublicKey: [
         { name: "message", type: "string" },
         { name: "encryptionPublicKey", type: "string" },
@@ -84,21 +78,14 @@ function buildMsgParams(encryptionPublicKey: Uint8Array, fromAddress: string) {
 export async function signEncryptionKey(
   encryptionPublicKey: Uint8Array,
   fromAddress: string,
-  providerRequest: (request: {
-    method: string;
-    params?: Array<any>;
-    from?: string;
-  }) => Promise<any>
+  signer: TypedDataSigner
 ): Promise<Uint8Array> {
-  const msgParams = JSON.stringify(
-    buildMsgParams(encryptionPublicKey, fromAddress)
+  const { domain, types, value } = buildMsgParams(
+    encryptionPublicKey,
+    fromAddress
   );
 
-  const result = await providerRequest({
-    method: "eth_signTypedData_v4",
-    params: [fromAddress, msgParams],
-    from: fromAddress,
-  });
+  const result = await signer._signTypedData(domain, types, value);
 
   console.log("TYPED SIGNED:" + JSON.stringify(result));
 
@@ -109,25 +96,21 @@ export async function signEncryptionKey(
  * Validate that the Encryption Public Key was signed by the holder of the given Ethereum address.
  */
 export function validatePublicKeyMessage(msg: PublicKeyMessage): boolean {
-  const typedData = buildMsgParams(
+  const { domain, types, value } = buildMsgParams(
     msg.encryptionPublicKey,
     "0x" + utils.bytesToHex(msg.ethAddress)
   );
 
-  const hash = _TypedDataEncoder.hash(
-    typedData.domain,
-    typedData.types,
-    typedData.message
-  );
-
   try {
+    const hash = _TypedDataEncoder.hash(domain, types, value);
+
     const recovered = recoverAddress(hash, msg.signature);
     console.log("Recovered", recovered);
     console.log("ethAddress", "0x" + utils.bytesToHex(msg.ethAddress));
 
-    return equals(utils.hexToBytes(recovered), msg.ethAddress);
+    return equals(utils.hexToBytes(recovered.toLowerCase()), msg.ethAddress);
   } catch (e) {
-    console.error("Could not recover public key from signature");
+    console.error("Could not recover public key from signature", e);
     return false;
   }
 }

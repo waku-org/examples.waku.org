@@ -4,10 +4,11 @@
   "private": true,
   "homepage": "/eth-pm",
   "dependencies": {
-    "@ethersproject/providers": "^5.6.8",
+    "@ethersproject/abstract-signer": "5.7.0",
+    "@ethersproject/providers": "5.7.0",
     "@material-ui/core": "^4.12.3",
     "@material-ui/icons": "^4.11.2",
-    "ethers": "^5.7.0",
+    "ethers": "5.7.0",
     "fontsource-roboto": "^4.0.0",
     "js-waku": "0.24.0-cdd0752",
     "protobufjs": "^6.11.2",
