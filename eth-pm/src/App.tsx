@@ -26,6 +26,7 @@ import {
 } from "./waku";
 import { Web3Provider } from "@ethersproject/providers/src.ts/web3-provider";
 import ConnectWallet from "./ConnectWallet";
+import { waku_message } from "js-waku";
 
 const theme = createMuiTheme({
   palette: {
@@ -110,7 +111,10 @@ function App() {
 
     let unsubscribe: undefined | (() => Promise<void>);
 
-    waku.filter.addDecryptionKey(PublicKeyMessageEncryptionKey);
+    waku.filter.addDecryptionKey(PublicKeyMessageEncryptionKey, {
+      method: waku_message.DecryptionMethod.Symmetric,
+      contentTopics: [PublicKeyContentTopic],
+    });
     waku.filter
       .subscribe(observerPublicKeyMessage, [PublicKeyContentTopic])
       .then(
@@ -140,7 +144,10 @@ function App() {
     if (!waku) return;
     if (!encryptionKeyPair) return;
 
-    waku.filter.addDecryptionKey(encryptionKeyPair.privateKey);
+    waku.filter.addDecryptionKey(encryptionKeyPair.privateKey, {
+      method: waku_message.DecryptionMethod.Asymmetric,
+      contentTopics: [PrivateMessageContentTopic],
+    });
 
     return function cleanUp() {
       if (!waku) return;
