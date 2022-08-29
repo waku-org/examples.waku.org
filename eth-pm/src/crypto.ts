@@ -108,7 +108,7 @@ export function validatePublicKeyMessage(msg: PublicKeyMessage): boolean {
     console.log("Recovered", recovered);
     console.log("ethAddress", "0x" + utils.bytesToHex(msg.ethAddress));
 
-    return equals(utils.hexToBytes(recovered.toLowerCase()), msg.ethAddress);
+    return equals(utils.hexToBytes(recovered), msg.ethAddress);
   } catch (e) {
     console.error("Could not recover public key from signature", e);
     return false;
