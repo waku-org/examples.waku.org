@@ -11,17 +11,14 @@ interface Props {
 }
 
 export default function ConnectWallet({ setAddress, setProvider }: Props) {
-  const connectWallet = () => {
+  const connectWallet = async () => {
     try {
-      window.ethereum
-        .request({ method: "eth_requestAccounts" })
-        .then((accounts: string[]) => {
-          const _provider = new ethers.providers.Web3Provider(window.ethereum);
-          setAddress(accounts[0]);
-          setProvider(_provider);
-        });
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const accounts = await provider.send("eth_requestAccounts", []);
+      setAddress(accounts[0]);
+      setProvider(provider);
     } catch (e) {
-      console.error("No web3 provider available");
+      console.error("No web3 provider available", e);
     }
   };
 

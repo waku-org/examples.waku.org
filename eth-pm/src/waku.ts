@@ -1,26 +1,35 @@
 import { Dispatch, SetStateAction } from "react";
-import { utils, Waku, WakuMessage } from "js-waku";
+import {
+  Protocols,
+  utils,
+  waitForRemotePeer,
+  Waku,
+  WakuMessage,
+} from "js-waku";
 import { PrivateMessage, PublicKeyMessage } from "./messaging/wire";
 import { validatePublicKeyMessage } from "./crypto";
 import { Message } from "./messaging/Messages";
 import { equals } from "uint8arrays/equals";
+import { createWaku } from "js-waku/lib/create_waku";
+import { PeerDiscoveryStaticPeers } from "js-waku/lib/peer_discovery_static_list";
+import {
+  getPredefinedBootstrapNodes,
+  Fleet,
+} from "js-waku/lib/predefined_bootstrap_nodes";
 
 export const PublicKeyContentTopic = "/eth-pm/1/public-key/proto";
 export const PrivateMessageContentTopic = "/eth-pm/1/private-message/proto";
 
 export async function initWaku(): Promise<Waku> {
-  const waku = await Waku.create({ bootstrap: { default: true } });
-
-  // Wait to be connected to at least one peer
-  await new Promise((resolve, reject) => {
-    // If we are not connected to any peer within 10sec let's just reject
-    // As we are not implementing connection management in this example
-
-    setTimeout(reject, 10000);
-    waku.libp2p.connectionManager.on("peer:connect", () => {
-      resolve(null);
-    });
+  const waku = await createWaku({
+    libp2p: {
+      peerDiscovery: [
+        new PeerDiscoveryStaticPeers(getPredefinedBootstrapNodes(Fleet.Test)),
+      ],
+    },
   });
+  await waku.start();
+  await waitForRemotePeer(waku, [Protocols.Filter, Protocols.LightPush]);
 
   return waku;
 }

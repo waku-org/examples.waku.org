@@ -8,21 +8,20 @@ import {
 import { PublicKeyMessage } from "./messaging/wire";
 import { WakuMessage, Waku } from "js-waku";
 import { PublicKeyContentTopic } from "./waku";
+import type { TypedDataSigner } from "@ethersproject/abstract-signer";
 
 interface Props {
   EncryptionKeyPair: KeyPair | undefined;
   waku: Waku | undefined;
   address: string | undefined;
-  providerRequest:
-    | ((request: { method: string; params?: Array<any> }) => Promise<any>)
-    | undefined;
+  signer: TypedDataSigner | undefined;
 }
 
 export default function BroadcastPublicKey({
   EncryptionKeyPair,
   waku,
   address,
-  providerRequest,
+  signer,
 }: Props) {
   const [publicKeyMsg, setPublicKeyMsg] = useState<PublicKeyMessage>();
 
@@ -30,7 +29,7 @@ export default function BroadcastPublicKey({
     if (!EncryptionKeyPair) return;
     if (!address) return;
     if (!waku) return;
-    if (!providerRequest) return;
+    if (!signer) return;
 
     if (publicKeyMsg) {
       encodePublicKeyWakuMessage(publicKeyMsg)
@@ -43,11 +42,7 @@ export default function BroadcastPublicKey({
           console.log("Failed to encode Public Key Message in Waku Message", e);
         });
     } else {
-      createPublicKeyMessage(
-        address,
-        EncryptionKeyPair.publicKey,
-        providerRequest
-      )
+      createPublicKeyMessage(address, EncryptionKeyPair.publicKey, signer)
         .then((msg) => {
           setPublicKeyMsg(msg);
           encodePublicKeyWakuMessage(msg)
@@ -77,7 +72,7 @@ export default function BroadcastPublicKey({
       variant="contained"
       color="primary"
       onClick={broadcastPublicKey}
-      disabled={!EncryptionKeyPair || !waku || !address || !providerRequest}
+      disabled={!EncryptionKeyPair || !waku || !address || !signer}
     >
       Broadcast Encryption Public Key
     </Button>

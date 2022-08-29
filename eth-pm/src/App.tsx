@@ -26,6 +26,7 @@ import {
 } from "./waku";
 import { Web3Provider } from "@ethersproject/providers/src.ts/web3-provider";
 import ConnectWallet from "./ConnectWallet";
+import { waku_message } from "js-waku";
 
 const theme = createMuiTheme({
   palette: {
@@ -77,10 +78,10 @@ function App() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [address, setAddress] = useState<string>();
   const [peerStats, setPeerStats] = useState<{
-    relayPeers: number;
+    filterPeers: number;
     lightPushPeers: number;
   }>({
-    relayPeers: 0,
+    filterPeers: 0,
     lightPushPeers: 0,
   });
 
@@ -88,15 +89,15 @@ function App() {
 
   // Waku initialization
   useEffect(() => {
-    if (waku) return;
-    initWaku()
-      .then((_waku) => {
-        console.log("waku: ready");
-        setWaku(_waku);
-      })
-      .catch((e) => {
-        console.error("Failed to initiate Waku", e);
-      });
+    (async () => {
+      if (waku) return;
+
+      const _waku = await initWaku();
+      console.log("waku: ready");
+      setWaku(_waku);
+    })().catch((e) => {
+      console.error("Failed to initiate Waku", e);
+    });
   }, [waku]);
 
   useEffect(() => {
@@ -108,16 +109,34 @@ function App() {
       setPublicKeys
     );
 
-    waku.relay.addDecryptionKey(PublicKeyMessageEncryptionKey);
-    waku.relay.addObserver(observerPublicKeyMessage, [PublicKeyContentTopic]);
+    let unsubscribe: undefined | (() => Promise<void>);
+
+    waku.filter.addDecryptionKey(PublicKeyMessageEncryptionKey, {
+      method: waku_message.DecryptionMethod.Symmetric,
+      contentTopics: [PublicKeyContentTopic],
+    });
+    waku.filter
+      .subscribe(observerPublicKeyMessage, [PublicKeyContentTopic])
+      .then(
+        (_unsubscribe) => {
+          console.log("subscribed to ", PublicKeyContentTopic);
+          unsubscribe = _unsubscribe;
+        },
+        (e) => {
+          console.error("Failed to subscribe", e);
+        }
+      );
 
     return function cleanUp() {
       if (!waku) return;
-
-      waku.relay.deleteDecryptionKey(PublicKeyMessageEncryptionKey);
-      waku.relay.deleteObserver(observerPublicKeyMessage, [
-        PublicKeyContentTopic,
-      ]);
+      waku.filter.deleteDecryptionKey(PublicKeyMessageEncryptionKey);
+      if (typeof unsubscribe === "undefined") return;
+      unsubscribe().then(
+        () => {
+          console.log("unsubscribed to ", PublicKeyContentTopic);
+        },
+        (e) => console.error("Failed to unsubscribe", e)
+      );
     };
   }, [waku, address]);
 
@@ -125,13 +144,16 @@ function App() {
     if (!waku) return;
     if (!encryptionKeyPair) return;
 
-    waku.relay.addDecryptionKey(encryptionKeyPair.privateKey);
+    waku.filter.addDecryptionKey(encryptionKeyPair.privateKey, {
+      method: waku_message.DecryptionMethod.Asymmetric,
+      contentTopics: [PrivateMessageContentTopic],
+    });
 
     return function cleanUp() {
       if (!waku) return;
       if (!encryptionKeyPair) return;
 
-      waku.relay.deleteDecryptionKey(encryptionKeyPair.privateKey);
+      waku.filter.deleteDecryptionKey(encryptionKeyPair.privateKey);
     };
   }, [waku, encryptionKeyPair]);
 
@@ -146,16 +168,23 @@ function App() {
       address
     );
 
-    waku.relay.addObserver(observerPrivateMessage, [
-      PrivateMessageContentTopic,
-    ]);
+    let unsubscribe: undefined | (() => Promise<void>);
+
+    waku.filter
+      .subscribe(observerPrivateMessage, [PrivateMessageContentTopic])
+      .then(
+        (_unsubscribe) => {
+          unsubscribe = _unsubscribe;
+        },
+        (e) => {
+          console.error("Failed to subscribe", e);
+        }
+      );
 
     return function cleanUp() {
       if (!waku) return;
-      if (!observerPrivateMessage) return;
-      waku.relay.deleteObserver(observerPrivateMessage, [
-        PrivateMessageContentTopic,
-      ]);
+      if (typeof unsubscribe === "undefined") return;
+      unsubscribe().catch((e) => console.error("Failed to unsubscribe", e));
     };
   }, [waku, address, encryptionKeyPair]);
 
@@ -163,15 +192,12 @@ function App() {
     if (!waku) return;
 
     const interval = setInterval(async () => {
-      let lightPushPeers = 0;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      for await (const _peer of waku.store.peers) {
-        lightPushPeers++;
-      }
+      const lightPushPeers = await waku.store.peers();
+      const filterPeers = await waku.filter.peers();
 
       setPeerStats({
-        relayPeers: waku.relay.getPeers().size,
-        lightPushPeers,
+        filterPeers: filterPeers.length,
+        lightPushPeers: lightPushPeers.length,
       });
     }, 1000);
     return () => clearInterval(interval);
@@ -199,7 +225,7 @@ function App() {
               />
             </IconButton>
             <Typography className={classes.peers} aria-label="connected-peers">
-              Peers: {peerStats.relayPeers} relay, {peerStats.lightPushPeers}{" "}
+              Peers: {peerStats.filterPeers} filter, {peerStats.lightPushPeers}{" "}
               light push
             </Typography>
             <Typography variant="h6" className={classes.title}>
@@ -228,7 +254,7 @@ function App() {
                 address={address}
                 EncryptionKeyPair={encryptionKeyPair}
                 waku={waku}
-                providerRequest={provider?.provider?.request}
+                signer={provider?.getSigner()}
               />
             </fieldset>
             <fieldset>

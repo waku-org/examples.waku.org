@@ -133,7 +133,7 @@ function sendMessage(
         .push(msg)
         .then((res) => {
           console.log("Message sent", res);
-          callback(res ? res.isSuccess : false);
+          callback(res?.isSuccess ?? false);
         })
         .catch((e) => {
           console.error("Failed to send message", e);
