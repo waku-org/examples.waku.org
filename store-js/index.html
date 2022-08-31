@@ -4,12 +4,12 @@
 <head>
   <meta charset='UTF-8' />
   <meta content='width=device-width, initial-scale=1.0' name='viewport' />
-  <title>JS-Waku unpkg example</title>
+  <title>JS-Waku store script tag example</title>
 </head>
 
 <body>
 
-<div><h1>Timestamp of latest relay ping</h1></div>
+<div><h1>Timestamp of latest message seen in store</h1></div>
 <div id='timestamp'></div>
 
 <script type='module'>
@@ -49,7 +49,7 @@
       if (latestMessage) {
         timestampDiv.innerHTML = latestMessage.timestamp;
       } else {
-        timestampDiv.innerHTML = '<p>No ping message available</p>';
+        timestampDiv.innerHTML = '<p>No message available, go to <a href="https://js-waku.wakuconnect.dev/examples/web-chat/">web-chat</a> to send a message</p>';
       }
 
       // When returning true, `queryHistory` stops retrieving pages
@@ -61,8 +61,9 @@
     // Only retrieve a week of messages
     startTime.setTime(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
+
     await node.store
-            .queryHistory(['/relay-ping/1/ping/null'], {
+            .queryHistory([], {
               callback,
               pageDirection: 'backward',
               pageSize: 1,
