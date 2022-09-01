@@ -1,5 +1,4 @@
-import { Reader } from "protobufjs/minimal";
-
+import { utils } from "js-waku";
 import * as proto from "./proto/chat_message";
 
 /**
@@ -20,8 +19,8 @@ export class ChatMessage {
     nick: string,
     text: string
   ): ChatMessage {
-    const timestampNumber = Math.floor(timestamp.valueOf() / 1000);
-    const payload = Buffer.from(text, "utf-8");
+    const timestampNumber = BigInt(Math.floor(timestamp.valueOf() / 1000));
+    const payload = utils.utf8ToBytes(text);
 
     return new ChatMessage({
       timestamp: timestampNumber,
@@ -35,7 +34,7 @@ export class ChatMessage {
    * @param bytes The payload to decode.
    */
   static decode(bytes: Uint8Array): ChatMessage {
-    const protoMsg = proto.ChatMessage.decode(Reader.create(bytes));
+    const protoMsg = proto.ChatMessage.decode(bytes);
     return new ChatMessage(protoMsg);
   }
 
@@ -44,11 +43,11 @@ export class ChatMessage {
    * @returns The encoded payload.
    */
   encode(): Uint8Array {
-    return proto.ChatMessage.encode(this.proto).finish();
+    return proto.ChatMessage.encode(this.proto);
   }
 
   get timestamp(): Date {
-    return new Date(this.proto.timestamp * 1000);
+    return new Date(Number(this.proto.timestamp * BigInt(1000)));
   }
 
   get nick(): string {
