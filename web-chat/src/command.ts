@@ -1,5 +1,4 @@
-import { multiaddr } from "multiaddr";
-import PeerId from "peer-id";
+import { multiaddr } from "@multiformats/multiaddr";
 import { Waku } from "js-waku";
 
 function help(): string[] {
@@ -26,7 +25,7 @@ function info(waku: Waku | undefined): string[] {
   if (!waku) {
     return ["Waku node is starting"];
   }
-  return [`PeerId: ${waku.libp2p.peerId.toB58String()}`];
+  return [`PeerId: ${waku.libp2p.peerId.toString()}`];
 }
 
 function connect(peer: string | undefined, waku: Waku | undefined): string[] {
@@ -42,9 +41,7 @@ function connect(peer: string | undefined, waku: Waku | undefined): string[] {
     if (!peerId) {
       return ["Peer Id needed to dial"];
     }
-    waku.addPeerToAddressBook(PeerId.createFromB58String(peerId), [
-      peerMultiaddr,
-    ]);
+    waku.addPeerToAddressBook(peerId, [peerMultiaddr]);
     return [
       `${peerId}: ${peerMultiaddr.toString()} added to address book, autodial in progress`,
     ];
@@ -58,13 +55,10 @@ async function peers(waku: Waku | undefined): Promise<string[]> {
     return ["Waku node is starting"];
   }
   let response: string[] = [];
-  const peers = [];
+  const peers = await waku.libp2p.peerStore.all();
 
-  for await (const peer of waku.libp2p.peerStore.getPeers()) {
-    peers.push(peer);
-  }
   Array.from(peers).forEach((peer) => {
-    response.push(peer.id.toB58String() + ":");
+    response.push(peer.id.toString() + ":");
     let addresses = "  addresses: [";
     peer.addresses.forEach(({ multiaddr }) => {
       addresses += " " + multiaddr.toString() + ",";
@@ -88,21 +82,14 @@ function connections(waku: Waku | undefined): string[] {
     return ["Waku node is starting"];
   }
   let response: string[] = [];
-  waku.libp2p.connections.forEach(
-    (
-      connections: import("libp2p-interfaces/src/connection/connection")[],
-      peerId
-    ) => {
-      response.push(peerId + ":");
-      let strConnections = "  connections: [";
-      connections.forEach((connection) => {
-        strConnections += JSON.stringify(connection.stat);
-        strConnections += "; " + JSON.stringify(connection.streams);
-      });
-      strConnections += "]";
-      response.push(strConnections);
-    }
-  );
+  let strConnections = "  connections: \n";
+  waku.libp2p.connectionManager.getConnections().forEach((connection) => {
+    strConnections += connection.remotePeer.toString() + ", ";
+    strConnections += JSON.stringify(connection.stat);
+    strConnections += "; " + JSON.stringify(connection.streams);
+    strConnections += "\n";
+  });
+  response.push(strConnections);
   if (response.length === 0) {
     response.push("Not connected to any peer.");
   }

@@ -24,8 +24,8 @@ export default function Room(props: Props) {
     if (!waku) return;
 
     // Update relay peer count on heartbeat
-    waku.relay.on("gossipsub:heartbeat", () => {
-      setRelayPeers(waku.relay.getPeers().size);
+    waku.relay.addEventListener("gossipsub:heartbeat", () => {
+      setRelayPeers(waku.relay.getMeshPeers().length);
     });
   }, [waku]);
 
@@ -33,13 +33,9 @@ export default function Room(props: Props) {
     if (!waku) return;
 
     // Update store peer when new peer connected & identified
-    waku.libp2p.peerStore.on("change:protocols", async () => {
-      let counter = 0;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      for await (const _peer of waku.store.peers) {
-        counter++;
-      }
-      setStorePeers(counter);
+    waku.libp2p.peerStore.addEventListener("change:protocols", async () => {
+      const peers = await waku.store.peers();
+      setStorePeers(peers.length);
     });
   }, [waku]);
 

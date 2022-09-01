@@ -1,11 +1,14 @@
 import { useEffect, useReducer, useState } from "react";
 import "./App.css";
 import {
-  discovery,
-  getPredefinedBootstrapNodes,
   PageDirection,
+  Protocols,
   Waku,
+  WakuFilter,
+  WakuLightPush,
   WakuMessage,
+  WakuRelay,
+  WakuStore,
 } from "js-waku";
 import handleCommand from "./command";
 import Room from "./Room";
@@ -13,6 +16,13 @@ import { WakuContext } from "./WakuContext";
 import { ThemeProvider } from "@livechat/ui-kit";
 import { generate } from "server-name-generator";
 import { Message } from "./Message";
+import {
+  Fleet,
+  getPredefinedBootstrapNodes,
+} from "js-waku/lib/predefined_bootstrap_nodes";
+import { waitForRemotePeer } from "js-waku/lib/wait_for_remote_peer";
+import { PeerDiscoveryStaticPeers } from "js-waku/lib/peer_discovery_static_list";
+import { defaultLibp2p } from "js-waku/lib/create_waku";
 
 const themes = {
   AuthorName: {
@@ -130,7 +140,7 @@ export default function App() {
     if (historicalMessagesRetrieved) return;
 
     const retrieveMessages = async () => {
-      await waku.waitForRemotePeer();
+      await waitForRemotePeer(waku, [Protocols.Relay, Protocols.Store]);
       console.log(`Retrieving archived messages`);
 
       try {
@@ -175,19 +185,22 @@ export default function App() {
 
 async function initWaku(setter: (waku: Waku) => void) {
   try {
-    const waku = await Waku.create({
-      libp2p: {
-        config: {
-          pubsub: {
-            enabled: true,
-            emitSelf: true,
-          },
-        },
-      },
-      bootstrap: {
-        peers: getPredefinedBootstrapNodes(selectFleetEnv()),
-      },
+    const wakuRelay = new WakuRelay({ emitSelf: true });
+    const libp2p = await defaultLibp2p(wakuRelay, {
+      peerDiscovery: [
+        new PeerDiscoveryStaticPeers(
+          getPredefinedBootstrapNodes(selectFleetEnv())
+        ),
+      ],
     });
+    const wakuStore = new WakuStore(libp2p);
+
+    // TODO: Remove these two declarations once there are optional in js-waku
+    const wakuLightPush = new WakuLightPush(libp2p);
+    const wakuFilter = new WakuFilter(libp2p);
+
+    const waku = new Waku({}, libp2p, wakuStore, wakuLightPush, wakuFilter);
+    await waku.start();
 
     setter(waku);
   } catch (e) {
@@ -198,9 +211,9 @@ async function initWaku(setter: (waku: Waku) => void) {
 function selectFleetEnv() {
   // Works with react-scripts
   if (process?.env?.NODE_ENV === "development") {
-    return discovery.predefined.Fleet.Test;
+    return Fleet.Test;
   } else {
-    return discovery.predefined.Fleet.Prod;
+    return Fleet.Prod;
   }
 }
 
