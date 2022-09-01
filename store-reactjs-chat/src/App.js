@@ -1,6 +1,7 @@
-import { Waku } from "js-waku";
+import { waitForRemotePeer, utils } from "js-waku";
 import * as React from "react";
 import protons from "protons";
+import { createWaku } from "js-waku/lib/create_waku";
 
 const ContentTopic = "/toy-chat/2/huilong/proto";
 
@@ -22,9 +23,11 @@ function App() {
 
     setWakuStatus("Starting");
 
-    Waku.create({ bootstrap: { default: true } }).then((waku) => {
-      setWaku(waku);
-      setWakuStatus("Connecting");
+    createWaku({ defaultBootstrap: true }).then((waku) => {
+      waku.start().then(() => {
+        setWaku(waku);
+        setWakuStatus("Connecting");
+      });
     });
   }, [waku, wakuStatus]);
 
@@ -34,7 +37,7 @@ function App() {
     // We do not handle disconnection/re-connection in this example
     if (wakuStatus === "Connected") return;
 
-    waku.waitForRemotePeer().then(() => {
+    waitForRemotePeer(waku, ["store"]).then(() => {
       // We are now connected to a store node
       setWakuStatus("Connected");
     });
@@ -55,14 +58,20 @@ function App() {
     // 7 days/week, 24 hours/day, 60min/hour, 60secs/min, 100ms/sec
     startTime.setTime(startTime.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-    waku.store
-      .queryHistory([ContentTopic], {
-        callback: processMessages,
-        timeFilter: { startTime, endTime: new Date() },
-      })
-      .catch((e) => {
-        console.log("Failed to retrieve messages", e);
-      });
+    // TODO: Remove this timeout once https://github.com/status-im/js-waku/issues/913 is done
+    setTimeout(
+      () =>
+        waku.store
+          .queryHistory([ContentTopic], {
+            callback: processMessages,
+            timeFilter: { startTime, endTime: new Date() },
+          })
+          .catch((e) => {
+            console.log("Failed to retrieve messages", e);
+            setWakuStatus("Error Encountered");
+          }),
+      200
+    );
   }, [waku, wakuStatus]);
 
   return (
@@ -92,15 +101,20 @@ function decodeMessage(wakuMessage) {
   const time = new Date();
   time.setTime(timestamp);
 
-  const utf8Text = Buffer.from(text).toString("utf-8");
+  const utf8Text = utils.bytesToUtf8(text);
 
-  return { text: utf8Text, timestamp: time, nick };
+  return {
+    text: utf8Text,
+    timestamp: time,
+    nick,
+    timestampInt: wakuMessage.timestamp,
+  };
 }
 
 function Messages(props) {
-  return props.messages.map(({ text, timestamp, nick }) => {
+  return props.messages.map(({ text, timestamp, nick, timestampInt }) => {
     return (
-      <li>
+      <li key={timestampInt}>
         ({formatDate(timestamp)}) {nick}: {text}
       </li>
     );
