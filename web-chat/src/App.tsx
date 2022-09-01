@@ -23,6 +23,7 @@ import {
 import { waitForRemotePeer } from "js-waku/lib/wait_for_remote_peer";
 import { PeerDiscoveryStaticPeers } from "js-waku/lib/peer_discovery_static_list";
 import { defaultLibp2p } from "js-waku/lib/create_waku";
+import process from "process";
 
 const themes = {
   AuthorName: {

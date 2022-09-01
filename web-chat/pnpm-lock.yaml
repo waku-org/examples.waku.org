@@ -9,9 +9,10 @@ specifiers:
   '@types/react-dom': ^17.0.11
   cspell: ^6.0.0
   gh-pages: ^4.0.0
-  js-waku: 0.24.0-71ca4c9
+  js-waku: 0.24.0-f52dd9e
   npm-run-all: ^4.1.5
   prettier: ^2.6.2
+  process: ^0.11.10
   protons: ^5.1.0
   protons-runtime: ^3.1.0
   react: ^17.0.2
@@ -25,7 +26,8 @@ specifiers:
 dependencies:
   '@livechat/ui-kit': 0.5.0-20_sk3eihvpffgp52mstba5zhq3vu
   '@multiformats/multiaddr': 10.4.0
-  js-waku: 0.24.0-71ca4c9_hdkjjslme7izp7mvl7xyfhj4di
+  js-waku: 0.24.0-f52dd9e_hdkjjslme7izp7mvl7xyfhj4di
+  process: 0.11.10
   protons-runtime: 3.1.0_uint8arraylist@2.3.2
   react: 17.0.2
   react-dom: 17.0.2_react@17.0.2
@@ -8588,8 +8590,8 @@ packages:
   /js-tokens/4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
 
-  /js-waku/0.24.0-71ca4c9_hdkjjslme7izp7mvl7xyfhj4di:
-    resolution: {integrity: sha512-jCv+mrviDVZXt7LKaVO5YIDWJxxUYzDQDuCcZxAWH6ga9xeAqc4R47oB2ppyeZWI51bviDiGH1nUYOIYscu1AQ==}
+  /js-waku/0.24.0-f52dd9e_hdkjjslme7izp7mvl7xyfhj4di:
+    resolution: {integrity: sha512-LCl0R6wjmkeAaVs1WaSm+93gMfSDqrOF3TXJjNHWeZmMehWjKe2OHRtl4VfW9C2CJoiBePrpElsp/rqCFKe0OA==}
     engines: {node: '>=16'}
     dependencies:
       '@chainsafe/libp2p-gossipsub': 3.5.1_x2utdhayajzrh747hktprshhby
@@ -10735,6 +10737,11 @@ packages:
   /process-nextick-args/2.0.1:
     resolution: {integrity: sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==}
     dev: true
+
+  /process/0.11.10:
+    resolution: {integrity: sha512-cdGef/drWFoydD1JsMzuFf8100nZl+GT+yacc2bEced5f9Rjk4z+WtFUTBu9PhOi9j/jfmBPu0mMEY4wIdAF8A==}
+    engines: {node: '>= 0.6.0'}
+    dev: false
 
   /promise/7.3.1:
     resolution: {integrity: sha512-nolQXZ/4L+bP/UGlkfaIujX9BKxGwmQ9OT4mOt5yvy8iK1h3wqTEJCijzGANTCCl9nWjY41juyAn2K3Q1hLLTg==}
