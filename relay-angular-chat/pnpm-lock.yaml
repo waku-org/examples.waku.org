@@ -23,7 +23,7 @@ specifiers:
   karma-coverage: ~2.1.0
   karma-jasmine: ~4.0.0
   karma-jasmine-html-reporter: ~1.7.0
-  protons: ^2.0.3
+  protobufjs: ^7.1.0
   rxjs: ~7.5.0
   tslib: ^2.3.0
   typescript: ~4.5.2
@@ -39,7 +39,7 @@ dependencies:
   '@angular/platform-browser-dynamic': 13.2.7_vkbm4mesp4vzs4r6epm7k663dq
   '@angular/router': 13.2.7_uouthnyvqoiyqb2ogpzzqrqwhi
   js-waku: 0.24.0-f52dd9e_adbj7bocxelisufu5fxaajl5fa
-  protons: 2.0.3
+  protobufjs: 7.1.0
   rxjs: 7.5.6
   tslib: 2.4.0
   zone.js: 0.11.7
@@ -7584,10 +7584,6 @@ packages:
       long: 5.2.0
     dev: false
 
-  /protocol-buffers-schema/3.6.0:
-    resolution: {integrity: sha512-TdDRD+/QNdrCGCE7v8340QyuXd4kIWIgapsE2+n/SaGiSSbomYl4TjHlvIoCWRpE7wFt02EpB35VVA2ImcBVqw==}
-    dev: false
-
   /protons-runtime/1.0.4:
     resolution: {integrity: sha512-DSKWjAgwaXhtYO5Jo/MrU8n/75I/P2IhxU0Fk/lSrXx6Gxl5DH+I6cHcbGAYFmAlOBmU4QRa0mvVme8VXlDeUg==}
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
@@ -7613,15 +7609,6 @@ packages:
     dependencies:
       protobufjs: 7.1.0
       uint8arraylist: 2.3.2
-    dev: false
-
-  /protons/2.0.3:
-    resolution: {integrity: sha512-j6JikP/H7gNybNinZhAHMN07Vjr1i4lVupg598l4I9gSTjJqOvKnwjzYX2PzvBTSVf2eZ2nWv4vG+mtW8L6tpA==}
-    dependencies:
-      protocol-buffers-schema: 3.6.0
-      signed-varint: 2.0.1
-      uint8arrays: 3.1.0
-      varint: 5.0.2
     dev: false
 
   /proxy-addr/2.0.7:
@@ -8122,12 +8109,6 @@ packages:
 
   /signal-exit/3.0.7:
     resolution: {integrity: sha512-wnD2ZE+l+SPC/uoS0vXeE9L1+0wuaMqKlfz9AMUo38JsyLSBWSFcHR1Rri62LZc12vLr1gb3jl7iwQhgwpAbGQ==}
-
-  /signed-varint/2.0.1:
-    resolution: {integrity: sha512-abgDPg1106vuZZOvw7cFwdCABddfJRz5akcCcchzTbhyhYnsG31y4AlZEgp315T7W3nQq5P4xeOm186ZiPVFzw==}
-    dependencies:
-      varint: 5.0.2
-    dev: false
 
   /slash/3.0.0:
     resolution: {integrity: sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q==}
@@ -8818,10 +8799,6 @@ packages:
     dependencies:
       builtins: 1.0.3
     dev: true
-
-  /varint/5.0.2:
-    resolution: {integrity: sha512-lKxKYG6H03yCZUpAGOPOsMcGxd1RHCu1iKvEHYDPmTyq2HueGhD73ssNBqqQWfvYs04G9iUFRvmAVLW20Jw6ow==}
-    dev: false
 
   /varint/6.0.0:
     resolution: {integrity: sha512-cXEIW6cfr15lFv563k4GuVuW/fiwjknytD37jIOLSdSWuOI6WnO/oKwmP2FQTU2l01LP8/M5TSAJpzUaGe3uWg==}
