@@ -1,4 +1,4 @@
-import { WakuMessage } from "js-waku";
+import { PushResponse, WakuMessage } from "js-waku";
 import { ChatContentTopic } from "./App";
 import ChatList from "./ChatList";
 import MessageInput from "./MessageInput";
@@ -18,28 +18,22 @@ export default function Room(props: Props) {
   const { waku } = useWaku();
 
   const [storePeers, setStorePeers] = useState(0);
-  const [relayPeers, setRelayPeers] = useState(0);
-
-  useEffect(() => {
-    if (!waku) return;
-
-    // Update relay peer count on heartbeat
-    waku.relay.on("gossipsub:heartbeat", () => {
-      setRelayPeers(waku.relay.getPeers().size);
-    });
-  }, [waku]);
+  const [filterPeers, setFilterPeers] = useState(0);
+  const [lightPushPeers, setLightPushPeers] = useState(0);
 
   useEffect(() => {
     if (!waku) return;
 
     // Update store peer when new peer connected & identified
-    waku.libp2p.peerStore.on("change:protocols", async () => {
-      let counter = 0;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      for await (const _peer of waku.store.peers) {
-        counter++;
-      }
-      setStorePeers(counter);
+    waku.libp2p.peerStore.addEventListener("change:protocols", async () => {
+      const storePeers = await waku.store.peers();
+      setStorePeers(storePeers.length);
+
+      const filterPeers = await waku.filter.peers();
+      setFilterPeers(filterPeers.length);
+
+      const lightPushPeers = await waku.lightPush.peers();
+      setLightPushPeers(lightPushPeers.length);
     });
   }, [waku]);
 
@@ -49,7 +43,9 @@ export default function Room(props: Props) {
       style={{ height: "98vh", display: "flex", flexDirection: "column" }}
     >
       <TitleBar
-        leftIcons={[`Peers: ${relayPeers} relay ${storePeers} store.`]}
+        leftIcons={[
+          `Peers: ${lightPushPeers} light push, ${filterPeers} filter, ${storePeers} store.`,
+        ]}
         title="Waku v2 chat app"
       />
       <ChatList messages={props.messages} />
@@ -61,7 +57,7 @@ export default function Room(props: Props) {
                   messageToSend,
                   props.nick,
                   props.commandHandler,
-                  waku.relay.send.bind(waku.relay)
+                  waku.lightPush.push.bind(waku.lightPush)
                 );
               }
             : undefined
@@ -75,7 +71,7 @@ async function handleMessage(
   message: string,
   nick: string,
   commandHandler: (cmd: string) => void,
-  messageSender: (msg: WakuMessage) => Promise<void>
+  messageSender: (msg: WakuMessage) => Promise<PushResponse | null>
 ) {
   if (message.startsWith("/")) {
     commandHandler(message);
@@ -87,6 +83,6 @@ async function handleMessage(
       ChatContentTopic,
       { timestamp }
     );
-    return messageSender(wakuMsg);
+    await messageSender(wakuMsg);
   }
 }

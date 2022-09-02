@@ -4,7 +4,8 @@
 
 - Group chat
 - React/TypeScript
-- Waku Relay
+- Waku Filter
+- Waku Light Push
 - Waku Store
 
 A ReactJS chat app is provided as a showcase of the library used in the browser.

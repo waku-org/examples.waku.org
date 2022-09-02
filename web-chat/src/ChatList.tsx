@@ -16,12 +16,10 @@ export default function ChatList(props: Props) {
   const renderedMessages = props.messages.map((message) => (
     <LiveMessage
       key={
-        message.sentTimestamp
-          ? message.sentTimestamp.valueOf()
-          : "" +
-            message.timestamp.valueOf() +
-            message.nick +
-            message.payloadAsUtf8
+        message.nick +
+        message.payloadAsUtf8 +
+        message.timestamp.valueOf() +
+        message.sentTimestamp?.valueOf()
       }
       authorName={message.nick}
       date={formatDisplayDate(message)}
