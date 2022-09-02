@@ -59,6 +59,6 @@ export class ChatMessage {
       return "";
     }
 
-    return Buffer.from(this.proto.payload).toString("utf-8");
+    return utils.bytesToUtf8(this.proto.payload);
   }
 }

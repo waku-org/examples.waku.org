@@ -1,4 +1,4 @@
-import { ChangeEvent, KeyboardEvent, useState } from "react";
+import { ChangeEvent, KeyboardEvent, useEffect, useState } from "react";
 import { useWaku } from "./WakuContext";
 import {
   TextInput,
@@ -15,6 +15,7 @@ interface Props {
 
 export default function MessageInput(props: Props) {
   const [inputText, setInputText] = useState<string>("");
+  const [activeButton, setActiveButton] = useState<boolean>(false);
   const { waku } = useWaku();
 
   const sendMessage = async () => {
@@ -39,10 +40,21 @@ export default function MessageInput(props: Props) {
     }
   };
 
-  // Enable the button if there are relay peers available or the user is sending a command
-  const activeButton =
-    (waku && waku.relay.getMeshPeers().length !== 0) ||
-    inputText.startsWith("/");
+  // Enable the button if there are peers available or the user is sending a command
+  useEffect(() => {
+    if (inputText.startsWith("/")) {
+      setActiveButton(true);
+    } else if (waku) {
+      (async () => {
+        const peers = await waku.lightPush.peers();
+        if (!!peers) {
+          setActiveButton(true);
+        } else {
+          setActiveButton(false);
+        }
+      })();
+    }
+  }, [activeButton, inputText, waku]);
 
   return (
     <TextComposer

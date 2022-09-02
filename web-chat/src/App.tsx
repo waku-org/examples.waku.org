@@ -121,7 +121,7 @@ export default function App() {
     // Let's retrieve previous messages before listening to new messages
     if (!historicalMessagesRetrieved) return;
 
-    const handleRelayMessage = (wakuMsg: WakuMessage) => {
+    const handleIncomingMessage = (wakuMsg: WakuMessage) => {
       console.log("Message received: ", wakuMsg);
       const msg = Message.fromWakuMessage(wakuMsg);
       if (msg) {
@@ -129,10 +129,26 @@ export default function App() {
       }
     };
 
-    waku.relay.addObserver(handleRelayMessage, [ChatContentTopic]);
+    let unsubscribe: undefined | (() => Promise<void>);
+    waku.filter.subscribe(handleIncomingMessage, [ChatContentTopic]).then(
+      (_unsubscribe) => {
+        console.log("subscribed to ", ChatContentTopic);
+        unsubscribe = _unsubscribe;
+      },
+      (e) => {
+        console.error("Failed to subscribe", e);
+      }
+    );
 
     return function cleanUp() {
-      waku?.relay.deleteObserver(handleRelayMessage, [ChatContentTopic]);
+      if (!waku) return;
+      if (typeof unsubscribe === "undefined") return;
+      unsubscribe().then(
+        () => {
+          console.log("unsubscribed to ", ChatContentTopic);
+        },
+        (e) => console.error("Failed to unsubscribe", e)
+      );
     };
   }, [waku, historicalMessagesRetrieved]);
 
@@ -141,7 +157,11 @@ export default function App() {
     if (historicalMessagesRetrieved) return;
 
     const retrieveMessages = async () => {
-      await waitForRemotePeer(waku, [Protocols.Relay, Protocols.Store]);
+      await waitForRemotePeer(waku, [
+        Protocols.Store,
+        Protocols.Filter,
+        Protocols.LightPush,
+      ]);
       console.log(`Retrieving archived messages`);
 
       try {
@@ -186,7 +206,9 @@ export default function App() {
 
 async function initWaku(setter: (waku: Waku) => void) {
   try {
+    // TODO: Remove this declaration once there are optional in js-waku
     const wakuRelay = new WakuRelay({ emitSelf: true });
+
     const libp2p = await defaultLibp2p(wakuRelay, {
       peerDiscovery: [
         new PeerDiscoveryStaticPeers(
@@ -196,7 +218,6 @@ async function initWaku(setter: (waku: Waku) => void) {
     });
     const wakuStore = new WakuStore(libp2p);
 
-    // TODO: Remove these two declarations once there are optional in js-waku
     const wakuLightPush = new WakuLightPush(libp2p);
     const wakuFilter = new WakuFilter(libp2p);
 
@@ -211,7 +232,8 @@ async function initWaku(setter: (waku: Waku) => void) {
 
 function selectFleetEnv() {
   // Works with react-scripts
-  if (process?.env?.NODE_ENV === "development") {
+  // TODO: Re-enable the switch once nwaku v0.12 is deployed
+  if (true || process?.env?.NODE_ENV === "development") {
     return Fleet.Test;
   } else {
     return Fleet.Prod;
