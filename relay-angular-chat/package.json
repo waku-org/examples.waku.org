@@ -21,7 +21,7 @@
     "@angular/platform-browser": "~13.2.0",
     "@angular/platform-browser-dynamic": "~13.2.0",
     "@angular/router": "~13.2.0",
-    "js-waku": "^0.19.2",
+    "js-waku": "0.24.0-f52dd9e",
     "protons": "^2.0.3",
     "rxjs": "~7.5.0",
     "tslib": "^2.3.0",
