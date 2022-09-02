@@ -1,7 +1,7 @@
 {
   "name": "@waku/relay-angular-chat",
   "version": "0.1.0",
-  "homepage": "/examples/relay-angular-chat",
+  "homepage": "/relay-angular-chat",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
