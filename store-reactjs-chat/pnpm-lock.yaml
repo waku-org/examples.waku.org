@@ -6,7 +6,7 @@ specifiers:
   '@testing-library/react': ^13.2.0
   '@testing-library/user-event': ^14.1.1
   js-waku: 0.24.0-e3bef47
-  protons: ^2.0.3
+  protobufjs: ^7.1.0
   react: ^18.1.0
   react-dom: ^18.1.0
   react-scripts: 5.0.1
@@ -18,7 +18,7 @@ dependencies:
   '@testing-library/react': 13.3.0_biqbaboplfbrettd7655fr4n2y
   '@testing-library/user-event': 14.4.2_znfriv3ismgf3ybh2woqwlpfea
   js-waku: 0.24.0-e3bef47_typescript@4.7.4
-  protons: 2.0.3
+  protobufjs: 7.1.0
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
   react-scripts: 5.0.1_qtbnez4q7bzoc4eqybg3efzzxe
@@ -7603,7 +7603,7 @@ packages:
       it-length-prefixed: 7.0.1
       it-pipe: 2.0.4
       js-sha3: 0.8.0
-      libp2p: 0.38.0-1f38ab7
+      libp2p: 0.38.0-0e7096d
       p-event: 5.0.1
       protons-runtime: 1.0.4
       uint8arrays: 3.1.0
@@ -7792,8 +7792,8 @@ packages:
       type-check: 0.4.0
     dev: false
 
-  /libp2p/0.38.0-1f38ab7:
-    resolution: {integrity: sha512-pVJiy/eKKPdjUBrNcemNdTKSc+4Edo89STzO6opPzpcGr25CidptBfJtPwWz+CKVtvxzW7BkiVgH2CTDf0bPwg==}
+  /libp2p/0.38.0-0e7096d:
+    resolution: {integrity: sha512-OrdnREspiwmgFdd2WagZcwZsRnks/EwWOTOql2Kg5cmpdbrGP/SEElbC/kUiYIQVVj8PjA4HQhxyD0q8wFGm9w==}
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
       '@achingbrain/nat-port-mapper': 1.0.7
@@ -9548,10 +9548,6 @@ packages:
       long: 5.2.0
     dev: false
 
-  /protocol-buffers-schema/3.6.0:
-    resolution: {integrity: sha512-TdDRD+/QNdrCGCE7v8340QyuXd4kIWIgapsE2+n/SaGiSSbomYl4TjHlvIoCWRpE7wFt02EpB35VVA2ImcBVqw==}
-    dev: false
-
   /protons-runtime/1.0.4:
     resolution: {integrity: sha512-DSKWjAgwaXhtYO5Jo/MrU8n/75I/P2IhxU0Fk/lSrXx6Gxl5DH+I6cHcbGAYFmAlOBmU4QRa0mvVme8VXlDeUg==}
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
@@ -9577,15 +9573,6 @@ packages:
     dependencies:
       protobufjs: 7.1.0
       uint8arraylist: 2.3.2
-    dev: false
-
-  /protons/2.0.3:
-    resolution: {integrity: sha512-j6JikP/H7gNybNinZhAHMN07Vjr1i4lVupg598l4I9gSTjJqOvKnwjzYX2PzvBTSVf2eZ2nWv4vG+mtW8L6tpA==}
-    dependencies:
-      protocol-buffers-schema: 3.6.0
-      signed-varint: 2.0.1
-      uint8arrays: 3.1.0
-      varint: 5.0.2
     dev: false
 
   /proxy-addr/2.0.7:
@@ -10318,12 +10305,6 @@ packages:
 
   /signal-exit/3.0.7:
     resolution: {integrity: sha512-wnD2ZE+l+SPC/uoS0vXeE9L1+0wuaMqKlfz9AMUo38JsyLSBWSFcHR1Rri62LZc12vLr1gb3jl7iwQhgwpAbGQ==}
-    dev: false
-
-  /signed-varint/2.0.1:
-    resolution: {integrity: sha512-abgDPg1106vuZZOvw7cFwdCABddfJRz5akcCcchzTbhyhYnsG31y4AlZEgp315T7W3nQq5P4xeOm186ZiPVFzw==}
-    dependencies:
-      varint: 5.0.2
     dev: false
 
   /sisteransi/1.0.5:
@@ -11165,10 +11146,6 @@ packages:
       '@types/istanbul-lib-coverage': 2.0.4
       convert-source-map: 1.8.0
       source-map: 0.7.4
-    dev: false
-
-  /varint/5.0.2:
-    resolution: {integrity: sha512-lKxKYG6H03yCZUpAGOPOsMcGxd1RHCu1iKvEHYDPmTyq2HueGhD73ssNBqqQWfvYs04G9iUFRvmAVLW20Jw6ow==}
     dev: false
 
   /varint/6.0.0:

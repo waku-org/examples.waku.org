@@ -7,6 +7,7 @@
 - Waku Filter
 - Waku Light Push
 - Waku Store
+- Protobuf using `protons`
 
 A ReactJS chat app is provided as a showcase of the library used in the browser.
 It implements [Waku v2 Toy Chat](https://rfc.vac.dev/spec/22/) protocol.

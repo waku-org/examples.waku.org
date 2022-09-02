@@ -3,7 +3,7 @@
 - React/JavaScript,
 - `create-react-app`/`react-scripts` 5.0.0
 - Waku Store,
-- Protobuf using `protons`.
+- Protobuf using `protobufjs`.
 - No async/await syntax.
 
 A simple app that retrieves chat messages using [Waku Store](https://rfc.vac.dev/spec/13/)
