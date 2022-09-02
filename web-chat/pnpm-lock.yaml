@@ -5,7 +5,7 @@ specifiers:
   '@multiformats/multiaddr': ^10.4.0
   '@types/jest': ^27.5.0
   '@types/node': ^17.0.32
-  '@types/react': ^17.0.39
+  '@types/react': ^18.0.18
   '@types/react-dom': ^17.0.11
   cspell: ^6.0.0
   gh-pages: ^4.0.0
@@ -24,7 +24,7 @@ specifiers:
   url: ^0.11.0
 
 dependencies:
-  '@livechat/ui-kit': 0.5.0-20_sk3eihvpffgp52mstba5zhq3vu
+  '@livechat/ui-kit': 0.5.0-20_ibvs32p3vr2bbtbo3dwziny444
   '@multiformats/multiaddr': 10.4.0
   js-waku: 0.24.0-f52dd9e_hdkjjslme7izp7mvl7xyfhj4di
   process: 0.11.10
@@ -37,7 +37,7 @@ dependencies:
 devDependencies:
   '@types/jest': 27.5.2
   '@types/node': 17.0.45
-  '@types/react': 17.0.48
+  '@types/react': 18.0.18
   '@types/react-dom': 17.0.17
   cspell: 6.5.0
   gh-pages: 4.0.0
@@ -1955,7 +1955,7 @@ packages:
     resolution: {integrity: sha512-G/YwXTkv7Den9mXDO7AhLWkE3q+I92B+VqAE+dYG4NGPaHZGvt3G8Q0p9vmE+sq7rTGphUbAvmQ9YpbfMQGGlA==}
     dev: false
 
-  /@emotion/react/11.10.0_skqlhrap4das3cz5b6iqdn2lqi:
+  /@emotion/react/11.10.0_d25jxjobwgtz6luclwkw6pvxim:
     resolution: {integrity: sha512-K6z9zlHxxBXwN8TcpwBKcEsBsOw4JWCCmR+BeeOWgqp8GIU1yA2Odd41bwdAAr0ssbQrbJbVnndvv7oiv1bZeQ==}
     peerDependencies:
       '@babel/core': ^7.0.0
@@ -1973,7 +1973,7 @@ packages:
       '@emotion/serialize': 1.1.0
       '@emotion/utils': 1.2.0
       '@emotion/weak-memoize': 0.3.0
-      '@types/react': 17.0.48
+      '@types/react': 18.0.18
       hoist-non-react-statics: 3.3.2
       react: 17.0.2
     dev: false
@@ -1992,7 +1992,7 @@ packages:
     resolution: {integrity: sha512-OiTkRgpxescko+M51tZsMq7Puu/KP55wMT8BgpcXVG2hqXc0Vo0mfymJ/Uj24Hp0i083ji/o0aLddh08UEjq8w==}
     dev: false
 
-  /@emotion/styled/11.10.0_wiynxy2xmewqltyl3r22mlxgsm:
+  /@emotion/styled/11.10.0_y2vdf3r3obixhilua46gaqfrtq:
     resolution: {integrity: sha512-V9oaEH6V4KePeQpgUE83i8ht+4Ri3E8Djp/ZPJ4DQlqWhSKITvgzlR3/YQE2hdfP4Jw3qVRkANJz01LLqK9/TA==}
     peerDependencies:
       '@babel/core': ^7.0.0
@@ -2008,10 +2008,10 @@ packages:
       '@babel/runtime': 7.18.9
       '@emotion/babel-plugin': 11.10.0
       '@emotion/is-prop-valid': 1.2.0
-      '@emotion/react': 11.10.0_skqlhrap4das3cz5b6iqdn2lqi
+      '@emotion/react': 11.10.0_d25jxjobwgtz6luclwkw6pvxim
       '@emotion/serialize': 1.1.0
       '@emotion/utils': 1.2.0
-      '@types/react': 17.0.48
+      '@types/react': 18.0.18
       react: 17.0.2
     dev: false
 
@@ -3057,7 +3057,7 @@ packages:
       tabbable: 5.3.3
     dev: false
 
-  /@livechat/react-hooks/0.3.16_pb6hpqslwrr7pc7rkrj76ugdey:
+  /@livechat/react-hooks/0.3.16_2slxtduwhuots5etcghk5zlo2q:
     resolution: {integrity: sha512-Fy7rr3GaL2kgN7I0Pqx9P437Vnqi1UO7zjmK+GHmwh6EhcYBLKRIg6fn3G+9jYAH6TfaNTkszTU9QaHgoqDYKg==}
     peerDependencies:
       react: ^16.8.0 || ^17
@@ -3069,9 +3069,9 @@ packages:
       react-frame-component: 5.2.3_oxfzelaz5ynxsop2v2nu2h2m64
       use-composed-ref: 1.3.0_react@17.0.2
       use-constant: 1.1.1_react@17.0.2
-      use-latest: 1.2.1_skqlhrap4das3cz5b6iqdn2lqi
-      use-onclickoutside: 0.4.1_skqlhrap4das3cz5b6iqdn2lqi
-      use-previous: 1.1.0_skqlhrap4das3cz5b6iqdn2lqi
+      use-latest: 1.2.1_d25jxjobwgtz6luclwkw6pvxim
+      use-onclickoutside: 0.4.1_d25jxjobwgtz6luclwkw6pvxim
+      use-previous: 1.1.0_d25jxjobwgtz6luclwkw6pvxim
       use-smooth-scroll: 1.1.1_react@17.0.2
       use-subscription: 1.8.0_react@17.0.2
     transitivePeerDependencies:
@@ -3080,7 +3080,7 @@ packages:
       - react-dom
     dev: false
 
-  /@livechat/ui-kit/0.5.0-20_sk3eihvpffgp52mstba5zhq3vu:
+  /@livechat/ui-kit/0.5.0-20_ibvs32p3vr2bbtbo3dwziny444:
     resolution: {integrity: sha512-M5SL//CNpnVjQhYDwrqWeCw7nlSsLDpHdbIwzAPqbmK42m0KLK5zHcaHCEh2Y385cqm0uk3687+vVRJEjHE8Vw==}
     peerDependencies:
       react: ^16.8.0 || ^17
@@ -3088,11 +3088,11 @@ packages:
     dependencies:
       '@babel/runtime': 7.18.9
       '@emotion/is-prop-valid': 1.2.0
-      '@emotion/react': 11.10.0_skqlhrap4das3cz5b6iqdn2lqi
-      '@emotion/styled': 11.10.0_wiynxy2xmewqltyl3r22mlxgsm
+      '@emotion/react': 11.10.0_d25jxjobwgtz6luclwkw6pvxim
+      '@emotion/styled': 11.10.0_y2vdf3r3obixhilua46gaqfrtq
       '@livechat/data-utils': 0.2.16
       '@livechat/dom-utils': 0.2.5
-      '@livechat/react-hooks': 0.3.16_pb6hpqslwrr7pc7rkrj76ugdey
+      '@livechat/react-hooks': 0.3.16_2slxtduwhuots5etcghk5zlo2q
       '@react-aria/button': 3.6.0_react@17.0.2
       '@react-aria/interactions': 3.10.0_react@17.0.2
       '@react-aria/utils': 3.13.2_react@17.0.2
@@ -3100,7 +3100,7 @@ packages:
       prop-types: 15.8.1
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
-      react-textarea-autosize: 8.3.4_skqlhrap4das3cz5b6iqdn2lqi
+      react-textarea-autosize: 8.3.4_d25jxjobwgtz6luclwkw6pvxim
       react-transition-group: 4.4.5_sfoxds7t5ydpegc3knd667wn6m
       recompose: 0.23.5_react@17.0.2
       resize-observer-polyfill: 1.5.1
@@ -3909,6 +3909,14 @@ packages:
 
   /@types/react/17.0.48:
     resolution: {integrity: sha512-zJ6IYlJ8cYYxiJfUaZOQee4lh99mFihBoqkOSEGV+dFi9leROW6+PgstzQ+w3gWTnUfskALtQPGHK6dYmPj+2A==}
+    dependencies:
+      '@types/prop-types': 15.7.5
+      '@types/scheduler': 0.16.2
+      csstype: 3.1.0
+    dev: true
+
+  /@types/react/18.0.18:
+    resolution: {integrity: sha512-6hI08umYs6NaiHFEEGioXnxJ+oEhY3eRz8VCUaudZmGdtvPviCJB8mgaMxaDWAdPSYd4eFavrPk2QIolwbLYrg==}
     dependencies:
       '@types/prop-types': 15.7.5
       '@types/scheduler': 0.16.2
@@ -11137,7 +11145,7 @@ packages:
       - webpack-plugin-serve
     dev: true
 
-  /react-textarea-autosize/8.3.4_skqlhrap4das3cz5b6iqdn2lqi:
+  /react-textarea-autosize/8.3.4_d25jxjobwgtz6luclwkw6pvxim:
     resolution: {integrity: sha512-CdtmP8Dc19xL8/R6sWvtknD/eCXkQr30dtvC4VmGInhRsfF8X/ihXCq6+9l9qbxmKRiq407/7z5fxE7cVWQNgQ==}
     engines: {node: '>=10'}
     peerDependencies:
@@ -11146,7 +11154,7 @@ packages:
       '@babel/runtime': 7.18.9
       react: 17.0.2
       use-composed-ref: 1.3.0_react@17.0.2
-      use-latest: 1.2.1_skqlhrap4das3cz5b6iqdn2lqi
+      use-latest: 1.2.1_d25jxjobwgtz6luclwkw6pvxim
     transitivePeerDependencies:
       - '@types/react'
     dev: false
@@ -12654,7 +12662,7 @@ packages:
       react: 17.0.2
     dev: false
 
-  /use-isomorphic-layout-effect/1.1.2_skqlhrap4das3cz5b6iqdn2lqi:
+  /use-isomorphic-layout-effect/1.1.2_d25jxjobwgtz6luclwkw6pvxim:
     resolution: {integrity: sha512-49L8yCO3iGT/ZF9QttjwLF/ZD9Iwto5LnH5LmEdk/6cFmXddqi2ulF0edxTwjj+7mqvpVVGQWvbXZdn32wRSHA==}
     peerDependencies:
       '@types/react': '*'
@@ -12663,11 +12671,11 @@ packages:
       '@types/react':
         optional: true
     dependencies:
-      '@types/react': 17.0.48
+      '@types/react': 18.0.18
       react: 17.0.2
     dev: false
 
-  /use-latest/1.2.1_skqlhrap4das3cz5b6iqdn2lqi:
+  /use-latest/1.2.1_d25jxjobwgtz6luclwkw6pvxim:
     resolution: {integrity: sha512-xA+AVm/Wlg3e2P/JiItTziwS7FK92LWrDB0p+hgXloIMuVCeJJ8v6f0eeHyPZaJrM+usM1FkFfbNCrJGs8A/zw==}
     peerDependencies:
       '@types/react': '*'
@@ -12676,30 +12684,30 @@ packages:
       '@types/react':
         optional: true
     dependencies:
-      '@types/react': 17.0.48
+      '@types/react': 18.0.18
       react: 17.0.2
-      use-isomorphic-layout-effect: 1.1.2_skqlhrap4das3cz5b6iqdn2lqi
+      use-isomorphic-layout-effect: 1.1.2_d25jxjobwgtz6luclwkw6pvxim
     dev: false
 
-  /use-onclickoutside/0.4.1_skqlhrap4das3cz5b6iqdn2lqi:
+  /use-onclickoutside/0.4.1_d25jxjobwgtz6luclwkw6pvxim:
     resolution: {integrity: sha512-hAo1viJ9D2mPffUig4EWCwE4as7fq84HANk3MCkY3rhXk5oMl0mjLCLF/OhzWIhTaITcAcDDcnaxRdMHPq+sww==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
       are-passive-events-supported: 1.1.1
       react: 17.0.2
-      use-latest: 1.2.1_skqlhrap4das3cz5b6iqdn2lqi
+      use-latest: 1.2.1_d25jxjobwgtz6luclwkw6pvxim
     transitivePeerDependencies:
       - '@types/react'
     dev: false
 
-  /use-previous/1.1.0_skqlhrap4das3cz5b6iqdn2lqi:
+  /use-previous/1.1.0_d25jxjobwgtz6luclwkw6pvxim:
     resolution: {integrity: sha512-t6ltKuYIpvcqD+VBnlUOaT+N94bN7HwUdB1u7rSpCIh9XvMJQIjsw/G8DoJlSDh029khFQ2L8q88oUWfKoWy5w==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0
     dependencies:
       react: 17.0.2
-      use-isomorphic-layout-effect: 1.1.2_skqlhrap4das3cz5b6iqdn2lqi
+      use-isomorphic-layout-effect: 1.1.2_d25jxjobwgtz6luclwkw6pvxim
     transitivePeerDependencies:
       - '@types/react'
     dev: false
