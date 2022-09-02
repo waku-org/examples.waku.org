@@ -1,17 +1,14 @@
 import { waitForRemotePeer, utils } from "js-waku";
 import * as React from "react";
-import protons from "protons";
+import protobuf from "protobufjs";
 import { createWaku } from "js-waku/lib/create_waku";
 
 const ContentTopic = "/toy-chat/2/huilong/proto";
 
-const proto = protons(`
-message ChatMessage {
-  uint64 timestamp = 1;
-  string nick = 2;
-  bytes text = 3;
-}
-`);
+const ProtoChatMessage = new protobuf.Type("ChatMessage")
+  .add(new protobuf.Field("timestamp", 1, "uint64"))
+  .add(new protobuf.Field("nick", 2, "string"))
+  .add(new protobuf.Field("text", 3, "bytes"));
 
 function App() {
   const [waku, setWaku] = React.useState(undefined);
@@ -92,14 +89,14 @@ export default App;
 function decodeMessage(wakuMessage) {
   if (!wakuMessage.payload) return;
 
-  const { timestamp, nick, text } = proto.ChatMessage.decode(
+  const { timestamp, nick, text } = ProtoChatMessage.decode(
     wakuMessage.payload
   );
 
   if (!timestamp || !text || !nick) return;
 
   const time = new Date();
-  time.setTime(timestamp);
+  time.setTime(Number(timestamp));
 
   const utf8Text = utils.bytesToUtf8(text);
 
