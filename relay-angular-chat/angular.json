@@ -20,7 +20,6 @@
             "outputPath": "dist/relay-angular-chat",
             "index": "src/index.html",
             "main": "src/main.ts",
-            "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
             "assets": [
               "src/favicon.ico",
@@ -29,31 +28,7 @@
             "styles": [
               "src/styles.css"
             ],
-            "scripts": [],
-            "allowedCommonJsDependencies": [
-              "libp2p-gossipsub/src/utils",
-              "rlp",
-              "multiaddr/src/convert",
-              "varint",
-              "multihashes",
-              "@chainsafe/libp2p-noise/dist/src/noise",
-              "debug",
-              "libp2p",
-              "libp2p-bootstrap",
-              "libp2p-crypto",
-              "libp2p-websockets",
-              "libp2p-websockets/src/filters",
-              "libp2p/src/ping",
-              "multiaddr",
-              "peer-id",
-              "buffer",
-              "crypto",
-              "ecies-geth",
-              "secp256k1",
-              "libp2p-gossipsub",
-              "it-concat",
-              "protons"
-            ]
+            "scripts": []
           },
           "configurations": {
             "production": {
@@ -110,7 +85,6 @@
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "main": "src/test.ts",
-            "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.spec.json",
             "karmaConfig": "karma.conf.js",
             "assets": [
@@ -126,5 +100,8 @@
       }
     }
   },
-  "defaultProject": "relay-angular-chat"
+  "defaultProject": "relay-angular-chat",
+  "cli": {
+    "analytics": false
+  }
 }

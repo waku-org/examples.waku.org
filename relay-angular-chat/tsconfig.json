@@ -22,11 +22,6 @@
       "es2020",
       "dom"
     ],
-    "paths": {
-      "buffer": ["node_modules/buffer"],
-      "crypto": ["node_modules/crypto-browserify"],
-      "stream": ["node_modules/stream-browserify"]
-    },
     "allowSyntheticDefaultImports": true,
   },
   "angularCompilerOptions": {
