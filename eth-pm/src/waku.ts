@@ -1,11 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
-import {
-  Protocols,
-  utils,
-  waitForRemotePeer,
-  Waku,
-  WakuMessage,
-} from "js-waku";
+import { Protocols, utils, Waku, WakuMessage } from "js-waku";
 import { PrivateMessage, PublicKeyMessage } from "./messaging/wire";
 import { validatePublicKeyMessage } from "./crypto";
 import { Message } from "./messaging/Messages";
@@ -16,6 +10,7 @@ import {
   getPredefinedBootstrapNodes,
   Fleet,
 } from "js-waku/lib/predefined_bootstrap_nodes";
+import { waitForRemotePeer } from "js-waku/lib/wait_for_remote_peer";
 
 export const PublicKeyContentTopic = "/eth-pm/1/public-key/proto";
 export const PrivateMessageContentTopic = "/eth-pm/1/private-message/proto";
