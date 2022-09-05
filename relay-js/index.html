@@ -27,12 +27,14 @@
      */
 
     import {
-        waitForRemotePeer,
         WakuMessage
     } from 'https://unpkg.com/js-waku@next/bundle/index.js';
     import {
-      createWaku
+        createWaku
     } from 'https://unpkg.com/js-waku@next/bundle/lib/create_waku.js'
+    import {
+        waitForRemotePeer
+    } from 'https://unpkg.com/js-waku@next/bundle/lib/wait_for_remote_peer.js'
 
     const statusDiv = document.getElementById('status');
     const messagesDiv = document.getElementById('messages');
