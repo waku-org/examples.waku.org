@@ -13,7 +13,7 @@ export async function saveKeyPairToStorage(
   const data = {
     salt: utils.bytesToHex(salt),
     iv: utils.bytesToHex(iv),
-    cipher: utils.bytesToHex(cipher),
+    cipher: utils.bytesToHex(new Uint8Array(cipher)),
   };
 
   localStorage.setItem("cipherEncryptionKeyPair", JSON.stringify(data));

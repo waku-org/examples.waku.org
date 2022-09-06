@@ -1,0 +1,74 @@
+pipeline {
+  agent { label 'linux' }
+
+  options {
+    disableConcurrentBuilds()
+    /* manage how many builds we keep */
+    buildDiscarder(logRotator(
+      numToKeepStr: '20',
+      daysToKeepStr: '30',
+    ))
+  }
+
+  environment {
+    SITE_DOMAIN = 'examples.waku.org'
+    GIT_AUTHOR_NAME = 'status-im-auto'
+    GIT_AUTHOR_EMAIL = 'auto@status.im'
+    PUPPETEER_SKIP_DOWNLOAD = 'true'
+  }
+
+  stages {
+    stage('Pre') {
+      steps {
+        sh 'yarn install --no-lockfile'
+        /* TODO: Build the main page. */
+        sh 'mkdir -p build/docs'
+      }
+    }
+
+    stage('Examples') {
+      parallel {
+        stage('eth-pm') { steps { script { buildExample() } } }
+        stage('relay-angular-chat') { steps { script { buildExample() } } }
+        stage('relay-reactjs-chat') { steps { script { buildExample() } } }
+        stage('store-reactjs-chat') { steps { script { buildExample() } } }
+        stage('web-chat') { steps { script { buildExample() } } }
+      }
+    }
+
+    stage('HTML Examples') {
+      parallel {
+        stage('relay-js') { steps { script { copyExample() } } }
+        stage('store-js') { steps { script { copyExample() } } }
+      }
+    }
+
+    stage('Publish') {
+      //when { expression { GIT_BRANCH.endsWith('master') } }
+      steps { script {
+        sh "echo ${SITE_DOMAIN} > build/docs/CNAME"
+        sshagent(credentials: ['status-im-auto-ssh']) {
+          sh 'node ci/deploy.js'
+        }
+      } }
+    }
+  }
+  post {
+    always { cleanWs() }
+  }
+}
+
+def buildExample(example=STAGE_NAME) {
+  def dest = "${WORKSPACE}/build/docs/${example}"
+  dir("${example}") {
+    sh 'yarn install --network-concurrency 1 --no-lockfile'
+    sh 'yarn run build'
+    sh "mkdir -p ${dest}"
+    sh "cp -r build/. ${dest}"
+  }
+}
+
+def copyExample(example=STAGE_NAME) {
+  sh "mkdir -p build/docs/${example}"
+  sh "cp ${example}/index.html build/docs/${example}/"
+}
