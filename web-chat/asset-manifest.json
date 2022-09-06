@@ -1,0 +1,14 @@
+{
+  "files": {
+    "main.css": "/web-chat/static/css/main.b267dcda.css",
+    "main.js": "/web-chat/static/js/main.1d6d6520.js",
+    "static/media/rpc.cjs": "/web-chat/static/media/rpc.93e8f6196bd2c425bf03.cjs",
+    "index.html": "/web-chat/index.html",
+    "main.b267dcda.css.map": "/web-chat/static/css/main.b267dcda.css.map",
+    "main.1d6d6520.js.map": "/web-chat/static/js/main.1d6d6520.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.b267dcda.css",
+    "static/js/main.1d6d6520.js"
+  ]
+}
