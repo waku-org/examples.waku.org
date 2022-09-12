@@ -2,6 +2,11 @@ import { waitForRemotePeer, utils } from "js-waku";
 import * as React from "react";
 import protobuf from "protobufjs";
 import { createWaku } from "js-waku/lib/create_waku";
+import {
+  Fleet,
+  getPredefinedBootstrapNodes,
+} from "js-waku/lib/predefined_bootstrap_nodes";
+import { PeerDiscoveryStaticPeers } from "js-waku/lib/peer_discovery_static_list";
 
 const ContentTopic = "/toy-chat/2/huilong/proto";
 
@@ -20,7 +25,13 @@ function App() {
 
     setWakuStatus("Starting");
 
-    createWaku({ defaultBootstrap: true }).then((waku) => {
+    createWaku({
+      libp2p: {
+        peerDiscovery: [
+          new PeerDiscoveryStaticPeers(getPredefinedBootstrapNodes(Fleet.Test)),
+        ],
+      },
+    }).then((waku) => {
       waku.start().then(() => {
         setWaku(waku);
         setWakuStatus("Connecting");
