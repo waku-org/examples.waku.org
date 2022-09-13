@@ -2,7 +2,7 @@ import "@ethersproject/shims";
 
 import React, { useEffect, useState } from "react";
 import "./App.css";
-import { Waku } from "js-waku";
+import type { WakuLight } from "js-waku/lib/interfaces";
 import { KeyPair, PublicKeyMessageEncryptionKey } from "./crypto";
 import { Message } from "./messaging/Messages";
 import "fontsource-roboto";
@@ -67,7 +67,7 @@ const useStyles = makeStyles({
 });
 
 function App() {
-  const [waku, setWaku] = useState<Waku>();
+  const [waku, setWaku] = useState<WakuLight>();
   const [provider, setProvider] = useState<Web3Provider>();
   const [encryptionKeyPair, setEncryptionKeyPair] = useState<
     KeyPair | undefined

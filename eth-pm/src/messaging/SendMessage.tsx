@@ -7,7 +7,8 @@ import {
   TextField,
 } from "@material-ui/core";
 import React, { ChangeEvent, useState, KeyboardEvent } from "react";
-import { utils, Waku, WakuMessage } from "js-waku";
+import { utils, WakuMessage } from "js-waku";
+import type { WakuLight } from "js-waku/lib/interfaces";
 import { PrivateMessage } from "./wire";
 import { PrivateMessageContentTopic } from "../waku";
 
@@ -22,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export interface Props {
-  waku: Waku | undefined;
+  waku: WakuLight | undefined;
   // address, public key
   recipients: Map<string, Uint8Array>;
 }
@@ -120,7 +121,7 @@ async function encodeEncryptedWakuMessage(
 }
 
 function sendMessage(
-  waku: Waku,
+  waku: WakuLight,
   recipientAddress: string,
   recipientPublicKey: Uint8Array,
   message: string,
