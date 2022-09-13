@@ -40,6 +40,7 @@ pipeline {
       parallel {
         stage('relay-js') { steps { script { copyExample() } } }
         stage('store-js') { steps { script { copyExample() } } }
+        stage('light-js') { steps { script { copyExample() } } }
       }
     }
 

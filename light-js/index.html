@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+    <meta charset='UTF-8'/>
+    <meta content='width=device-width, initial-scale=1.0' name='viewport'/>
+    <title>JS-Waku light node example</title>
+</head>
+
+<body>
+
+<div><h2>Status</h2></div>
+<div id='status'></div>
+
+<div><h2>Local Peer Id</h2></div>
+<div id='peer-id'></div>
+
+<div><h2>Remote Peer Id</h2></div>
+<div id='remote-peer-id'></div>
+
+<input id='remote-multiaddr'
+       type='text'
+       value="/dns4/node-01.ac-cn-hongkong-c.wakuv2.test.statusim.net/tcp/443/wss/p2p/16Uiu2HAkvWiyFsgRhuJEb9JfjYxEkoHLgnUQmr1N5mKWnYjxYRVm">
+<button id='dial' type='button'>Dial</button>
+<br/>
+<button id='subscribe' type='button'>Subscribe</button>
+<button id='unsubscribe' type='button'>Unsubscribe</button>
+<br/>
+<input id='textInput' placeholder='Type your message here' type='text'>
+<button id='sendButton' type='button'>Send Message</button>
+<br/>
+<div id="messages"></div>
+
+<script type='module'>
+    import {
+        utils,
+        WakuMessage
+    } from 'https://unpkg.com/js-waku@next/bundle/index.js';
+    import {
+        createLightNode
+    } from 'https://unpkg.com/js-waku@next/bundle/lib/create_waku.js'
+    import {
+        waitForRemotePeer
+    } from 'https://unpkg.com/js-waku@next/bundle/lib/wait_for_remote_peer.js'
+
+    const peerIdDiv = document.getElementById('peer-id');
+    const remotePeerIdDiv = document.getElementById('remote-peer-id');
+    const statusDiv = document.getElementById('status');
+    const remoteMultiAddrDiv = document.getElementById('remote-multiaddr');
+    const dialButton = document.getElementById('dial')
+    const subscribeButton = document.getElementById('subscribe')
+    const unsubscribeButton = document.getElementById('unsubscribe')
+    const messagesDiv = document.getElementById('messages')
+    const textInput = document.getElementById('textInput');
+    const sendButton = document.getElementById('sendButton');
+
+    const ContentTopic = "/light-js/0/message/utf8";
+    let messages = []
+    let unsubscribe;
+
+    subscribeButton.disabled = true
+    textInput.disabled = true;
+    sendButton.disabled = true;
+    unsubscribeButton.disabled = true;
+
+    const updateMessages = (msgs, div) => {
+        div.innerHTML = "<ul>"
+        messages.forEach(msg => div.innerHTML += "<li>" + msg + "</li>")
+        div.innerHTML += "</ul>"
+    }
+
+    statusDiv.innerHTML = '<p>Creating Waku node.</p>';
+    const node = await createLightNode();
+
+    statusDiv.innerHTML = '<p>Starting Waku node.</p>';
+    await node.start();
+    statusDiv.innerHTML = '<p>Waku node started.</p>';
+    peerIdDiv.innerHTML = '<p>' + node.libp2p.peerId.toString() + '</p>'
+
+    dialButton.onclick = async () => {
+        const ma = remoteMultiAddrDiv.value
+        if (!ma) {
+            statusDiv.innerHTML = '<p>Error: No multiaddr provided.</p>';
+            return;
+        }
+        statusDiv.innerHTML = '<p>Dialing peer.</p>';
+        await node.dial(ma, ["filter", "lightpush"])
+        await waitForRemotePeer(node, ["filter", "lightpush"]);
+        const peers = await node.libp2p.peerStore.all();
+        statusDiv.innerHTML = '<p>Peer dialed.</p>';
+        remotePeerIdDiv.innerHTML = '<p>' + peers[0].id.toString() + '</p>'
+        textInput.disabled = false;
+        sendButton.disabled = false;
+        subscribeButton.disabled = false;
+    }
+
+    const callback = (wakuMessage) => {
+        const text = utils.bytesToUtf8(wakuMessage.payload)
+        const timestamp = wakuMessage.timestamp.toString()
+        messages.push(text + " - " + timestamp)
+        updateMessages(messages, messagesDiv)
+    }
+
+    subscribeButton.onclick = async () => {
+        unsubscribe = await node.filter.subscribe(callback, [ContentTopic])
+        unsubscribeButton.disabled = false;
+    }
+
+    unsubscribeButton.onclick = async () => {
+        await unsubscribe();
+        unsubscribe = undefined
+        unsubscribeButton.disabled = true;
+    }
+
+    sendButton.onclick = async () => {
+        const text = textInput.value;
+
+        const wakuMessage = await WakuMessage.fromUtf8String(text, ContentTopic);
+        await node.lightPush.push(wakuMessage);
+        console.log('Message sent!');
+        textInput.value = null;
+    };
+</script>
+</body>
+
+</html>
