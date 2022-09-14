@@ -1,115 +1,115 @@
-import {WakuMessage, waitForRemotePeer} from "js-waku";
+import { WakuMessage } from "js-waku";
 import * as React from "react";
 import protobuf from "protobufjs";
-import {createWaku} from "js-waku/lib/create_waku";
+import { createWaku } from "js-waku/lib/create_waku";
+import { waitForRemotePeer } from "js-waku/lib/wait_for_remote_peer";
 
 const ContentTopic = `/relay-reactjs-chat/1/chat/proto`;
 
 const SimpleChatMessage = new protobuf.Type("SimpleChatMessage")
-    .add(new protobuf.Field("timestamp", 1, "uint32"))
-    .add(new protobuf.Field("text", 2, "string"));
+  .add(new protobuf.Field("timestamp", 1, "uint32"))
+  .add(new protobuf.Field("text", 2, "string"));
 
 function App() {
-    const [waku, setWaku] = React.useState(undefined);
-    const [wakuStatus, setWakuStatus] = React.useState("None");
-    // Using a counter just for the messages to be different
-    const [sendCounter, setSendCounter] = React.useState(0);
-    const [messages, setMessages] = React.useState([]);
+  const [waku, setWaku] = React.useState(undefined);
+  const [wakuStatus, setWakuStatus] = React.useState("None");
+  // Using a counter just for the messages to be different
+  const [sendCounter, setSendCounter] = React.useState(0);
+  const [messages, setMessages] = React.useState([]);
 
-    React.useEffect(() => {
-        if (!!waku) return;
-        if (wakuStatus !== "None") return;
+  React.useEffect(() => {
+    if (!!waku) return;
+    if (wakuStatus !== "None") return;
 
-        setWakuStatus("Starting");
-        (async () => {
+    setWakuStatus("Starting");
+    (async () => {
+      const waku = await createWaku({ defaultBootstrap: true });
 
-            const waku = await createWaku({defaultBootstrap: true})
+      setWaku(waku);
+      await waku.start();
+      setWakuStatus("Connecting");
+      await waitForRemotePeer(waku, ["relay"]);
+      setWakuStatus("Ready");
+    })();
+  }, [waku, wakuStatus]);
 
-            setWaku(waku);
-            await waku.start();
-            setWakuStatus("Connecting");
-            await waitForRemotePeer(waku, ["relay"]);
-            setWakuStatus("Ready");
-        })();
-    }, [waku, wakuStatus]);
+  const processIncomingMessage = React.useCallback((wakuMessage) => {
+    if (!wakuMessage.payload) return;
 
-    const processIncomingMessage = React.useCallback((wakuMessage) => {
-        if (!wakuMessage.payload) return;
+    const { text, timestamp } = SimpleChatMessage.decode(wakuMessage.payload);
 
-        const {text, timestamp} = SimpleChatMessage.decode(wakuMessage.payload);
+    const time = new Date();
 
-        const time = new Date();
+    time.setTime(timestamp);
+    const message = { text, timestamp: time };
 
-        time.setTime(timestamp);
-        const message = {text, timestamp: time};
+    setMessages((messages) => {
+      return [message].concat(messages);
+    });
+  }, []);
 
-        setMessages((messages) => {
-            return [message].concat(messages);
-        });
-    }, []);
+  React.useEffect(() => {
+    if (!waku) return;
 
-    React.useEffect(() => {
-        if (!waku) return;
+    // Pass the content topic to only process messages related to your dApp
+    waku.relay.addObserver(processIncomingMessage, [ContentTopic]);
 
-        // Pass the content topic to only process messages related to your dApp
-        waku.relay.addObserver(processIncomingMessage, [ContentTopic]);
-
-        // `cleanUp` is called when the component is unmounted, see ReactJS doc.
-        return function cleanUp() {
-            waku.relay.deleteObserver(processIncomingMessage, [ContentTopic]);
-        };
-    }, [waku, wakuStatus, processIncomingMessage]);
-
-    const sendMessageOnClick = () => {
-        // Check Waku is started and connected first.
-        if (wakuStatus !== "Ready") return;
-
-        sendMessage(`Here is message #${sendCounter}`, waku, new Date()).then(() =>
-            console.log("Message sent")
-        );
-
-        // For demonstration purposes.
-        setSendCounter(sendCounter + 1);
+    // `cleanUp` is called when the component is unmounted, see ReactJS doc.
+    return function cleanUp() {
+      waku.relay.deleteObserver(processIncomingMessage, [ContentTopic]);
     };
+  }, [waku, wakuStatus, processIncomingMessage]);
 
-    return (
-        <div className="App">
-            <header className="App-header">
-                <p>{wakuStatus}</p>
-                <button onClick={sendMessageOnClick} disabled={wakuStatus !== "Ready"}>
-                    Send Message
-                </button>
-                <ul>
-                    {messages.map((msg) => {
-                        return (
-                            <li key={msg.timestamp.valueOf()}>
-                                <p>
-                                    {msg.timestamp.toString()}: {msg.text}
-                                </p>
-                            </li>
-                        );
-                    })}
-                </ul>
-            </header>
-        </div>
+  const sendMessageOnClick = () => {
+    // Check Waku is started and connected first.
+    if (wakuStatus !== "Ready") return;
+
+    sendMessage(`Here is message #${sendCounter}`, waku, new Date()).then(() =>
+      console.log("Message sent")
     );
+
+    // For demonstration purposes.
+    setSendCounter(sendCounter + 1);
+  };
+
+  return (
+    <div className="App">
+      <header className="App-header">
+        <p>{wakuStatus}</p>
+        <button onClick={sendMessageOnClick} disabled={wakuStatus !== "Ready"}>
+          Send Message
+        </button>
+        <ul>
+          {messages.map((msg) => {
+            return (
+              <li key={msg.timestamp.valueOf()}>
+                <p>
+                  {msg.timestamp.toString()}: {msg.text}
+                </p>
+              </li>
+            );
+          })}
+        </ul>
+      </header>
+    </div>
+  );
 }
 
 function sendMessage(message, waku, timestamp) {
-    const time = timestamp.getTime();
+  const time = timestamp.getTime();
 
-    // Encode to protobuf
-    const protoMsg = SimpleChatMessage.create({
-        timestamp: time,
-        text: message,
-    });
-    const payload = SimpleChatMessage.encode(protoMsg).finish();
+  // Encode to protobuf
+  const protoMsg = SimpleChatMessage.create({
+    timestamp: time,
+    text: message,
+  });
+  const payload = SimpleChatMessage.encode(protoMsg).finish();
 
-    // Wrap in a Waku Message
-    return WakuMessage.fromBytes(payload, ContentTopic).then((wakuMessage) =>
-        // Send over Waku Relay
-        waku.relay.send(wakuMessage)
-    );
+  // Wrap in a Waku Message
+  return WakuMessage.fromBytes(payload, ContentTopic).then((wakuMessage) =>
+    // Send over Waku Relay
+    waku.relay.send(wakuMessage)
+  );
 }
 
 export default App;
