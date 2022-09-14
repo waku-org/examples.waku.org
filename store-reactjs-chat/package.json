@@ -7,7 +7,7 @@
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.2.0",
     "@testing-library/user-event": "^14.1.1",
-    "js-waku": "0.24.0-e3bef47",
+    "js-waku": "0.27.0",
     "protobufjs": "^7.1.0",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
