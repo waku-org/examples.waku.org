@@ -1,5 +1,5 @@
 import { multiaddr } from "@multiformats/multiaddr";
-import { Waku } from "js-waku";
+import type { WakuLight } from "js-waku/lib/interfaces";
 
 function help(): string[] {
   return [
@@ -21,14 +21,17 @@ function nick(
   return [`New nick: ${nick}`];
 }
 
-function info(waku: Waku | undefined): string[] {
+function info(waku: WakuLight | undefined): string[] {
   if (!waku) {
     return ["Waku node is starting"];
   }
   return [`PeerId: ${waku.libp2p.peerId.toString()}`];
 }
 
-function connect(peer: string | undefined, waku: Waku | undefined): string[] {
+function connect(
+  peer: string | undefined,
+  waku: WakuLight | undefined
+): string[] {
   if (!waku) {
     return ["Waku node is starting"];
   }
@@ -50,7 +53,7 @@ function connect(peer: string | undefined, waku: Waku | undefined): string[] {
   }
 }
 
-async function peers(waku: Waku | undefined): Promise<string[]> {
+async function peers(waku: WakuLight | undefined): Promise<string[]> {
   if (!waku) {
     return ["Waku node is starting"];
   }
@@ -77,7 +80,7 @@ async function peers(waku: Waku | undefined): Promise<string[]> {
   return response;
 }
 
-function connections(waku: Waku | undefined): string[] {
+function connections(waku: WakuLight | undefined): string[] {
   if (!waku) {
     return ["Waku node is starting"];
   }
@@ -98,7 +101,7 @@ function connections(waku: Waku | undefined): string[] {
 
 export default async function handleCommand(
   input: string,
-  waku: Waku | undefined,
+  waku: WakuLight | undefined,
   setNick: (nick: string) => void
 ): Promise<{ command: string; response: string[] }> {
   let response: string[] = [];

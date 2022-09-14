@@ -1,14 +1,14 @@
 import { Injectable } from "@angular/core";
-import { Waku } from "js-waku";
 import { BehaviorSubject, Subject } from "rxjs";
-import { createWaku } from "js-waku/lib/create_waku";
+import { createPrivacyNode } from "js-waku/lib/create_waku";
 import { waitForRemotePeer } from "js-waku/lib/wait_for_remote_peer";
+import type { WakuPrivacy } from "js-waku/lib/interfaces.js";
 
 @Injectable({
   providedIn: "root",
 })
 export class WakuService {
-  private wakuSubject = new Subject<Waku>();
+  private wakuSubject = new Subject<WakuPrivacy>();
   public waku = this.wakuSubject.asObservable();
 
   private wakuStatusSubject = new BehaviorSubject("");
@@ -17,7 +17,7 @@ export class WakuService {
   constructor() {}
 
   init() {
-    createWaku({ defaultBootstrap: true }).then((waku) => {
+    createPrivacyNode({ defaultBootstrap: true }).then((waku) => {
       waku.start().then(() => {
         this.wakuSubject.next(waku);
         this.wakuStatusSubject.next("Connecting...");

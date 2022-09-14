@@ -1,8 +1,8 @@
 import { createContext, useContext } from "react";
-import { Waku } from "js-waku";
+import type { WakuLight } from "js-waku/lib/interfaces";
 
 export type WakuContextType = {
-  waku?: Waku;
+  waku?: WakuLight;
 };
 
 export const WakuContext = createContext<WakuContextType>({ waku: undefined });

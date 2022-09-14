@@ -1,6 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { WakuService } from "../waku.service";
-import { Waku, WakuMessage } from "js-waku";
+import { WakuMessage } from "js-waku";
+import type { WakuPrivacy } from "js-waku/lib/interfaces";
 import protobuf from "protobufjs";
 
 const ProtoChatMessage = new protobuf.Type("ChatMessage")
@@ -21,7 +22,7 @@ export class MessagesComponent implements OnInit {
   contentTopic: string = `/relay-angular-chat/1/chat/proto`;
   messages: MessageInterface[] = [];
   messageCount: number = 0;
-  waku!: Waku;
+  waku!: WakuPrivacy;
   wakuStatus!: string;
 
   constructor(private wakuService: WakuService) {}

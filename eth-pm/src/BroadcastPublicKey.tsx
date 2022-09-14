@@ -6,13 +6,14 @@ import {
   PublicKeyMessageEncryptionKey,
 } from "./crypto";
 import { PublicKeyMessage } from "./messaging/wire";
-import { WakuMessage, Waku } from "js-waku";
+import { WakuMessage } from "js-waku";
+import { WakuLight } from "js-waku/lib/interfaces";
 import { PublicKeyContentTopic } from "./waku";
 import type { TypedDataSigner } from "@ethersproject/abstract-signer";
 
 interface Props {
   EncryptionKeyPair: KeyPair | undefined;
-  waku: Waku | undefined;
+  waku: WakuLight | undefined;
   address: string | undefined;
   signer: TypedDataSigner | undefined;
 }

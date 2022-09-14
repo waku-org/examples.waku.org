@@ -1,15 +1,6 @@
 import { useEffect, useReducer, useState } from "react";
 import "./App.css";
-import {
-  PageDirection,
-  Protocols,
-  Waku,
-  WakuFilter,
-  WakuLightPush,
-  WakuMessage,
-  WakuRelay,
-  WakuStore,
-} from "js-waku";
+import { PageDirection, Protocols, WakuMessage } from "js-waku";
 import handleCommand from "./command";
 import Room from "./Room";
 import { WakuContext } from "./WakuContext";
@@ -22,8 +13,9 @@ import {
 } from "js-waku/lib/predefined_bootstrap_nodes";
 import { waitForRemotePeer } from "js-waku/lib/wait_for_remote_peer";
 import { PeerDiscoveryStaticPeers } from "js-waku/lib/peer_discovery_static_list";
-import { defaultLibp2p } from "js-waku/lib/create_waku";
+import type { WakuLight } from "js-waku/lib/interfaces";
 import process from "process";
+import { createLightNode } from "js-waku/lib/create_waku";
 
 const themes = {
   AuthorName: {
@@ -57,7 +49,7 @@ const themes = {
 export const ChatContentTopic = "/toy-chat/2/huilong/proto";
 
 async function retrieveStoreMessages(
-  waku: Waku,
+  waku: WakuLight,
   setArchivedMessages: (value: Message[]) => void
 ): Promise<number> {
   const callback = (wakuMessages: WakuMessage[]): void => {
@@ -98,7 +90,7 @@ async function retrieveStoreMessages(
 
 export default function App() {
   const [messages, dispatchMessages] = useReducer(reduceMessages, []);
-  const [waku, setWaku] = useState<Waku | undefined>(undefined);
+  const [waku, setWaku] = useState<WakuLight | undefined>(undefined);
   const [nick, setNick] = useState<string>(() => {
     const persistedNick = window.localStorage.getItem("nick");
     return persistedNick !== null ? persistedNick : generate();
@@ -204,24 +196,17 @@ export default function App() {
   );
 }
 
-async function initWaku(setter: (waku: Waku) => void) {
+async function initWaku(setter: (waku: WakuLight) => void) {
   try {
-    // TODO: Remove this declaration once there are optional in js-waku
-    const wakuRelay = new WakuRelay({ emitSelf: true });
-
-    const libp2p = await defaultLibp2p(wakuRelay, {
-      peerDiscovery: [
-        new PeerDiscoveryStaticPeers(
-          getPredefinedBootstrapNodes(selectFleetEnv())
-        ),
-      ],
+    const waku = await createLightNode({
+      libp2p: {
+        peerDiscovery: [
+          new PeerDiscoveryStaticPeers(
+            getPredefinedBootstrapNodes(selectFleetEnv())
+          ),
+        ],
+      },
     });
-    const wakuStore = new WakuStore(libp2p);
-
-    const wakuLightPush = new WakuLightPush(libp2p);
-    const wakuFilter = new WakuFilter(libp2p);
-
-    const waku = new Waku({}, libp2p, wakuStore, wakuLightPush, wakuFilter);
     await waku.start();
 
     setter(waku);

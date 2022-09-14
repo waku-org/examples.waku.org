@@ -1,5 +1,5 @@
 import Messages, { Message } from "./Messages";
-import { Waku } from "js-waku";
+import type { WakuLight } from "js-waku/lib/interfaces";
 import SendMessage from "./SendMessage";
 import { makeStyles } from "@material-ui/core";
 
@@ -13,7 +13,7 @@ const useStyles = makeStyles({
 });
 
 interface Props {
-  waku: Waku | undefined;
+  waku: WakuLight | undefined;
   recipients: Map<string, Uint8Array>;
   messages: Message[];
 }
