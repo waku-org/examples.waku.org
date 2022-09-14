@@ -6,7 +6,7 @@
   "dependencies": {
     "@livechat/ui-kit": "^0.5.0-20",
     "@multiformats/multiaddr": "^10.4.0",
-    "js-waku": "0.26.0",
+    "js-waku": "0.27.0",
     "process": "^0.11.10",
     "protons-runtime": "^3.1.0",
     "react": "^17.0.2",
