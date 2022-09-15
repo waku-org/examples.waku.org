@@ -30,7 +30,7 @@
         WakuMessage
     } from 'https://unpkg.com/js-waku@0.27.0/bundle/index.js';
     import {
-        createWaku
+        createPrivacyNode
     } from 'https://unpkg.com/js-waku@0.27.0/bundle/lib/create_waku.js'
     import {
         waitForRemotePeer
@@ -60,7 +60,7 @@
         // We are currently working on migrating this method to DNS Discovery.
         //
         // https://js-waku.wakuconnect.dev/classes/waku.Waku.html#create
-        const waku = await createWaku({defaultBootstrap: true});
+        const waku = await createPrivacyNode({defaultBootstrap: true});
         await waku.start();
 
         // Had a hook to process all incoming messages on a specified content topic.
