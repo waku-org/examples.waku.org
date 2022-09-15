@@ -17,7 +17,7 @@
     Protocols
   } from 'https://unpkg.com/js-waku@0.27.0/bundle/index.js';
   import {
-    createWaku
+    createLightNode
   } from 'https://unpkg.com/js-waku@0.27.0/bundle/lib/create_waku.js'
   import {
     waitForRemotePeer
@@ -34,7 +34,7 @@
 
   try {
     timestampDiv.innerHTML = '<p>Creating waku.</p>';
-    const node = await createWaku({ defaultBootstrap: true });
+    const node = await createLightNode({ defaultBootstrap: true });
 
     timestampDiv.innerHTML = '<p>Starting waku.</p>';
     await node.start();
