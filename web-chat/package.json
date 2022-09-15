@@ -29,7 +29,7 @@
     "url": "^0.11.0"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "PORT=3003 react-scripts start",
     "build": "react-scripts build",
     "test:unit": "exit 0",
     "fix": "run-s fix:*",
