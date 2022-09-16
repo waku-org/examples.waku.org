@@ -9,7 +9,7 @@ specifiers:
   '@types/react-dom': ^17.0.11
   cspell: ^6.0.0
   gh-pages: ^4.0.0
-  js-waku: 0.27.0
+  js-waku: 0.28.0
   npm-run-all: ^4.1.5
   prettier: ^2.6.2
   process: ^0.11.10
@@ -26,7 +26,7 @@ specifiers:
 dependencies:
   '@livechat/ui-kit': 0.5.0-20_ibvs32p3vr2bbtbo3dwziny444
   '@multiformats/multiaddr': 10.4.0
-  js-waku: 0.27.0
+  js-waku: 0.28.0
   process: 0.11.10
   protons-runtime: 3.1.0_uint8arraylist@2.3.2
   react: 17.0.2
@@ -8382,8 +8382,8 @@ packages:
   /js-tokens/4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
 
-  /js-waku/0.27.0:
-    resolution: {integrity: sha512-uIh1h2Gu+aEyrGb4qmyk2Sc91in3fMfOil0kdtrps9HnA7ESbC5c6d148LeJaxqH5rfOkrfXXIhw1zwA3hlauw==}
+  /js-waku/0.28.0:
+    resolution: {integrity: sha512-MEIFugvio2IaQMQT+g+bn24BvlJ5S4PdSKD0AGVZlR7q1BhECwlpRoytyz0A/hC1+EJWhrZB8cpIAmxwtYWTBw==}
     engines: {node: '>=16'}
     dependencies:
       '@chainsafe/libp2p-gossipsub': 4.1.1

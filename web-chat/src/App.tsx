@@ -51,19 +51,7 @@ export const ChatContentTopic = "/toy-chat/2/huilong/proto";
 async function retrieveStoreMessages(
   waku: WakuLight,
   setArchivedMessages: (value: Message[]) => void
-): Promise<number> {
-  const callback = (wakuMessages: WakuMessage[]): void => {
-    const messages: Message[] = [];
-    wakuMessages
-      .map((wakuMsg) => Message.fromWakuMessage(wakuMsg))
-      .forEach((message) => {
-        if (message) {
-          messages.push(message);
-        }
-      });
-    setArchivedMessages(messages);
-  };
-
+): Promise<void> {
   const startTime = new Date();
   // Only retrieve a week of history
   startTime.setTime(Date.now() - 1000 * 60 * 60 * 24 * 7);
@@ -71,20 +59,32 @@ async function retrieveStoreMessages(
   const endTime = new Date();
 
   try {
-    const res = await waku.store.queryHistory([ChatContentTopic], {
-      pageSize: 5,
-      pageDirection: PageDirection.FORWARD,
-      timeFilter: {
-        startTime,
-        endTime,
-      },
-      callback,
-    });
+    for await (const messagesPromises of waku.store.queryGenerator(
+      [ChatContentTopic],
+      {
+        pageSize: 5,
+        pageDirection: PageDirection.FORWARD,
+        timeFilter: {
+          startTime,
+          endTime,
+        },
+      }
+    )) {
+      const messages: Message[] = [];
+      const wakuMessages = await Promise.all(messagesPromises);
 
-    return res.length;
+      wakuMessages
+        .filter(isWakuMessageDefined)
+        .map((wakuMsg) => Message.fromWakuMessage(wakuMsg))
+        .forEach((message) => {
+          if (message) {
+            messages.push(message);
+          }
+        });
+      setArchivedMessages(messages);
+    }
   } catch (e) {
     console.log("Failed to retrieve messages", e);
-    return 0;
   }
 }
 
@@ -228,3 +228,9 @@ function selectFleetEnv() {
 function reduceMessages(state: Message[], newMessages: Message[]) {
   return state.concat(newMessages);
 }
+
+const isWakuMessageDefined = (
+  msg: WakuMessage | undefined
+): msg is WakuMessage => {
+  return !!msg;
+};
