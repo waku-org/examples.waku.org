@@ -55,32 +55,40 @@ function App() {
   React.useEffect(() => {
     if (wakuStatus !== "Connected") return;
 
-    const processMessages = (retrievedMessages) => {
-      const messages = retrievedMessages.map(decodeMessage).filter(Boolean);
+    (async () => {
+      const startTime = new Date();
+      // 7 days/week, 24 hours/day, 60min/hour, 60secs/min, 100ms/sec
+      startTime.setTime(startTime.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-      setMessages((currentMessages) => {
-        return currentMessages.concat(messages.reverse());
-      });
-    };
+      // TODO: Remove this timeout once https://github.com/status-im/js-waku/issues/913 is done
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
-    const startTime = new Date();
-    // 7 days/week, 24 hours/day, 60min/hour, 60secs/min, 100ms/sec
-    startTime.setTime(startTime.getTime() - 7 * 24 * 60 * 60 * 1000);
-
-    // TODO: Remove this timeout once https://github.com/status-im/js-waku/issues/913 is done
-    setTimeout(
-      () =>
-        waku.store
-          .queryHistory([ContentTopic], {
-            callback: processMessages,
+      try {
+        for await (const messagesPromises of waku.store.queryGenerator(
+          [ContentTopic],
+          {
             timeFilter: { startTime, endTime: new Date() },
-          })
-          .catch((e) => {
-            console.log("Failed to retrieve messages", e);
-            setWakuStatus("Error Encountered");
-          }),
-      200
-    );
+            pageDirection: "forward",
+          }
+        )) {
+          const messages = await Promise.all(
+            messagesPromises
+              .map(async (p) => {
+                const msg = await p;
+                return decodeMessage(msg);
+              })
+              .filter(Boolean)
+          );
+
+          setMessages((currentMessages) => {
+            return currentMessages.concat(messages.reverse());
+          });
+        }
+      } catch (e) {
+        console.log("Failed to retrieve messages", e);
+        setWakuStatus("Error Encountered");
+      }
+    })();
   }, [waku, wakuStatus]);
 
   return (

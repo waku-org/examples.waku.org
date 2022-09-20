@@ -12,9 +12,9 @@
 <div><h1>Waku Node Status</h1></div>
 <div id='status'></div>
 
+<label for='textInput'>Message text</label>
 <input id='textInput' placeholder='Type your message here' type='text'>
-<button id='sendButton' type='button'>Send Message
-</button>
+<button id='sendButton' type='button'>Send Message using Relay</button>
 
 <div><h1>Messages</h1></div>
 <div id='messages'></div>
@@ -28,13 +28,13 @@
 
     import {
         WakuMessage
-    } from 'https://unpkg.com/js-waku@0.27.0/bundle/index.js';
+    } from 'https://unpkg.com/js-waku@0.28.0/bundle/index.js';
     import {
-        createWaku
-    } from 'https://unpkg.com/js-waku@0.27.0/bundle/lib/create_waku.js'
+        createPrivacyNode
+    } from 'https://unpkg.com/js-waku@0.28.0/bundle/lib/create_waku.js'
     import {
         waitForRemotePeer
-    } from 'https://unpkg.com/js-waku@0.27.0/bundle/lib/wait_for_remote_peer.js'
+    } from 'https://unpkg.com/js-waku@0.28.0/bundle/lib/wait_for_remote_peer.js'
 
     const statusDiv = document.getElementById('status');
     const messagesDiv = document.getElementById('messages');
@@ -60,7 +60,7 @@
         // We are currently working on migrating this method to DNS Discovery.
         //
         // https://js-waku.wakuconnect.dev/classes/waku.Waku.html#create
-        const waku = await createWaku({defaultBootstrap: true});
+        const waku = await createPrivacyNode({defaultBootstrap: true});
         await waku.start();
 
         // Had a hook to process all incoming messages on a specified content topic.

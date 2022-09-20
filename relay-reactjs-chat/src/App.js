@@ -1,7 +1,7 @@
 import { WakuMessage } from "js-waku";
 import * as React from "react";
 import protobuf from "protobufjs";
-import { createWaku } from "js-waku/lib/create_waku";
+import { createPrivacyNode } from "js-waku/lib/create_waku";
 import { waitForRemotePeer } from "js-waku/lib/wait_for_remote_peer";
 
 const ContentTopic = `/relay-reactjs-chat/1/chat/proto`;
@@ -23,7 +23,7 @@ function App() {
 
     setWakuStatus("Starting");
     (async () => {
-      const waku = await createWaku({ defaultBootstrap: true });
+      const waku = await createPrivacyNode({ defaultBootstrap: true });
 
       setWaku(waku);
       await waku.start();
