@@ -19,7 +19,7 @@ interface MessageInterface {
   styleUrls: ["./messages.component.css"],
 })
 export class MessagesComponent implements OnInit {
-  contentTopic: string = `/relay-angular-chat/1/chat/proto`;
+  contentTopic: string = `/js-waku-examples/1/chat/proto`;
   messages: MessageInterface[] = [];
   messageCount: number = 0;
   waku!: WakuPrivacy;

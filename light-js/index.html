@@ -56,7 +56,7 @@
     const textInput = document.getElementById('textInput');
     const sendButton = document.getElementById('sendButton');
 
-    const ContentTopic = "/light-js/0/message/utf8";
+    const ContentTopic = "/js-waku-examples/1/chat/utf8";
     let messages = []
     let unsubscribe;
 
@@ -106,12 +106,14 @@
     subscribeButton.onclick = async () => {
         unsubscribe = await node.filter.subscribe(callback, [ContentTopic])
         unsubscribeButton.disabled = false;
+        subscribeButton.disabled = true;
     }
 
     unsubscribeButton.onclick = async () => {
         await unsubscribe();
         unsubscribe = undefined
         unsubscribeButton.disabled = true;
+        subscribeButton.disabled = false;
     }
 
     sendButton.onclick = async () => {
