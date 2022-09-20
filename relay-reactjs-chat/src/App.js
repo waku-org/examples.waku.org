@@ -4,7 +4,7 @@ import protobuf from "protobufjs";
 import { createPrivacyNode } from "js-waku/lib/create_waku";
 import { waitForRemotePeer } from "js-waku/lib/wait_for_remote_peer";
 
-const ContentTopic = `/relay-reactjs-chat/1/chat/proto`;
+const ContentTopic = `/js-waku-examples/1/chat/proto`;
 
 const SimpleChatMessage = new protobuf.Type("SimpleChatMessage")
   .add(new protobuf.Field("timestamp", 1, "uint32"))
