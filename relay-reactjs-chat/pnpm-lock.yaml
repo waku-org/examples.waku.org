@@ -6,7 +6,7 @@ specifiers:
   '@testing-library/react': ^13.3.0
   '@testing-library/user-event': ^13.5.0
   eslint: ^8.22.0
-  js-waku: 0.28.0
+  js-waku: 0.28.1
   protobufjs: ^7.0.0
   react: ^18.2.0
   react-dom: ^18.2.0
@@ -17,7 +17,7 @@ dependencies:
   '@testing-library/jest-dom': 5.16.5
   '@testing-library/react': 13.3.0_biqbaboplfbrettd7655fr4n2y
   '@testing-library/user-event': 13.5.0_wl4iynrlixafokvgqnhzlvigei
-  js-waku: 0.28.0_undici@5.10.0
+  js-waku: 0.28.1_undici@5.10.0
   protobufjs: 7.0.0
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
@@ -7001,8 +7001,8 @@ packages:
   /js-tokens/4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
 
-  /js-waku/0.28.0_undici@5.10.0:
-    resolution: {integrity: sha512-MEIFugvio2IaQMQT+g+bn24BvlJ5S4PdSKD0AGVZlR7q1BhECwlpRoytyz0A/hC1+EJWhrZB8cpIAmxwtYWTBw==}
+  /js-waku/0.28.1_undici@5.10.0:
+    resolution: {integrity: sha512-0h9TpV6jywyjdes8hr9tFV/5iJh3LQN3sQFYHcXyi4cK+4htNiMrCRjBSqRBtfhs/j+4tOkrht8gRJRLHdA5RA==}
     engines: {node: '>=16'}
     dependencies:
       '@chainsafe/libp2p-gossipsub': 4.1.1_undici@5.10.0
