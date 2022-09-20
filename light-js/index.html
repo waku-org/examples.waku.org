@@ -36,14 +36,16 @@
 <script type='module'>
     import {
         utils,
-        WakuMessage
-    } from 'https://unpkg.com/js-waku@0.28.1/bundle/index.js';
+    } from 'https://unpkg.com/js-waku@0.29.0/bundle/index.js';
     import {
         createLightNode
-    } from 'https://unpkg.com/js-waku@0.28.1/bundle/lib/create_waku.js'
+    } from 'https://unpkg.com/js-waku@0.29.0/bundle/lib/create_waku.js'
     import {
         waitForRemotePeer
-    } from 'https://unpkg.com/js-waku@0.28.1/bundle/lib/wait_for_remote_peer.js'
+    } from 'https://unpkg.com/js-waku@0.29.0/bundle/lib/wait_for_remote_peer.js'
+    import {
+        EncoderV0, DecoderV0
+    } from 'https://unpkg.com/js-waku@0.29.0/bundle/lib/waku_message/version_0.js'
 
     const peerIdDiv = document.getElementById('peer-id');
     const remotePeerIdDiv = document.getElementById('remote-peer-id');
@@ -57,10 +59,13 @@
     const sendButton = document.getElementById('sendButton');
 
     const ContentTopic = "/js-waku-examples/1/chat/utf8";
-    let messages = []
+    const decoder = new DecoderV0(ContentTopic);
+    const encoder = new EncoderV0(ContentTopic);
+    let messages = [];
     let unsubscribe;
 
-    subscribeButton.disabled = true
+    dialButton.disabled = true;
+    subscribeButton.disabled = true;
     textInput.disabled = true;
     sendButton.disabled = true;
     unsubscribeButton.disabled = true;
@@ -78,6 +83,7 @@
     await node.start();
     statusDiv.innerHTML = '<p>Waku node started.</p>';
     peerIdDiv.innerHTML = '<p>' + node.libp2p.peerId.toString() + '</p>'
+    dialButton.disabled = false;
 
     dialButton.onclick = async () => {
         const ma = remoteMultiAddrDiv.value
@@ -104,7 +110,7 @@
     }
 
     subscribeButton.onclick = async () => {
-        unsubscribe = await node.filter.subscribe(callback, [ContentTopic])
+        unsubscribe = await node.filter.subscribe([decoder], callback)
         unsubscribeButton.disabled = false;
         subscribeButton.disabled = true;
     }
@@ -119,8 +125,7 @@
     sendButton.onclick = async () => {
         const text = textInput.value;
 
-        const wakuMessage = await WakuMessage.fromUtf8String(text, ContentTopic);
-        await node.lightPush.push(wakuMessage);
+        await node.lightPush.push(encoder, {payload: utils.utf8ToBytes(text)});
         console.log('Message sent!');
         textInput.value = null;
     };
