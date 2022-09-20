@@ -106,12 +106,14 @@
     subscribeButton.onclick = async () => {
         unsubscribe = await node.filter.subscribe(callback, [ContentTopic])
         unsubscribeButton.disabled = false;
+        subscribeButton.disabled = true;
     }
 
     unsubscribeButton.onclick = async () => {
         await unsubscribe();
         unsubscribe = undefined
         unsubscribeButton.disabled = true;
+        subscribeButton.disabled = false;
     }
 
     sendButton.onclick = async () => {
