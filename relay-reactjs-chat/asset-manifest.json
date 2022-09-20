@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/relay-reactjs-chat/static/css/main.e6c13ad2.css",
-    "main.js": "/relay-reactjs-chat/static/js/main.ba6c8d6d.js",
+    "main.js": "/relay-reactjs-chat/static/js/main.3904dcdc.js",
     "index.html": "/relay-reactjs-chat/index.html",
     "main.e6c13ad2.css.map": "/relay-reactjs-chat/static/css/main.e6c13ad2.css.map",
-    "main.ba6c8d6d.js.map": "/relay-reactjs-chat/static/js/main.ba6c8d6d.js.map"
+    "main.3904dcdc.js.map": "/relay-reactjs-chat/static/js/main.3904dcdc.js.map"
   },
   "entrypoints": [
     "static/css/main.e6c13ad2.css",
-    "static/js/main.ba6c8d6d.js"
+    "static/js/main.3904dcdc.js"
   ]
 }
