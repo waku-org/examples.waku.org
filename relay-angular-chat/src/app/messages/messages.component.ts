@@ -24,6 +24,7 @@ export class MessagesComponent implements OnInit {
   messageCount: number = 0;
   waku!: WakuPrivacy;
   wakuStatus!: string;
+  deleteObserver?: () => void;
 
   constructor(private wakuService: WakuService) {}
 
@@ -34,18 +35,17 @@ export class MessagesComponent implements OnInit {
 
     this.wakuService.waku.subscribe((waku) => {
       this.waku = waku;
-      this.waku.relay.addObserver(this.processIncomingMessages, [
-        this.contentTopic,
-      ]);
+      this.deleteObserver = this.waku.relay.addObserver(
+        this.processIncomingMessages,
+        [this.contentTopic]
+      );
     });
 
     window.onbeforeunload = () => this.ngOnDestroy();
   }
 
   ngOnDestroy(): void {
-    this.waku.relay.deleteObserver(this.processIncomingMessages, [
-      this.contentTopic,
-    ]);
+    if (this.deleteObserver) this.deleteObserver();
   }
 
   sendMessage(): void {
