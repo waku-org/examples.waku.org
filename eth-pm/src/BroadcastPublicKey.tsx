@@ -6,66 +6,53 @@ import {
   PublicKeyMessageEncryptionKey,
 } from "./crypto";
 import { PublicKeyMessage } from "./messaging/wire";
-import { WakuMessage } from "js-waku";
-import { WakuLight } from "js-waku/lib/interfaces";
+import type { WakuLight } from "js-waku/lib/interfaces";
+import { SymEncoder } from "js-waku/lib/waku_message/version_1";
 import { PublicKeyContentTopic } from "./waku";
 import type { TypedDataSigner } from "@ethersproject/abstract-signer";
 
 interface Props {
-  EncryptionKeyPair: KeyPair | undefined;
+  encryptionKeyPair: KeyPair | undefined;
   waku: WakuLight | undefined;
   address: string | undefined;
   signer: TypedDataSigner | undefined;
 }
 
 export default function BroadcastPublicKey({
-  EncryptionKeyPair,
+  encryptionKeyPair,
   waku,
   address,
   signer,
 }: Props) {
   const [publicKeyMsg, setPublicKeyMsg] = useState<PublicKeyMessage>();
 
-  const broadcastPublicKey = () => {
-    if (!EncryptionKeyPair) return;
+  const broadcastPublicKey = async () => {
+    if (!encryptionKeyPair) return;
     if (!address) return;
     if (!waku) return;
     if (!signer) return;
 
-    if (publicKeyMsg) {
-      encodePublicKeyWakuMessage(publicKeyMsg)
-        .then((wakuMsg) => {
-          waku.lightPush.push(wakuMsg).catch((e) => {
-            console.error("Failed to send Public Key Message", e);
-          });
-        })
-        .catch((e) => {
-          console.log("Failed to encode Public Key Message in Waku Message", e);
-        });
-    } else {
-      createPublicKeyMessage(address, EncryptionKeyPair.publicKey, signer)
-        .then((msg) => {
-          setPublicKeyMsg(msg);
-          encodePublicKeyWakuMessage(msg)
-            .then((wakuMsg) => {
-              waku.lightPush
-                .push(wakuMsg)
-                .then((res) => console.log("Public Key Message pushed", res))
-                .catch((e) => {
-                  console.error("Failed to send Public Key Message", e);
-                });
-            })
-            .catch((e) => {
-              console.log(
-                "Failed to encode Public Key Message in Waku Message",
-                e
-              );
-            });
-        })
-        .catch((e) => {
-          console.error("Failed to create public key message", e);
-        });
-    }
+    const _publicKeyMessage = await (async () => {
+      if (!publicKeyMsg) {
+        const pkm = await createPublicKeyMessage(
+          address,
+          encryptionKeyPair.publicKey,
+          signer
+        );
+
+        setPublicKeyMsg(pkm);
+        return pkm;
+      }
+      return publicKeyMsg;
+    })();
+    const payload = _publicKeyMessage.encode();
+
+    const publicKeyMessageEncoder = new SymEncoder(
+      PublicKeyContentTopic,
+      PublicKeyMessageEncryptionKey
+    );
+
+    waku.lightPush.push(publicKeyMessageEncoder, { payload });
   };
 
   return (
@@ -73,18 +60,9 @@ export default function BroadcastPublicKey({
       variant="contained"
       color="primary"
       onClick={broadcastPublicKey}
-      disabled={!EncryptionKeyPair || !waku || !address || !signer}
+      disabled={!encryptionKeyPair || !waku || !address || !signer}
     >
       Broadcast Encryption Public Key
     </Button>
   );
-}
-
-async function encodePublicKeyWakuMessage(
-  publicKeyMessage: PublicKeyMessage
-): Promise<WakuMessage> {
-  const payload = publicKeyMessage.encode();
-  return await WakuMessage.fromBytes(payload, PublicKeyContentTopic, {
-    symKey: PublicKeyMessageEncryptionKey,
-  });
 }

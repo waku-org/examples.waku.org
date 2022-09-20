@@ -41,9 +41,6 @@ export async function createPublicKeyMessage(
     signer
   );
 
-  console.log("Asking wallet to sign Public Key Message");
-  console.log("Public Key Message signed");
-
   return new PublicKeyMessage({
     encryptionPublicKey: encryptionPublicKey,
     ethAddress: utils.hexToBytes(address),

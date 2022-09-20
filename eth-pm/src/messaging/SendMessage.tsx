@@ -7,8 +7,9 @@ import {
   TextField,
 } from "@material-ui/core";
 import React, { ChangeEvent, useState, KeyboardEvent } from "react";
-import { utils, WakuMessage } from "js-waku";
+import { utils } from "js-waku";
 import type { WakuLight } from "js-waku/lib/interfaces";
+import { AsymEncoder } from "js-waku/lib/waku_message/version_1";
 import { PrivateMessage } from "./wire";
 import { PrivateMessageContentTopic } from "../waku";
 
@@ -104,45 +105,26 @@ export default function SendMessage({ waku, recipients }: Props) {
   );
 }
 
-async function encodeEncryptedWakuMessage(
-  message: string,
-  publicKey: Uint8Array,
-  address: string
-): Promise<WakuMessage> {
-  const privateMessage = new PrivateMessage({
-    toAddress: utils.hexToBytes(address),
-    message: message,
-  });
-
-  const payload = privateMessage.encode();
-  return WakuMessage.fromBytes(payload, PrivateMessageContentTopic, {
-    encPublicKey: publicKey,
-  });
-}
-
-function sendMessage(
+async function sendMessage(
   waku: WakuLight,
   recipientAddress: string,
   recipientPublicKey: Uint8Array,
   message: string,
   callback: (res: boolean) => void
 ) {
-  encodeEncryptedWakuMessage(message, recipientPublicKey, recipientAddress)
-    .then((msg) => {
-      console.log("pushing");
-      waku.lightPush
-        .push(msg)
-        .then((res) => {
-          console.log("Message sent", res);
-          callback(res?.isSuccess ?? false);
-        })
-        .catch((e) => {
-          console.error("Failed to send message", e);
-          callback(false);
-        });
-    })
-    .catch((e) => {
-      console.error("Cannot encode & encrypt message", e);
-      callback(false);
-    });
+  const privateMessage = new PrivateMessage({
+    toAddress: utils.hexToBytes(recipientAddress),
+    message: message,
+  });
+  const payload = privateMessage.encode();
+
+  const encoder = new AsymEncoder(
+    PrivateMessageContentTopic,
+    recipientPublicKey
+  );
+
+  console.log("pushing");
+  const res = await waku.lightPush.push(encoder, { payload });
+  console.log("Message sent", res);
+  callback(Boolean(res.recipients.length));
 }

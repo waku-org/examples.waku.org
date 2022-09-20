@@ -3,6 +3,7 @@ import "@ethersproject/shims";
 import React, { useEffect, useState } from "react";
 import "./App.css";
 import type { WakuLight } from "js-waku/lib/interfaces";
+import { AsymDecoder, SymDecoder } from "js-waku/lib/waku_message/version_1";
 import { KeyPair, PublicKeyMessageEncryptionKey } from "./crypto";
 import { Message } from "./messaging/Messages";
 import "fontsource-roboto";
@@ -26,7 +27,6 @@ import {
 } from "./waku";
 import { Web3Provider } from "@ethersproject/providers/src.ts/web3-provider";
 import ConnectWallet from "./ConnectWallet";
-import { waku_message } from "js-waku";
 
 const theme = createMuiTheme({
   palette: {
@@ -72,6 +72,8 @@ function App() {
   const [encryptionKeyPair, setEncryptionKeyPair] = useState<
     KeyPair | undefined
   >();
+  const [privateMessageDecoder, setPrivateMessageDecoder] =
+    useState<AsymDecoder>();
   const [publicKeys, setPublicKeys] = useState<Map<string, Uint8Array>>(
     new Map()
   );
@@ -109,14 +111,15 @@ function App() {
       setPublicKeys
     );
 
+    const publicKeyMessageDecoder = new SymDecoder(
+      PublicKeyContentTopic,
+      PublicKeyMessageEncryptionKey
+    );
+
     let unsubscribe: undefined | (() => Promise<void>);
 
-    waku.filter.addDecryptionKey(PublicKeyMessageEncryptionKey, {
-      method: waku_message.DecryptionMethod.Symmetric,
-      contentTopics: [PublicKeyContentTopic],
-    });
     waku.filter
-      .subscribe(observerPublicKeyMessage, [PublicKeyContentTopic])
+      .subscribe([publicKeyMessageDecoder], observerPublicKeyMessage)
       .then(
         (_unsubscribe) => {
           console.log("subscribed to ", PublicKeyContentTopic);
@@ -128,9 +131,8 @@ function App() {
       );
 
     return function cleanUp() {
-      if (!waku) return;
-      waku.filter.deleteDecryptionKey(PublicKeyMessageEncryptionKey);
       if (typeof unsubscribe === "undefined") return;
+
       unsubscribe().then(
         () => {
           console.log("unsubscribed to ", PublicKeyContentTopic);
@@ -141,25 +143,16 @@ function App() {
   }, [waku, address]);
 
   useEffect(() => {
-    if (!waku) return;
     if (!encryptionKeyPair) return;
 
-    waku.filter.addDecryptionKey(encryptionKeyPair.privateKey, {
-      method: waku_message.DecryptionMethod.Asymmetric,
-      contentTopics: [PrivateMessageContentTopic],
-    });
-
-    return function cleanUp() {
-      if (!waku) return;
-      if (!encryptionKeyPair) return;
-
-      waku.filter.deleteDecryptionKey(encryptionKeyPair.privateKey);
-    };
-  }, [waku, encryptionKeyPair]);
+    setPrivateMessageDecoder(
+      new AsymDecoder(PrivateMessageContentTopic, encryptionKeyPair.privateKey)
+    );
+  }, [encryptionKeyPair]);
 
   useEffect(() => {
     if (!waku) return;
-    if (!encryptionKeyPair) return;
+    if (!privateMessageDecoder) return;
     if (!address) return;
 
     const observerPrivateMessage = handlePrivateMessage.bind(
@@ -170,23 +163,20 @@ function App() {
 
     let unsubscribe: undefined | (() => Promise<void>);
 
-    waku.filter
-      .subscribe(observerPrivateMessage, [PrivateMessageContentTopic])
-      .then(
-        (_unsubscribe) => {
-          unsubscribe = _unsubscribe;
-        },
-        (e) => {
-          console.error("Failed to subscribe", e);
-        }
-      );
+    waku.filter.subscribe([privateMessageDecoder], observerPrivateMessage).then(
+      (_unsubscribe) => {
+        unsubscribe = _unsubscribe;
+      },
+      (e) => {
+        console.error("Failed to subscribe", e);
+      }
+    );
 
     return function cleanUp() {
-      if (!waku) return;
       if (typeof unsubscribe === "undefined") return;
       unsubscribe().catch((e) => console.error("Failed to unsubscribe", e));
     };
-  }, [waku, address, encryptionKeyPair]);
+  }, [waku, address, privateMessageDecoder]);
 
   useEffect(() => {
     if (!waku) return;
@@ -252,7 +242,7 @@ function App() {
               />
               <BroadcastPublicKey
                 address={address}
-                EncryptionKeyPair={encryptionKeyPair}
+                encryptionKeyPair={encryptionKeyPair}
                 waku={waku}
                 signer={provider?.getSigner()}
               />
