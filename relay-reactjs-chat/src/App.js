@@ -52,12 +52,12 @@ function App() {
     if (!waku) return;
 
     // Pass the content topic to only process messages related to your dApp
-    waku.relay.addObserver(processIncomingMessage, [ContentTopic]);
+    const deleteObserver = waku.relay.addObserver(processIncomingMessage, [
+      ContentTopic,
+    ]);
 
-    // `cleanUp` is called when the component is unmounted, see ReactJS doc.
-    return function cleanUp() {
-      waku.relay.deleteObserver(processIncomingMessage, [ContentTopic]);
-    };
+    // Called when the component is unmounted, see ReactJS doc.
+    return deleteObserver;
   }, [waku, wakuStatus, processIncomingMessage]);
 
   const sendMessageOnClick = () => {
