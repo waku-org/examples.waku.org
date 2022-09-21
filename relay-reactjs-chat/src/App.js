@@ -1,10 +1,12 @@
-import { WakuMessage } from "js-waku";
 import * as React from "react";
 import protobuf from "protobufjs";
 import { createPrivacyNode } from "js-waku/lib/create_waku";
 import { waitForRemotePeer } from "js-waku/lib/wait_for_remote_peer";
+import { DecoderV0, EncoderV0 } from "js-waku/lib/waku_message/version_0";
 
 const ContentTopic = `/js-waku-examples/1/chat/proto`;
+const Encoder = new EncoderV0(ContentTopic);
+const Decoder = new DecoderV0(ContentTopic);
 
 const SimpleChatMessage = new protobuf.Type("SimpleChatMessage")
   .add(new protobuf.Field("timestamp", 1, "uint32"))
@@ -34,6 +36,7 @@ function App() {
   }, [waku, wakuStatus]);
 
   const processIncomingMessage = React.useCallback((wakuMessage) => {
+    console.log("Message received", wakuMessage);
     if (!wakuMessage.payload) return;
 
     const { text, timestamp } = SimpleChatMessage.decode(wakuMessage.payload);
@@ -52,9 +55,10 @@ function App() {
     if (!waku) return;
 
     // Pass the content topic to only process messages related to your dApp
-    const deleteObserver = waku.relay.addObserver(processIncomingMessage, [
-      ContentTopic,
-    ]);
+    const deleteObserver = waku.relay.addObserver(
+      Decoder,
+      processIncomingMessage
+    );
 
     // Called when the component is unmounted, see ReactJS doc.
     return deleteObserver;
@@ -105,11 +109,8 @@ function sendMessage(message, waku, timestamp) {
   });
   const payload = SimpleChatMessage.encode(protoMsg).finish();
 
-  // Wrap in a Waku Message
-  return WakuMessage.fromBytes(payload, ContentTopic).then((wakuMessage) =>
-    // Send over Waku Relay
-    waku.relay.send(wakuMessage)
-  );
+  // Send over Waku Relay
+  return waku.relay.send(Encoder, { payload });
 }
 
 export default App;
