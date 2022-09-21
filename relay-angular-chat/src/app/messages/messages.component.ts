@@ -1,8 +1,9 @@
 import { Component, OnInit } from "@angular/core";
 import { WakuService } from "../waku.service";
-import { WakuMessage } from "js-waku";
 import type { WakuPrivacy } from "js-waku/lib/interfaces";
 import protobuf from "protobufjs";
+import { DecoderV0, EncoderV0 } from "js-waku/lib/waku_message/version_0";
+import type { MessageV0 } from "js-waku/lib/waku_message/version_0";
 
 const ProtoChatMessage = new protobuf.Type("ChatMessage")
   .add(new protobuf.Field("timestamp", 1, "uint32"))
@@ -20,13 +21,18 @@ interface MessageInterface {
 })
 export class MessagesComponent implements OnInit {
   contentTopic: string = `/js-waku-examples/1/chat/proto`;
+  decoder: DecoderV0;
+  encoder: EncoderV0;
   messages: MessageInterface[] = [];
   messageCount: number = 0;
   waku!: WakuPrivacy;
   wakuStatus!: string;
   deleteObserver?: () => void;
 
-  constructor(private wakuService: WakuService) {}
+  constructor(private wakuService: WakuService) {
+    this.decoder = new DecoderV0(this.contentTopic);
+    this.encoder = new EncoderV0(this.contentTopic);
+  }
 
   ngOnInit(): void {
     this.wakuService.wakuStatus.subscribe((wakuStatus) => {
@@ -36,8 +42,8 @@ export class MessagesComponent implements OnInit {
     this.wakuService.waku.subscribe((waku) => {
       this.waku = waku;
       this.deleteObserver = this.waku.relay.addObserver(
-        this.processIncomingMessages,
-        [this.contentTopic]
+        this.decoder,
+        this.processIncomingMessages
       );
     });
 
@@ -57,16 +63,13 @@ export class MessagesComponent implements OnInit {
     });
 
     const payload = ProtoChatMessage.encode(protoMsg).finish();
-
-    WakuMessage.fromBytes(payload, this.contentTopic).then((wakuMessage) => {
-      this.waku.relay.send(wakuMessage).then(() => {
-        console.log(`Message #${this.messageCount} sent`);
-        this.messageCount += 1;
-      });
+    this.waku.relay.send(this.encoder, { payload }).then(() => {
+      console.log(`Message #${this.messageCount} sent`);
+      this.messageCount += 1;
     });
   }
 
-  processIncomingMessages = (wakuMessage: WakuMessage) => {
+  processIncomingMessages = (wakuMessage: MessageV0) => {
     if (!wakuMessage.payload) return;
 
     const { text, timestamp } = ProtoChatMessage.decode(
