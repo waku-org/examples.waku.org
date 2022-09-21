@@ -1,6 +1,6 @@
 import { useEffect, useReducer, useState } from "react";
 import "./App.css";
-import { PageDirection, Protocols, WakuMessage } from "js-waku";
+import { PageDirection, Protocols } from "js-waku";
 import handleCommand from "./command";
 import Room from "./Room";
 import { WakuContext } from "./WakuContext";
@@ -16,6 +16,7 @@ import { PeerDiscoveryStaticPeers } from "js-waku/lib/peer_discovery_static_list
 import type { WakuLight } from "js-waku/lib/interfaces";
 import process from "process";
 import { createLightNode } from "js-waku/lib/create_waku";
+import { DecoderV0, MessageV0 } from "js-waku/lib/waku_message/version_0";
 
 const themes = {
   AuthorName: {
@@ -47,6 +48,7 @@ const themes = {
 };
 
 export const ChatContentTopic = "/toy-chat/2/huilong/proto";
+const ChatDecoder = new DecoderV0(ChatContentTopic);
 
 async function retrieveStoreMessages(
   waku: WakuLight,
@@ -60,7 +62,7 @@ async function retrieveStoreMessages(
 
   try {
     for await (const messagesPromises of waku.store.queryGenerator(
-      [ChatContentTopic],
+      [ChatDecoder],
       {
         pageSize: 5,
         pageDirection: PageDirection.FORWARD,
@@ -70,11 +72,11 @@ async function retrieveStoreMessages(
         },
       }
     )) {
-      const messages: Message[] = [];
       const wakuMessages = await Promise.all(messagesPromises);
 
+      const messages: Message[] = [];
       wakuMessages
-        .filter(isWakuMessageDefined)
+        .filter(isMessageDefined)
         .map((wakuMsg) => Message.fromWakuMessage(wakuMsg))
         .forEach((message) => {
           if (message) {
@@ -113,7 +115,7 @@ export default function App() {
     // Let's retrieve previous messages before listening to new messages
     if (!historicalMessagesRetrieved) return;
 
-    const handleIncomingMessage = (wakuMsg: WakuMessage) => {
+    const handleIncomingMessage = (wakuMsg: MessageV0) => {
       console.log("Message received: ", wakuMsg);
       const msg = Message.fromWakuMessage(wakuMsg);
       if (msg) {
@@ -122,7 +124,7 @@ export default function App() {
     };
 
     let unsubscribe: undefined | (() => Promise<void>);
-    waku.filter.subscribe(handleIncomingMessage, [ChatContentTopic]).then(
+    waku.filter.subscribe([ChatDecoder], handleIncomingMessage).then(
       (_unsubscribe) => {
         console.log("subscribed to ", ChatContentTopic);
         unsubscribe = _unsubscribe;
@@ -229,8 +231,6 @@ function reduceMessages(state: Message[], newMessages: Message[]) {
   return state.concat(newMessages);
 }
 
-const isWakuMessageDefined = (
-  msg: WakuMessage | undefined
-): msg is WakuMessage => {
+const isMessageDefined = (msg: MessageV0 | undefined): msg is MessageV0 => {
   return !!msg;
 };

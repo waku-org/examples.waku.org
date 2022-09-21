@@ -1,4 +1,4 @@
-import { PushResponse, WakuMessage } from "js-waku";
+import type { Message as WakuMessage } from "js-waku/lib/interfaces";
 import { ChatContentTopic } from "./App";
 import ChatList from "./ChatList";
 import MessageInput from "./MessageInput";
@@ -7,6 +7,7 @@ import { TitleBar } from "@livechat/ui-kit";
 import { Message } from "./Message";
 import { ChatMessage } from "./chat_message";
 import { useEffect, useState } from "react";
+import { EncoderV0 } from "js-waku/lib/waku_message/version_0";
 
 interface Props {
   messages: Message[];
@@ -20,6 +21,8 @@ export default function Room(props: Props) {
   const [storePeers, setStorePeers] = useState(0);
   const [filterPeers, setFilterPeers] = useState(0);
   const [lightPushPeers, setLightPushPeers] = useState(0);
+
+  const ChatEncoder = new EncoderV0(ChatContentTopic);
 
   useEffect(() => {
     if (!waku) return;
@@ -57,7 +60,9 @@ export default function Room(props: Props) {
                   messageToSend,
                   props.nick,
                   props.commandHandler,
-                  waku.lightPush.push.bind(waku.lightPush)
+                  async (msg) => {
+                    await waku.lightPush.push(ChatEncoder, msg);
+                  }
                 );
               }
             : undefined
@@ -71,18 +76,15 @@ async function handleMessage(
   message: string,
   nick: string,
   commandHandler: (cmd: string) => void,
-  messageSender: (msg: WakuMessage) => Promise<PushResponse | null>
+  sender: (wakuMsg: WakuMessage) => Promise<void>
 ) {
   if (message.startsWith("/")) {
     commandHandler(message);
   } else {
     const timestamp = new Date();
     const chatMessage = ChatMessage.fromUtf8String(timestamp, nick, message);
-    const wakuMsg = await WakuMessage.fromBytes(
-      chatMessage.encode(),
-      ChatContentTopic,
-      { timestamp }
-    );
-    await messageSender(wakuMsg);
+    const payload = chatMessage.encode();
+
+    await sender({ payload, timestamp });
   }
 }
