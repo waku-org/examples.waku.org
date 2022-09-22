@@ -10,4 +10,4 @@ This example uses Waku Filter to listen to messages and Waku Light Push to send 
 
 To test the example, simply download the `index.html` file from this folder and open it in a browser.
 
-The `master` branch's HEAD is deployed at https://js.waku.org/light-js/.
+The `master` branch's HEAD is deployed at https://examples.waku.org/light-js/.
