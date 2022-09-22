@@ -13,15 +13,10 @@
 <div id='timestamp'></div>
 
 <script type='module'>
-    import {
-        Protocols
-    } from 'https://unpkg.com/js-waku@0.28.1/bundle/index.js';
-    import {
-        createWaku
-    } from 'https://unpkg.com/js-waku@0.28.1/bundle/lib/create_waku.js'
-    import {
-        waitForRemotePeer
-    } from 'https://unpkg.com/js-waku@0.28.1/bundle/lib/wait_for_remote_peer.js'
+    import {Protocols} from 'https://unpkg.com/js-waku@0.29.0/bundle/index.js';
+    import {createWaku} from 'https://unpkg.com/js-waku@0.29.0/bundle/lib/create_waku.js'
+    import {waitForRemotePeer} from 'https://unpkg.com/js-waku@0.29.0/bundle/lib/wait_for_remote_peer.js'
+    import {DecoderV0} from 'https://unpkg.com/js-waku@0.29.0/bundle/lib/waku_message/version_0.js'
 
     /**
      * This example demonstrates how to use the js-waku minified bundle
@@ -56,7 +51,7 @@
     startTime.setTime(Date.now() - 7 * 24 * 60 * 60 * 1000);
     try {
         await node.store
-            .queryOrderedCallback([],
+            .queryOrderedCallback([new DecoderV0("/relay-ping/1/ping/null")],
                 callback,
                 {
                     pageDirection: 'backward',

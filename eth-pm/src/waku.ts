@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction } from "react";
-import { Protocols, utils, WakuMessage } from "js-waku";
-import type { WakuLight } from "js-waku/lib/interfaces";
+import { Protocols, utils } from "js-waku";
+import type { WakuLight, Message as WakuMessage } from "js-waku/lib/interfaces";
 import { PrivateMessage, PublicKeyMessage } from "./messaging/wire";
 import { validatePublicKeyMessage } from "./crypto";
 import { Message } from "./messaging/Messages";

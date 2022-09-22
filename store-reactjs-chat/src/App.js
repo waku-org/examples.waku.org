@@ -8,8 +8,10 @@ import {
 } from "js-waku/lib/predefined_bootstrap_nodes";
 import { PeerDiscoveryStaticPeers } from "js-waku/lib/peer_discovery_static_list";
 import { waitForRemotePeer } from "js-waku/lib/wait_for_remote_peer";
+import { DecoderV0 } from "js-waku/lib/waku_message/version_0";
 
 const ContentTopic = "/toy-chat/2/huilong/proto";
+const Decoder = new DecoderV0(ContentTopic);
 
 const ProtoChatMessage = new protobuf.Type("ChatMessage")
   .add(new protobuf.Field("timestamp", 1, "uint64"))
@@ -65,7 +67,7 @@ function App() {
 
       try {
         for await (const messagesPromises of waku.store.queryGenerator(
-          [ContentTopic],
+          [Decoder],
           {
             timeFilter: { startTime, endTime: new Date() },
             pageDirection: "forward",

@@ -10,4 +10,4 @@ This example uses Waku Store to retrieve the latest ping relay message (used for
 
 To test the example, simply download the `index.html` file from this folder and open it in a browser.
 
-The `master` branch's HEAD is deployed at https://js-waku.wakuconnect.dev/examples/store-js/.
+The `master` branch's HEAD is deployed at https://examples.waku.org/store-js/.

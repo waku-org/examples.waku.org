@@ -10,15 +10,15 @@
 
 A barebones messaging app to illustrate the [Angular Relay guide](https://docs.wakuconnect.dev/docs/guides/10_angular_relay/).
 
+The `master` branch's HEAD is deployed at https://examples.waku.org/relay-angular-chat/.
+
 To run a development version locally, do:
 
 ```shell
-git clone https://github.com/status-im/js-waku/ ; cd js-waku
-npm install   # Install dependencies for js-waku
-npm run build # Build js-waku
-cd examples/relay-reactjs-chat
-yarn   # Install dependencies for the web app
-yarn start # Start development server to serve the web app on http://localhost:4200/
+git clone https://github.com/waku-org/js-waku-examples
+cd relay-angular-chat
+npm install
+npm start
 ```
 
 ### Known issues

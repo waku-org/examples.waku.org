@@ -18,15 +18,13 @@ only knowing their Ethereum Address.
 This protocol has been created to demonstrated how encryption and signature could be added to message
 sent over the Waku v2 network.
 
-The `master` branch's HEAD is deployed at https://js-waku.wakuconnect.dev/examples/eth-pm/.
+The `master` branch's HEAD is deployed at https://examples.waku.org/eth-pm/.
 
 To run a development version locally, do:
 
 ```shell
-git clone https://github.com/status-im/js-waku/ ; cd js-waku
-npm install   # Install dependencies for js-waku
-npm run build # Build js-waku
-cd examples/eth-pm
-npm install   # Install dependencies for the web app
-npm run start # Start development server to serve the web app on http://localhost:3000/js-waku/eth-pm
+git clone https://github.com/waku-org/js-waku-examples
+cd eth-pm
+npm install
+npm run start
 ```
