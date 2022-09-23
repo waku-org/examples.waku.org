@@ -1,5 +1,10 @@
 pipeline {
-  agent { label 'linux' }
+  agent {
+    dockerfile {
+      label 'linux'
+      dir 'ci'
+    }
+  }
 
   options {
     disableConcurrentBuilds()
@@ -14,13 +19,14 @@ pipeline {
     SITE_DOMAIN = 'examples.waku.org'
     GIT_AUTHOR_NAME = 'status-im-auto'
     GIT_AUTHOR_EMAIL = 'auto@status.im'
+    GIT_SSH_COMMAND = 'ssh -o StrictHostKeyChecking=no'
     PUPPETEER_SKIP_DOWNLOAD = 'true'
   }
 
   stages {
     stage('Pre') {
       steps {
-        sh 'yarn install --no-lockfile'
+        sh 'pnpm install --silent'
         /* TODO: Build the main page. */
         sh 'mkdir -p build/docs'
       }
@@ -63,8 +69,8 @@ pipeline {
 def buildExample(example=STAGE_NAME) {
   def dest = "${WORKSPACE}/build/docs/${example}"
   dir("${example}") {
-    sh 'yarn install --network-concurrency 1 --no-lockfile'
-    sh 'yarn run build'
+    sh 'pnpm install --silent'
+    sh 'pnpm run build'
     sh "mkdir -p ${dest}"
     sh "cp -r build/. ${dest}"
   }
