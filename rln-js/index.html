@@ -10,7 +10,7 @@
 <body>
 
 <div><h1>RLN</h1>
-    <button id='generate-credentials' type='button'>Generate RLN Credentials</button>
+    <button id='generate-credentials' type='button' disabled>Generate RLN Credentials</button>
     <div><h2>Credentials</h2>
         <div><h3>Key</h3>
             <div id="key"></div>
@@ -34,11 +34,11 @@
     <input id='remote-multiaddr'
            type='text'
            value="/dns4/node-01.ac-cn-hongkong-c.wakuv2.test.statusim.net/tcp/443/wss/p2p/16Uiu2HAkvWiyFsgRhuJEb9JfjYxEkoHLgnUQmr1N5mKWnYjxYRVm">
-    <button id='dial' type='button'>Dial</button>
+    <button id='dial' type='button' disabled>Dial</button>
     <br/>
     <label for='textInput'>Message text</label>
-    <input id='textInput' placeholder='Type your message here' type='text'>
-    <button id='sendButton' type='button'>Send message using Light Push</button>
+    <input id='textInput' placeholder='Type your message here' type='text' disabled>
+    <button id='sendButton' type='button' disabled>Send message using Light Push</button>
     <br/>
     <div id="messages"></div>
 </div>
@@ -63,9 +63,11 @@
     const keyDiv = document.getElementById('key');
     const commitmentDiv = document.getElementById('commitment');
 
-    generateCredsButton.disabled = true;
-    const rlnInstance = await create();
-    generateCredsButton.disabled = false;
+    let rlnInstance;
+    (async () => {
+        rlnInstance = await create()
+        generateCredsButton.disabled = false;
+    })();
 
     let membership;
     generateCredsButton.onclick = () => {
@@ -88,10 +90,6 @@
     const decoder = new DecoderV0(ContentTopic);
     const encoder = new EncoderV0(ContentTopic);
     let messages = [];
-
-    dialButton.disabled = true;
-    textInput.disabled = true;
-    sendButton.disabled = true;
 
     const updateMessages = (msgs, div) => {
         div.innerHTML = "<ul>"
