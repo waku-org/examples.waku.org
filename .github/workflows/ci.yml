@@ -16,7 +16,7 @@ jobs:
             eth-pm,
             relay-angular-chat,
             relay-reactjs-chat,
-            rln-reactts,
+            rln-react-ts,
             store-reactjs-chat,
             web-chat
           ]
