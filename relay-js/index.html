@@ -13,8 +13,8 @@
 <div id='status'></div>
 
 <label for='textInput'>Message text</label>
-<input id='textInput' placeholder='Type your message here' type='text'>
-<button id='sendButton' type='button'>Send Message using Relay</button>
+<input id='textInput' placeholder='Type your message here' type='text' disabled>
+<button id='sendButton' type='button' disabled>Send Message using Relay</button>
 
 <div><h1>Messages</h1></div>
 <div id='messages'></div>
@@ -35,10 +35,6 @@
     const messagesDiv = document.getElementById('messages');
     const textInput = document.getElementById('textInput');
     const sendButton = document.getElementById('sendButton');
-
-    // Keep it disabled until Waku node is ready
-    textInput.disabled = true;
-    sendButton.disabled = true;
 
     // Every Waku Message has a content topic that categorizes it.
     // It is always encoded in clear text.
