@@ -63,7 +63,9 @@
     const keyDiv = document.getElementById('key');
     const commitmentDiv = document.getElementById('commitment');
 
+    generateCredsButton.disabled = true;
     const rlnInstance = await create();
+    generateCredsButton.disabled = false;
 
     let membership;
     generateCredsButton.onclick = () => {
