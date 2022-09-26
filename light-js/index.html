@@ -22,14 +22,14 @@
 <input id='remote-multiaddr'
        type='text'
        value="/dns4/node-01.ac-cn-hongkong-c.wakuv2.test.statusim.net/tcp/443/wss/p2p/16Uiu2HAkvWiyFsgRhuJEb9JfjYxEkoHLgnUQmr1N5mKWnYjxYRVm">
-<button id='dial' type='button'>Dial</button>
+<button id='dial' type='button' disabled>Dial</button>
 <br/>
-<button id='subscribe' type='button'>Subscribe with Filter</button>
-<button id='unsubscribe' type='button'>Unsubscribe with Filter</button>
+<button id='subscribe' type='button' disabled>Subscribe with Filter</button>
+<button id='unsubscribe' type='button' disabled>Unsubscribe with Filter</button>
 <br/>
 <label for='textInput'>Message text</label>
 <input id='textInput' placeholder='Type your message here' type='text'>
-<button id='sendButton' type='button'>Send message using Light Push</button>
+<button id='sendButton' type='button' disabled>Send message using Light Push</button>
 <br/>
 <div id="messages"></div>
 
@@ -63,12 +63,6 @@
     const encoder = new EncoderV0(ContentTopic);
     let messages = [];
     let unsubscribe;
-
-    dialButton.disabled = true;
-    subscribeButton.disabled = true;
-    textInput.disabled = true;
-    sendButton.disabled = true;
-    unsubscribeButton.disabled = true;
 
     const updateMessages = (msgs, div) => {
         div.innerHTML = "<ul>"
