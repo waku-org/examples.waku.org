@@ -14,7 +14,7 @@
     "@types/node": "^16.11.59",
     "@types/react": "^18.0.21",
     "@types/react-dom": "^18.0.6",
-    "@waku/rln": "0.0.4",
+    "@waku/rln": "0.0.8",
     "ethers": "^5.7.1",
     "js-waku": "^0.29.0",
     "react": "^18.2.0",
@@ -24,10 +24,10 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "craco start",
-    "build": "craco build",
+    "start": "PORT=3004 react-scripts start",
+    "build": "react-scripts build",
     "test": "exit 0",
-    "eject": "craco eject"
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
@@ -46,8 +46,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "@craco/craco": "^6.4.5"
   }
 }
