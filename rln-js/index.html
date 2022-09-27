@@ -10,6 +10,14 @@
 <body>
 
 <div><h1>RLN</h1>
+    <div><h2>Wallet</h2>
+        <div id='wallet'></div> <button id='connect-wallet' type='button' disabled>Connect Wallet</button>
+    </div>
+
+    <div><h2>RLN</h2>
+        <button id='retrieve-rln-details' type='button' disabled>Retrieve RLN details</button>
+    </div>
+
     <p>You can either generate new credentials:</p><br/>
     <button id='generate-credentials' type='button' disabled>Generate RLN Credentials</button>
     <p>Or import existing ones:</p><br/>
@@ -34,6 +42,7 @@
         <div><h3>Commitment</h3>
             <div id="commitment"></div>
         </div>
+        <button id='register-button' type='button' disabled>Register Credentials in Contract</button>
     </div>
 </div>
 
@@ -68,6 +77,8 @@
 
     import {create, MembershipKey, RLNEncoder} from "https://unpkg.com/@waku/rln@0.0.8-964df01/bundle/index.js";
 
+    import {ethers} from "https://unpkg.com/ethers@5.0.7/dist/ethers-all.esm.min.js"
+
     // RLN Elements
     const generateCredsButton = document.getElementById('generate-credentials')
     const idDiv = document.getElementById('id');
@@ -77,11 +88,15 @@
     const identityKeyInput = document.getElementById('id-key')
     const commitmentKeyInput = document.getElementById('commitment-key')
     const importButton = document.getElementById('import-button')
+    const connectWalletButton = document.getElementById('connect-wallet');
+    const retrieveRLNDetailsButton = document.getElementById('retrieve-rln-details')
+    const registerButton = document.getElementById('register-button');
 
     let rlnInstance;
     (async () => {
         rlnInstance = await create()
         generateCredsButton.disabled = false;
+        connectWalletButton.disabled = false;
     })();
 
     // Waku Elements
@@ -92,6 +107,7 @@
 
     const textInput = document.getElementById('textInput');
     const sendButton = document.getElementById('sendButton');
+    const walletDiv = document.getElementById('wallet');
 
     const messagesDiv = document.getElementById('messages')
 
@@ -100,20 +116,25 @@
     let encoder;
     let nodeConnected;
     let nick;
+    let retrievedRLNEvents = false;
+    
     const updateFields = () => {
-        if (membershipKey && membershipId) {
+        if (membershipKey) {
             keyDiv.innerHTML = utils.bytesToHex(membershipKey.IDKey)
             commitmentDiv.innerHTML = utils.bytesToHex(membershipKey.IDCommitment)
-            idDiv.innerHTML = membershipId
+            idDiv.innerHTML = membershipId || "-"
 
-            encoder = new RLNEncoder(
-                new EncoderV0(ContentTopic),
-                rlnInstance,
-                membershipId,
-                membershipKey
-            );
+
+            if (membershipId) {
+                encoder = new RLNEncoder(
+                    new EncoderV0(ContentTopic),
+                    rlnInstance,
+                    membershipId,
+                    membershipKey
+                );
+            }
         }
-
+        
         importButton.disabled = !(membershipIdInput.value
             && identityKeyInput.value
             && commitmentKeyInput.value);
@@ -127,7 +148,7 @@
 
     generateCredsButton.onclick = () => {
         membershipKey = rlnInstance.generateMembershipKey()
-        updateFields()
+        updateFields();
     }
 
     membershipIdInput.onchange = updateFields;
@@ -138,7 +159,7 @@
         const idKey = utils.hexToBytes(identityKeyInput.value)
         const idCommitment = utils.hexToBytes(commitmentKeyInput.value)
         membershipKey = new MembershipKey(idKey, idCommitment)
-        membershipId = membershipIdInput.value;
+        membershipId = membershipIdInput.value ;
         updateFields()
     }
 
@@ -174,6 +195,120 @@
 
         messages.push(`(${nick}) <strong>${utils.bytesToUtf8(text)}</strong> <i>[${time.toString()}]</i>`);
         updateMessages(messages, messagesDiv)
+    }
+
+    const checkChain = async (chainId) => {
+        retrieveRLNDetailsButton.disabled = retrievedRLNEvents || chainId != 5;
+        registerButton.disabled = !(chainId == 5 && retrievedRLNEvents);
+        if(chainId != 5){
+            alert("Switch to Goerli")
+        }
+    }
+
+    const checkCurrentChain = async () => {
+        const network = await provider.getNetwork();
+        checkChain(network.chainId);
+    }
+
+    const rlnDeployBlk = 7677135;
+    const rlnAddress = "0x367F3e869cF2E1DD28644E308b42652cb6fcDA72";
+    const rlnAbi = [
+        "function MEMBERSHIP_DEPOSIT() public view returns(uint256)",
+        "function register(uint256 pubkey) external payable",
+        "function withdraw(uint256 secret, uint256 _pubkeyIndex, address payable receiver) external",
+        "event MemberRegistered(uint256 pubkey, uint256 index)",
+        "event MemberWithdrawn(uint256 pubkey, uint256 index)"
+    ];
+
+    const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+
+    checkCurrentChain();
+
+    let accounts;
+    let rlnContract;
+
+    const handleMembership = (pubkey, index, event) => {
+        try {
+            const idCommitment = ethers.utils.zeroPad(ethers.utils.arrayify(pubkey), 32);
+            rlnInstance.insertMember(idCommitment);
+            console.debug("IDCommitment registered in tree", idCommitment, index.toNumber());
+        } catch(err){
+            alert(err); // TODO: the merkle tree can be in a wrong state. The app should be disabled
+        }
+    }
+
+    const setAccounts = acc => {
+        accounts = acc;
+        walletDiv.innerHTML = accounts.length ? accounts[0] : "";
+    }
+
+    connectWalletButton.onclick = async () => {
+        try {
+            accounts = await provider.send("eth_requestAccounts", []);
+            setAccounts(accounts);
+            checkCurrentChain();
+        } catch (e) {
+            ("No web3 provider available", e);
+        }
+    };
+
+    retrieveRLNDetailsButton.onclick = async () => {
+        rlnContract = new ethers.Contract(rlnAddress, rlnAbi, provider);
+        
+        const filter = rlnContract.filters.MemberRegistered()
+
+        // populating merkle tree:
+        const alreadyRegisteredMembers = await rlnContract.queryFilter(filter, rlnDeployBlk)
+        alreadyRegisteredMembers.forEach(event => {
+            handleMembership(event.args.pubkey, event.args.index, event);
+        });
+
+        alert("Loaded all events from contract");
+        retrievedRLNEvents = true;
+        // TODO: at this point it should be possible to register a credential and send messages
+        // TODO: emit an event to enable message form and register button
+
+        retrieveRLNDetailsButton.disabled = true;
+        registerButton.disabled = false;
+
+        // reacting to new registrations
+        rlnContract.on(filter, (pubkey, index, event) => {
+            handleMembership(event.args.pubkey, event.args.index, event);
+        });
+    }
+
+    window.ethereum.on('accountsChanged', setAccounts);
+    window.ethereum.on('chainChanged', chainId => {
+        checkChain(parseInt(chainId, 16));
+    });
+
+    registerButton.onclick = async () => {
+        try {
+            registerButton.disabled = true;
+            
+            const pubkey = ethers.BigNumber.from(membershipKey.IDCommitment);
+            const price = await rlnContract.MEMBERSHIP_DEPOSIT();
+
+            const signer = provider.getSigner()
+            const rlnContractWithSigner = rlnContract.connect(signer);
+
+            const txResponse = await rlnContractWithSigner.register(pubkey, {value: price});
+            console.log("Transaction broadcasted:", txResponse);
+
+            const txReceipt = await txResponse.wait();
+
+            console.log("Transaction receipt", txReceipt);
+
+            // Update membershipId
+            membershipId = txReceipt.events[0].args.index.toNumber();
+            console.log("Obtained index for current membership credentials", membershipId);
+            updateFields();
+            registerButton.disabled = false;
+        } catch(err) {
+            alert(err);
+            registerButton.disabled = false;
+        }
+
     }
 
     let node;
