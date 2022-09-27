@@ -202,7 +202,9 @@
         const timestamp = new Date();
         const msg = ProtoChatMessage.create({text, nick, timestamp: timestamp.valueOf()});
         const payload = ProtoChatMessage.encode(msg).finish();
+        console.log("Sending message with proof...")
         await node.lightPush.push(encoder, {payload, timestamp});
+        console.log("Message sent!")
         textInput.value = null;
     };
 </script>
