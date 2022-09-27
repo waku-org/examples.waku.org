@@ -10,8 +10,24 @@
 <body>
 
 <div><h1>RLN</h1>
+    <p>You can either generate new credentials:</p><br/>
     <button id='generate-credentials' type='button' disabled>Generate RLN Credentials</button>
+    <p>Or import existing ones:</p><br/>
+
+    <div>
+        <label for="membership-id">Membership ID (your index in the RLN smart contract):</label>
+        <input id="membership-id" name="membership-id" type="text"><br>
+        <label for="id-key">RLN Identity Key (hex string):</label>
+        <input id="id-key" name="id-key" type="text"><br>
+        <label for="commitment-key">RLN Commitment Key (hex string):</label>
+        <input id="commitment-key" name="commitment-key" type="text"><br>
+        <button disabled id='import-button' type='button'>Import RLN Credentials</button>
+    </div>
+
     <div><h2>Credentials</h2>
+        <div><h3>Membership id</h3>
+            <div id="id"></div>
+        </div>
         <div><h3>Key</h3>
             <div id="key"></div>
         </div>
@@ -23,19 +39,12 @@
 
 <div><h1>Waku</h1>
     <div id='status'></div>
-
-    <div><h2>Local Peer Id</h2>
-        <div id='peer-id'></div>
-    </div>
-    <div><h2>Remote Peer Id</h2>
-        <div id='remote-peer-id'></div>
-    </div>
-    <label for='remote-multiaddr'>Remote peer's multiaddr</label>
-    <input id='remote-multiaddr'
-           type='text'
-           value="/dns4/node-01.ac-cn-hongkong-c.wakuv2.test.statusim.net/tcp/443/wss/p2p/16Uiu2HAkvWiyFsgRhuJEb9JfjYxEkoHLgnUQmr1N5mKWnYjxYRVm">
-    <button id='dial' type='button' disabled>Dial</button>
     <br/>
+    <label for='nick-input'>Your nickname</label>
+    <input id='nick-input' placeholder='Choose a nickname' type='text'>
+    <button disabled id='set-nick' type='button'>Set nickname</button>
+    <br/>
+
     <label for='textInput'>Message text</label>
     <input id='textInput' placeholder='Type your message here' type='text' disabled>
     <button id='sendButton' type='button' disabled>Send message using Light Push</button>
@@ -44,24 +53,30 @@
 </div>
 
 <script type='module'>
+    import {utils} from 'https://unpkg.com/js-waku@0.29.0-7714812/bundle/index.js';
+    import {createLightNode} from 'https://unpkg.com/js-waku@0.29.0-7714812/bundle/lib/create_waku.js'
+    import {waitForRemotePeer} from 'https://unpkg.com/js-waku@0.29.0-7714812/bundle/lib/wait_for_remote_peer.js'
     import {
-        utils,
-    } from 'https://unpkg.com/js-waku@0.29.0/bundle/index.js';
+        PeerDiscoveryStaticPeers
+    } from "https://unpkg.com/js-waku@0.29.0-7714812/bundle/lib/peer_discovery_static_list";
     import {
-        createLightNode
-    } from 'https://unpkg.com/js-waku@0.29.0/bundle/lib/create_waku.js'
-    import {
-        waitForRemotePeer
-    } from 'https://unpkg.com/js-waku@0.29.0/bundle/lib/wait_for_remote_peer.js'
-    import {
-        EncoderV0, DecoderV0
-    } from 'https://unpkg.com/js-waku@0.29.0/bundle/lib/waku_message/version_0.js'
-    import {create} from "https://unpkg.com/@waku/rln@0.0.7/bundle/index.js";
+        getPredefinedBootstrapNodes
+    } from "https://unpkg.com/js-waku@0.29.0-7714812/bundle/lib/predefined_bootstrap_nodes";
+    import {EncoderV0, DecoderV0} from 'https://unpkg.com/js-waku@0.29.0-7714812/bundle/lib/waku_message/version_0.js'
 
-    // RLN
+    import {protobuf} from "https://taisukef.github.io/protobuf-es.js/dist/protobuf-es.js";
+
+    import {create, MembershipKey, RLNEncoder} from "https://unpkg.com/@waku/rln@0.0.8-964df01/bundle/index.js";
+
+    // RLN Elements
     const generateCredsButton = document.getElementById('generate-credentials')
+    const idDiv = document.getElementById('id');
     const keyDiv = document.getElementById('key');
     const commitmentDiv = document.getElementById('commitment');
+    const membershipIdInput = document.getElementById('membership-id')
+    const identityKeyInput = document.getElementById('id-key')
+    const commitmentKeyInput = document.getElementById('commitment-key')
+    const importButton = document.getElementById('import-button')
 
     let rlnInstance;
     (async () => {
@@ -69,26 +84,81 @@
         generateCredsButton.disabled = false;
     })();
 
-    let membership;
-    generateCredsButton.onclick = () => {
-        membership = rlnInstance.generateMembershipKey()
-        keyDiv.innerHTML = utils.bytesToHex(membership.IDKey)
-        commitmentDiv.innerHTML = utils.bytesToHex(membership.IDCommitment)
-    }
-
-    // Waku
-    const peerIdDiv = document.getElementById('peer-id');
-    const remotePeerIdDiv = document.getElementById('remote-peer-id');
+    // Waku Elements
     const statusDiv = document.getElementById('status');
-    const remoteMultiAddrDiv = document.getElementById('remote-multiaddr');
-    const dialButton = document.getElementById('dial')
-    const messagesDiv = document.getElementById('messages')
+
+    const nicknameInput = document.getElementById('nick-input')
+    const setNickButton = document.getElementById('set-nick')
+
     const textInput = document.getElementById('textInput');
     const sendButton = document.getElementById('sendButton');
 
-    const ContentTopic = "/js-waku-examples/1/chat/utf8";
+    const messagesDiv = document.getElementById('messages')
+
+    let membershipId;
+    let membershipKey;
+    let encoder;
+    let nodeConnected;
+    let nick;
+    const updateFields = () => {
+        if (membershipKey && membershipId) {
+            keyDiv.innerHTML = utils.bytesToHex(membershipKey.IDKey)
+            commitmentDiv.innerHTML = utils.bytesToHex(membershipKey.IDCommitment)
+            idDiv.innerHTML = membershipId
+
+            encoder = new RLNEncoder(
+                new EncoderV0(ContentTopic),
+                rlnInstance,
+                membershipId,
+                membershipKey
+            );
+        }
+
+        importButton.disabled = !(membershipIdInput.value
+            && identityKeyInput.value
+            && commitmentKeyInput.value);
+
+        const readyToSend = (membershipKey && membershipId && nodeConnected && nick)
+        textInput.disabled = !readyToSend;
+        sendButton.disabled = !readyToSend;
+
+        setNickButton.disabled = !nicknameInput.value;
+    }
+
+    generateCredsButton.onclick = () => {
+        membershipKey = rlnInstance.generateMembershipKey()
+        updateFields()
+    }
+
+    membershipIdInput.onchange = updateFields;
+    identityKeyInput.onchange = updateFields;
+    commitmentKeyInput.onchange = updateFields;
+
+    importButton.onclick = () => {
+        const idKey = utils.hexToBytes(identityKeyInput.value)
+        const idCommitment = utils.hexToBytes(commitmentKeyInput.value)
+        membershipKey = new MembershipKey(idKey, idCommitment)
+        membershipId = membershipIdInput.value;
+        updateFields()
+    }
+
+    // Protobuf
+    const ProtoChatMessage = new protobuf.Type("ChatMessage")
+        .add(new protobuf.Field("timestamp", 1, "uint64"))
+        .add(new protobuf.Field("nick", 2, "string"))
+        .add(new protobuf.Field("text", 3, "bytes"));
+
+    // Waku
+    nicknameInput.onchange = updateFields
+    setNickButton.onclick = () => {
+        nick = nicknameInput.value;
+        updateFields()
+    }
+
+    const ContentTopic = "/toy-chat/2/luzhou/proto";
+    // const ContentTopic = "/toy-chat/2/huilong/proto"
     const decoder = new DecoderV0(ContentTopic);
-    const encoder = new EncoderV0(ContentTopic);
+
     let messages = [];
 
     const updateMessages = (msgs, div) => {
@@ -97,44 +167,44 @@
         div.innerHTML += "</ul>"
     }
 
-    statusDiv.innerHTML = '<p>Creating Waku node.</p>';
-    const node = await createLightNode();
-
-    statusDiv.innerHTML = '<p>Starting Waku node.</p>';
-    await node.start();
-    statusDiv.innerHTML = '<p>Waku node started.</p>';
-    peerIdDiv.innerHTML = '<p>' + node.libp2p.peerId.toString() + '</p>'
-    dialButton.disabled = false;
-
-    dialButton.onclick = async () => {
-        const ma = remoteMultiAddrDiv.value
-        if (!ma) {
-            statusDiv.innerHTML = '<p>Error: No multiaddr provided.</p>';
-            return;
-        }
-        statusDiv.innerHTML = '<p>Dialing peer.</p>';
-        await node.dial(ma, ["filter", "lightpush"])
-        await waitForRemotePeer(node, ["filter", "lightpush"]);
-        const peers = await node.libp2p.peerStore.all();
-        statusDiv.innerHTML = '<p>Peer dialed.</p>';
-        remotePeerIdDiv.innerHTML = '<p>' + peers[0].id.toString() + '</p>'
-        await node.filter.subscribe([decoder], callback)
-        textInput.disabled = false;
-        sendButton.disabled = false;
-    }
-
     const callback = (wakuMessage) => {
-        const text = utils.bytesToUtf8(wakuMessage.payload)
-        const timestamp = wakuMessage.timestamp.toString()
-        messages.push(text + " - " + timestamp)
+        const {timestamp, nick, text} = ProtoChatMessage.decode(wakuMessage.payload)
+        const time = new Date();
+        time.setTime(Number(timestamp));
+
+        messages.push(`(${nick}) <strong>${utils.bytesToUtf8(text)}</strong> <i>[${time.toString()}]</i>`);
         updateMessages(messages, messagesDiv)
     }
 
-    sendButton.onclick = async () => {
-        const text = textInput.value;
+    let node;
+    (async () => {
+        statusDiv.innerHTML = '<p>Creating Waku node.</p>';
+        node = await createLightNode({
+            libp2p: {
+                peerDiscovery: [
+                    new PeerDiscoveryStaticPeers(getPredefinedBootstrapNodes("test")),
+                ],
+            },
+        });
 
-        await node.lightPush.push(encoder, {payload: utils.utf8ToBytes(text)});
-        console.log('Message sent!');
+        statusDiv.innerHTML = '<p>Starting Waku node.</p>';
+        await node.start();
+        statusDiv.innerHTML = '<p>Waku node started.</p>';
+        await waitForRemotePeer(node, ["filter", "lightpush"]);
+        statusDiv.innerHTML = '<p>Waku node connected.</p>';
+        await node.filter.subscribe([decoder], callback)
+        nodeConnected = true;
+        updateFields()
+    })()
+
+    sendButton.onclick = async () => {
+        const text = utils.utf8ToBytes(textInput.value);
+        const timestamp = new Date();
+        const msg = ProtoChatMessage.create({text, nick, timestamp: timestamp.valueOf()});
+        const payload = ProtoChatMessage.encode(msg).finish();
+        console.log("Sending message with proof...")
+        await node.lightPush.push(encoder, {payload, timestamp});
+        console.log("Message sent!")
         textInput.value = null;
     };
 </script>
