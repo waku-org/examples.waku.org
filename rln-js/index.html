@@ -16,7 +16,7 @@
     </div>
 
     <div><h2>RLN</h2>
-        <button disabled id='retrieve-rln-details' type='button'>Retrieve RLN details</button>
+        <button disabled id='retrieve-rln-details' type='button'>Retrieve RLN contract state from blockchain</button>
     </div>
 
     <p>You can either generate new credentials:</p><br/>
@@ -50,6 +50,13 @@
 <div><h1>Waku</h1>
     <div id='status'></div>
     <br/>
+
+    <label for='remote-multiaddr'>Remote peer's multiaddr</label>
+    <input id='remote-multiaddr'
+           type='text'
+           value="/dns4/node-01.ac-cn-hongkong-c.wakuv2.test.statusim.net/tcp/443/wss/p2p/16Uiu2HAkvWiyFsgRhuJEb9JfjYxEkoHLgnUQmr1N5mKWnYjxYRVm">
+    <button id='dial' type='button' disabled>Dial</button>
+    <br/>
     <label for='nick-input'>Your nickname</label>
     <input id='nick-input' placeholder='Choose a nickname' type='text'>
     <button disabled id='set-nick' type='button'>Set nickname</button>
@@ -66,12 +73,6 @@
     import {utils} from 'https://unpkg.com/js-waku@0.29.0-29436ea/bundle/index.js';
     import {createLightNode} from 'https://unpkg.com/js-waku@0.29.0-29436ea/bundle/lib/create_waku.js'
     import {waitForRemotePeer} from 'https://unpkg.com/js-waku@0.29.0-29436ea/bundle/lib/wait_for_remote_peer.js'
-    import {
-        PeerDiscoveryStaticPeers
-    } from "https://unpkg.com/js-waku@0.29.0-29436ea/bundle/lib/peer_discovery_static_list";
-    import {
-        getPredefinedBootstrapNodes
-    } from "https://unpkg.com/js-waku@0.29.0-29436ea/bundle/lib/predefined_bootstrap_nodes";
     import {EncoderV0, DecoderV0} from 'https://unpkg.com/js-waku@0.29.0-29436ea/bundle/lib/waku_message/version_0.js'
 
     import {protobuf} from "https://taisukef.github.io/protobuf-es.js/dist/protobuf-es.js";
@@ -95,6 +96,9 @@
 
     // Waku Elements
     const statusDiv = document.getElementById('status');
+
+    const dialButton = document.getElementById('dial')
+    const remoteMultiAddrInput = document.getElementById('remote-multiaddr')
 
     const nicknameInput = document.getElementById('nick-input')
     const setNickButton = document.getElementById('set-nick')
@@ -195,8 +199,6 @@
     ];
 
     const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
-
-    checkCurrentChain();
 
     let accounts;
     let rlnContract;
@@ -315,23 +317,29 @@
     let node;
     (async () => {
         statusDiv.innerHTML = '<p>Creating Waku node.</p>';
-        node = await createLightNode({
-            libp2p: {
-                peerDiscovery: [
-                    new PeerDiscoveryStaticPeers(getPredefinedBootstrapNodes("test")),
-                ],
-            },
-        });
+        node = await createLightNode();
 
         statusDiv.innerHTML = '<p>Starting Waku node.</p>';
         await node.start();
         statusDiv.innerHTML = '<p>Waku node started.</p>';
+        dialButton.disabled = false;
+        updateFields()
+    })()
+
+    dialButton.onclick = async () => {
+        const ma = remoteMultiAddrInput.value
+        if (!ma) {
+            statusDiv.innerHTML = '<p>Error: No multiaddr provided.</p>';
+            return;
+        }
+        statusDiv.innerHTML = '<p>Dialing peer.</p>';
+        await node.dial(ma, ["filter", "lightpush"])
         await waitForRemotePeer(node, ["filter", "lightpush"]);
         statusDiv.innerHTML = '<p>Waku node connected.</p>';
         await node.filter.subscribe([decoder], callback)
+        statusDiv.innerHTML = '<p>Waku node subscribed.</p>';
         nodeConnected = true;
-        updateFields()
-    })()
+    }
 
     sendButton.onclick = async () => {
         const text = utils.utf8ToBytes(textInput.value);
