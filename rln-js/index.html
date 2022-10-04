@@ -10,8 +10,17 @@
 <body>
 
 <div><h1>RLN</h1>
+    <div><h2>Wallet</h2>
+        <div id='wallet'></div>
+        <button disabled id='connect-wallet' type='button'>Connect Wallet</button>
+    </div>
+
+    <div><h2>RLN</h2>
+        <button disabled id='retrieve-rln-details' type='button'>Retrieve RLN contract state from blockchain</button>
+    </div>
+
     <p>You can either generate new credentials:</p><br/>
-    <button id='generate-credentials' type='button' disabled>Generate RLN Credentials</button>
+    <button disabled id='generate-credentials' type='button'>Generate RLN Credentials</button>
     <p>Or import existing ones:</p><br/>
 
     <div>
@@ -34,11 +43,19 @@
         <div><h3>Commitment</h3>
             <div id="commitment"></div>
         </div>
+        <button disabled id='register-button' type='button'>Register Credentials in Contract</button>
     </div>
 </div>
 
 <div><h1>Waku</h1>
     <div id='status'></div>
+    <br/>
+
+    <label for='remote-multiaddr'>Remote peer's multiaddr</label>
+    <input id='remote-multiaddr'
+           type='text'
+           value="/dns4/node-01.ac-cn-hongkong-c.wakuv2.test.statusim.net/tcp/443/wss/p2p/16Uiu2HAkvWiyFsgRhuJEb9JfjYxEkoHLgnUQmr1N5mKWnYjxYRVm">
+    <button id='dial' type='button' disabled>Dial</button>
     <br/>
     <label for='nick-input'>Your nickname</label>
     <input id='nick-input' placeholder='Choose a nickname' type='text'>
@@ -46,27 +63,23 @@
     <br/>
 
     <label for='textInput'>Message text</label>
-    <input id='textInput' placeholder='Type your message here' type='text' disabled>
-    <button id='sendButton' type='button' disabled>Send message using Light Push</button>
+    <input disabled id='textInput' placeholder='Type your message here' type='text'>
+    <button disabled id='sendButton' type='button'>Send message using Light Push</button>
     <br/>
     <div id="messages"></div>
 </div>
 
 <script type='module'>
-    import {utils} from 'https://unpkg.com/js-waku@0.29.0-7714812/bundle/index.js';
-    import {createLightNode} from 'https://unpkg.com/js-waku@0.29.0-7714812/bundle/lib/create_waku.js'
-    import {waitForRemotePeer} from 'https://unpkg.com/js-waku@0.29.0-7714812/bundle/lib/wait_for_remote_peer.js'
-    import {
-        PeerDiscoveryStaticPeers
-    } from "https://unpkg.com/js-waku@0.29.0-7714812/bundle/lib/peer_discovery_static_list";
-    import {
-        getPredefinedBootstrapNodes
-    } from "https://unpkg.com/js-waku@0.29.0-7714812/bundle/lib/predefined_bootstrap_nodes";
-    import {EncoderV0, DecoderV0} from 'https://unpkg.com/js-waku@0.29.0-7714812/bundle/lib/waku_message/version_0.js'
+    import {utils} from 'https://unpkg.com/js-waku@0.29.0-29436ea/bundle/index.js';
+    import {createLightNode} from 'https://unpkg.com/js-waku@0.29.0-29436ea/bundle/lib/create_waku.js'
+    import {waitForRemotePeer} from 'https://unpkg.com/js-waku@0.29.0-29436ea/bundle/lib/wait_for_remote_peer.js'
+    import {EncoderV0, DecoderV0} from 'https://unpkg.com/js-waku@0.29.0-29436ea/bundle/lib/waku_message/version_0.js'
 
     import {protobuf} from "https://taisukef.github.io/protobuf-es.js/dist/protobuf-es.js";
 
-    import {create, MembershipKey, RLNEncoder} from "https://unpkg.com/@waku/rln@0.0.8-964df01/bundle/index.js";
+    import {create, MembershipKey, RLNEncoder} from "https://unpkg.com/@waku/rln@0.0.10/bundle/index.js";
+
+    import {ethers} from "https://unpkg.com/ethers@5.0.7/dist/ethers-all.esm.min.js"
 
     // RLN Elements
     const generateCredsButton = document.getElementById('generate-credentials')
@@ -77,21 +90,22 @@
     const identityKeyInput = document.getElementById('id-key')
     const commitmentKeyInput = document.getElementById('commitment-key')
     const importButton = document.getElementById('import-button')
-
-    let rlnInstance;
-    (async () => {
-        rlnInstance = await create()
-        generateCredsButton.disabled = false;
-    })();
+    const connectWalletButton = document.getElementById('connect-wallet');
+    const retrieveRLNDetailsButton = document.getElementById('retrieve-rln-details')
+    const registerButton = document.getElementById('register-button');
 
     // Waku Elements
     const statusDiv = document.getElementById('status');
+
+    const dialButton = document.getElementById('dial')
+    const remoteMultiAddrInput = document.getElementById('remote-multiaddr')
 
     const nicknameInput = document.getElementById('nick-input')
     const setNickButton = document.getElementById('set-nick')
 
     const textInput = document.getElementById('textInput');
     const sendButton = document.getElementById('sendButton');
+    const walletDiv = document.getElementById('wallet');
 
     const messagesDiv = document.getElementById('messages')
 
@@ -100,18 +114,30 @@
     let encoder;
     let nodeConnected;
     let nick;
+    let retrievedRLNEvents = false;
+    let rlnInstance;
+
+    // Load zero-kit WASM blob.
+    (async () => {
+        rlnInstance = await create()
+        generateCredsButton.disabled = false;
+        connectWalletButton.disabled = false;
+    })();
+
     const updateFields = () => {
-        if (membershipKey && membershipId) {
+        if (membershipKey) {
             keyDiv.innerHTML = utils.bytesToHex(membershipKey.IDKey)
             commitmentDiv.innerHTML = utils.bytesToHex(membershipKey.IDCommitment)
-            idDiv.innerHTML = membershipId
+            idDiv.innerHTML = membershipId || "-"
 
-            encoder = new RLNEncoder(
-                new EncoderV0(ContentTopic),
-                rlnInstance,
-                membershipId,
-                membershipKey
-            );
+            if (membershipId) {
+                encoder = new RLNEncoder(
+                    new EncoderV0(ContentTopic),
+                    rlnInstance,
+                    membershipId,
+                    membershipKey
+                );
+            }
         }
 
         importButton.disabled = !(membershipIdInput.value
@@ -127,7 +153,7 @@
 
     generateCredsButton.onclick = () => {
         membershipKey = rlnInstance.generateMembershipKey()
-        updateFields()
+        updateFields();
     }
 
     membershipIdInput.onchange = updateFields;
@@ -148,6 +174,119 @@
         .add(new protobuf.Field("nick", 2, "string"))
         .add(new protobuf.Field("text", 3, "bytes"));
 
+    // Wallet
+    const checkChain = async (chainId) => {
+        retrieveRLNDetailsButton.disabled = retrievedRLNEvents || chainId !== 5;
+        registerButton.disabled = !(chainId === 5 && retrievedRLNEvents);
+        if (chainId !== 5) {
+            alert("Switch to Goerli")
+        }
+    }
+
+    const checkCurrentChain = async () => {
+        const network = await provider.getNetwork();
+        checkChain(network.chainId);
+    }
+
+    const rlnDeployBlk = 7677135;
+    const rlnAddress = "0x367F3e869cF2E1DD28644E308b42652cb6fcDA72";
+    const rlnAbi = [
+        "function MEMBERSHIP_DEPOSIT() public view returns(uint256)",
+        "function register(uint256 pubkey) external payable",
+        "function withdraw(uint256 secret, uint256 _pubkeyIndex, address payable receiver) external",
+        "event MemberRegistered(uint256 pubkey, uint256 index)",
+        "event MemberWithdrawn(uint256 pubkey, uint256 index)"
+    ];
+
+    const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+
+    let accounts;
+    let rlnContract;
+
+    const handleMembership = (pubkey, index) => {
+        try {
+            const idCommitment = ethers.utils.zeroPad(ethers.utils.arrayify(pubkey), 32);
+            rlnInstance.insertMember(idCommitment);
+            console.debug("IDCommitment registered in tree", idCommitment, index.toNumber());
+        } catch (err) {
+            alert(err); // TODO: the merkle tree can be in a wrong state. The app should be disabled
+        }
+    }
+
+    const setAccounts = acc => {
+        accounts = acc;
+        walletDiv.innerHTML = accounts.length ? accounts[0] : "";
+    }
+
+    connectWalletButton.onclick = async () => {
+        try {
+            accounts = await provider.send("eth_requestAccounts", []);
+            setAccounts(accounts);
+            checkCurrentChain();
+        } catch (e) {
+            console.log("No web3 provider available", e);
+        }
+    };
+
+    retrieveRLNDetailsButton.onclick = async () => {
+        rlnContract = new ethers.Contract(rlnAddress, rlnAbi, provider);
+
+        const filter = rlnContract.filters.MemberRegistered()
+
+        // populating merkle tree:
+        const alreadyRegisteredMembers = await rlnContract.queryFilter(filter, rlnDeployBlk)
+        alreadyRegisteredMembers.forEach(event => {
+            handleMembership(event.args.pubkey, event.args.index, event);
+        });
+
+        alert("Loaded all events from contract");
+        retrievedRLNEvents = true;
+        // TODO: at this point it should be possible to register a credential and send messages
+        // TODO: emit an event to enable message form and register button
+
+        retrieveRLNDetailsButton.disabled = true;
+        registerButton.disabled = false;
+
+        // reacting to new registrations
+        rlnContract.on(filter, (pubkey, index, event) => {
+            handleMembership(event.args.pubkey, event.args.index, event);
+        });
+    }
+
+    window.ethereum.on('accountsChanged', setAccounts);
+    window.ethereum.on('chainChanged', chainId => {
+        checkChain(parseInt(chainId, 16));
+    });
+
+    registerButton.onclick = async () => {
+        try {
+            registerButton.disabled = true;
+
+            const pubkey = ethers.BigNumber.from(membershipKey.IDCommitment);
+            const price = await rlnContract.MEMBERSHIP_DEPOSIT();
+
+            const signer = provider.getSigner()
+            const rlnContractWithSigner = rlnContract.connect(signer);
+
+            const txResponse = await rlnContractWithSigner.register(pubkey, {value: price});
+            console.log("Transaction broadcasted:", txResponse);
+
+            const txReceipt = await txResponse.wait();
+
+            console.log("Transaction receipt", txReceipt);
+
+            // Update membershipId
+            membershipId = txReceipt.events[0].args.index.toNumber();
+            console.log("Obtained index for current membership credentials", membershipId);
+            updateFields();
+            registerButton.disabled = false;
+        } catch (err) {
+            alert(err);
+            registerButton.disabled = false;
+        }
+
+    }
+
     // Waku
     nicknameInput.onchange = updateFields
     setNickButton.onclick = () => {
@@ -156,7 +295,6 @@
     }
 
     const ContentTopic = "/toy-chat/2/luzhou/proto";
-    // const ContentTopic = "/toy-chat/2/huilong/proto"
     const decoder = new DecoderV0(ContentTopic);
 
     let messages = [];
@@ -179,23 +317,29 @@
     let node;
     (async () => {
         statusDiv.innerHTML = '<p>Creating Waku node.</p>';
-        node = await createLightNode({
-            libp2p: {
-                peerDiscovery: [
-                    new PeerDiscoveryStaticPeers(getPredefinedBootstrapNodes("test")),
-                ],
-            },
-        });
+        node = await createLightNode();
 
         statusDiv.innerHTML = '<p>Starting Waku node.</p>';
         await node.start();
         statusDiv.innerHTML = '<p>Waku node started.</p>';
+        dialButton.disabled = false;
+        updateFields()
+    })()
+
+    dialButton.onclick = async () => {
+        const ma = remoteMultiAddrInput.value
+        if (!ma) {
+            statusDiv.innerHTML = '<p>Error: No multiaddr provided.</p>';
+            return;
+        }
+        statusDiv.innerHTML = '<p>Dialing peer.</p>';
+        await node.dial(ma, ["filter", "lightpush"])
         await waitForRemotePeer(node, ["filter", "lightpush"]);
         statusDiv.innerHTML = '<p>Waku node connected.</p>';
         await node.filter.subscribe([decoder], callback)
+        statusDiv.innerHTML = '<p>Waku node subscribed.</p>';
         nodeConnected = true;
-        updateFields()
-    })()
+    }
 
     sendButton.onclick = async () => {
         const text = utils.utf8ToBytes(textInput.value);
