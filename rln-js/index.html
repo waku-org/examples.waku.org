@@ -11,15 +11,16 @@
 
 <div><h1>RLN</h1>
     <div><h2>Wallet</h2>
-        <div id='wallet'></div> <button id='connect-wallet' type='button' disabled>Connect Wallet</button>
+        <div id='wallet'></div>
+        <button disabled id='connect-wallet' type='button'>Connect Wallet</button>
     </div>
 
     <div><h2>RLN</h2>
-        <button id='retrieve-rln-details' type='button' disabled>Retrieve RLN details</button>
+        <button disabled id='retrieve-rln-details' type='button'>Retrieve RLN details</button>
     </div>
 
     <p>You can either generate new credentials:</p><br/>
-    <button id='generate-credentials' type='button' disabled>Generate RLN Credentials</button>
+    <button disabled id='generate-credentials' type='button'>Generate RLN Credentials</button>
     <p>Or import existing ones:</p><br/>
 
     <div>
@@ -42,7 +43,7 @@
         <div><h3>Commitment</h3>
             <div id="commitment"></div>
         </div>
-        <button id='register-button' type='button' disabled>Register Credentials in Contract</button>
+        <button disabled id='register-button' type='button'>Register Credentials in Contract</button>
     </div>
 </div>
 
@@ -55,8 +56,8 @@
     <br/>
 
     <label for='textInput'>Message text</label>
-    <input id='textInput' placeholder='Type your message here' type='text' disabled>
-    <button id='sendButton' type='button' disabled>Send message using Light Push</button>
+    <input disabled id='textInput' placeholder='Type your message here' type='text'>
+    <button disabled id='sendButton' type='button'>Send message using Light Push</button>
     <br/>
     <div id="messages"></div>
 </div>
@@ -92,13 +93,6 @@
     const retrieveRLNDetailsButton = document.getElementById('retrieve-rln-details')
     const registerButton = document.getElementById('register-button');
 
-    let rlnInstance;
-    (async () => {
-        rlnInstance = await create()
-        generateCredsButton.disabled = false;
-        connectWalletButton.disabled = false;
-    })();
-
     // Waku Elements
     const statusDiv = document.getElementById('status');
 
@@ -117,13 +111,20 @@
     let nodeConnected;
     let nick;
     let retrievedRLNEvents = false;
-    
+    let rlnInstance;
+
+    // Load zero-kit WASM blob.
+    (async () => {
+        rlnInstance = await create()
+        generateCredsButton.disabled = false;
+        connectWalletButton.disabled = false;
+    })();
+
     const updateFields = () => {
         if (membershipKey) {
             keyDiv.innerHTML = utils.bytesToHex(membershipKey.IDKey)
             commitmentDiv.innerHTML = utils.bytesToHex(membershipKey.IDCommitment)
             idDiv.innerHTML = membershipId || "-"
-
 
             if (membershipId) {
                 encoder = new RLNEncoder(
@@ -134,7 +135,7 @@
                 );
             }
         }
-        
+
         importButton.disabled = !(membershipIdInput.value
             && identityKeyInput.value
             && commitmentKeyInput.value);
@@ -159,7 +160,7 @@
         const idKey = utils.hexToBytes(identityKeyInput.value)
         const idCommitment = utils.hexToBytes(commitmentKeyInput.value)
         membershipKey = new MembershipKey(idKey, idCommitment)
-        membershipId = membershipIdInput.value ;
+        membershipId = membershipIdInput.value;
         updateFields()
     }
 
@@ -169,38 +170,11 @@
         .add(new protobuf.Field("nick", 2, "string"))
         .add(new protobuf.Field("text", 3, "bytes"));
 
-    // Waku
-    nicknameInput.onchange = updateFields
-    setNickButton.onclick = () => {
-        nick = nicknameInput.value;
-        updateFields()
-    }
-
-    const ContentTopic = "/toy-chat/2/luzhou/proto";
-    // const ContentTopic = "/toy-chat/2/huilong/proto"
-    const decoder = new DecoderV0(ContentTopic);
-
-    let messages = [];
-
-    const updateMessages = (msgs, div) => {
-        div.innerHTML = "<ul>"
-        messages.forEach(msg => div.innerHTML += "<li>" + msg + "</li>")
-        div.innerHTML += "</ul>"
-    }
-
-    const callback = (wakuMessage) => {
-        const {timestamp, nick, text} = ProtoChatMessage.decode(wakuMessage.payload)
-        const time = new Date();
-        time.setTime(Number(timestamp));
-
-        messages.push(`(${nick}) <strong>${utils.bytesToUtf8(text)}</strong> <i>[${time.toString()}]</i>`);
-        updateMessages(messages, messagesDiv)
-    }
-
+    // Wallet
     const checkChain = async (chainId) => {
-        retrieveRLNDetailsButton.disabled = retrievedRLNEvents || chainId != 5;
-        registerButton.disabled = !(chainId == 5 && retrievedRLNEvents);
-        if(chainId != 5){
+        retrieveRLNDetailsButton.disabled = retrievedRLNEvents || chainId !== 5;
+        registerButton.disabled = !(chainId === 5 && retrievedRLNEvents);
+        if (chainId !== 5) {
             alert("Switch to Goerli")
         }
     }
@@ -227,12 +201,12 @@
     let accounts;
     let rlnContract;
 
-    const handleMembership = (pubkey, index, event) => {
+    const handleMembership = (pubkey, index) => {
         try {
             const idCommitment = ethers.utils.zeroPad(ethers.utils.arrayify(pubkey), 32);
             rlnInstance.insertMember(idCommitment);
             console.debug("IDCommitment registered in tree", idCommitment, index.toNumber());
-        } catch(err){
+        } catch (err) {
             alert(err); // TODO: the merkle tree can be in a wrong state. The app should be disabled
         }
     }
@@ -248,13 +222,13 @@
             setAccounts(accounts);
             checkCurrentChain();
         } catch (e) {
-            ("No web3 provider available", e);
+            console.log("No web3 provider available", e);
         }
     };
 
     retrieveRLNDetailsButton.onclick = async () => {
         rlnContract = new ethers.Contract(rlnAddress, rlnAbi, provider);
-        
+
         const filter = rlnContract.filters.MemberRegistered()
 
         // populating merkle tree:
@@ -285,7 +259,7 @@
     registerButton.onclick = async () => {
         try {
             registerButton.disabled = true;
-            
+
             const pubkey = ethers.BigNumber.from(membershipKey.IDCommitment);
             const price = await rlnContract.MEMBERSHIP_DEPOSIT();
 
@@ -304,11 +278,38 @@
             console.log("Obtained index for current membership credentials", membershipId);
             updateFields();
             registerButton.disabled = false;
-        } catch(err) {
+        } catch (err) {
             alert(err);
             registerButton.disabled = false;
         }
 
+    }
+
+    // Waku
+    nicknameInput.onchange = updateFields
+    setNickButton.onclick = () => {
+        nick = nicknameInput.value;
+        updateFields()
+    }
+
+    const ContentTopic = "/toy-chat/2/luzhou/proto";
+    const decoder = new DecoderV0(ContentTopic);
+
+    let messages = [];
+
+    const updateMessages = (msgs, div) => {
+        div.innerHTML = "<ul>"
+        messages.forEach(msg => div.innerHTML += "<li>" + msg + "</li>")
+        div.innerHTML += "</ul>"
+    }
+
+    const callback = (wakuMessage) => {
+        const {timestamp, nick, text} = ProtoChatMessage.decode(wakuMessage.payload)
+        const time = new Date();
+        time.setTime(Number(timestamp));
+
+        messages.push(`(${nick}) <strong>${utils.bytesToUtf8(text)}</strong> <i>[${time.toString()}]</i>`);
+        updateMessages(messages, messagesDiv)
     }
 
     let node;
