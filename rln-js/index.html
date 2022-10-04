@@ -55,7 +55,7 @@
     <input id='remote-multiaddr'
            type='text'
            value="/dns4/node-01.ac-cn-hongkong-c.wakuv2.test.statusim.net/tcp/443/wss/p2p/16Uiu2HAkvWiyFsgRhuJEb9JfjYxEkoHLgnUQmr1N5mKWnYjxYRVm">
-    <button id='dial' type='button' disabled>Dial</button>
+    <button disabled id='dial' type='button'>Dial</button>
     <br/>
     <label for='nick-input'>Your nickname</label>
     <input id='nick-input' placeholder='Choose a nickname' type='text'>
@@ -77,7 +77,12 @@
 
     import {protobuf} from "https://taisukef.github.io/protobuf-es.js/dist/protobuf-es.js";
 
-    import {create, MembershipKey, RLNEncoder} from "https://unpkg.com/@waku/rln@0.0.10/bundle/index.js";
+    import {
+        create,
+        MembershipKey,
+        RLNDecoder,
+        RLNEncoder
+    } from "https://unpkg.com/@waku/rln@0.0.10/bundle/index.js";
 
     import {ethers} from "https://unpkg.com/ethers@5.0.7/dist/ethers-all.esm.min.js"
 
@@ -112,17 +117,19 @@
     let membershipId;
     let membershipKey;
     let encoder;
+    let node;
     let nodeConnected;
     let nick;
     let retrievedRLNEvents = false;
+    let rlnInstancePromise = create();
     let rlnInstance;
 
     // Load zero-kit WASM blob.
-    (async () => {
-        rlnInstance = await create()
+    rlnInstancePromise.then((_rlnInstance) => {
+        rlnInstance = _rlnInstance
         generateCredsButton.disabled = false;
         connectWalletButton.disabled = false;
-    })();
+    })
 
     const updateFields = () => {
         if (membershipKey) {
@@ -149,6 +156,8 @@
         sendButton.disabled = !readyToSend;
 
         setNickButton.disabled = !nicknameInput.value;
+
+        dialButton.disabled = !(node && node.isStarted() && retrievedRLNEvents)
     }
 
     generateCredsButton.onclick = () => {
@@ -251,6 +260,7 @@
         rlnContract.on(filter, (pubkey, index, event) => {
             handleMembership(event.args.pubkey, event.args.index, event);
         });
+        updateFields()
     }
 
     window.ethereum.on('accountsChanged', setAccounts);
@@ -294,15 +304,31 @@
         updateFields()
     }
 
-    const ContentTopic = "/toy-chat/2/luzhou/proto";
-    const decoder = new DecoderV0(ContentTopic);
-
     let messages = [];
 
-    const updateMessages = (msgs, div) => {
-        div.innerHTML = "<ul>"
-        messages.forEach(msg => div.innerHTML += "<li>" + msg + "</li>")
-        div.innerHTML += "</ul>"
+    const updateMessages = () => {
+        messagesDiv.innerHTML = "<ul>"
+        messages.forEach(msg => {
+            messagesDiv.innerHTML += `<li>${msg.msg} - [epoch: ${msg.epoch}, proof: ${msg.proofState} ]</li>`
+
+            console.log("msg.verify", msg.verify)
+            console.log("msg.proof", msg.rateLimitProof)
+
+            if (msg.proofState === "verifying...") {
+                console.log("Verifying proof")
+                const res = msg.verify()
+                console.log("proof verified!", res)
+                if (res === undefined) {
+                    msg.proofState = "no proof attached"
+                } else if (res) {
+                    msg.proofState = "verified."
+                } else {
+                    msg.proofState = "invalid!"
+                }
+                updateMessages()
+            }
+        })
+        messagesDiv.innerHTML += "</ul>"
     }
 
     const callback = (wakuMessage) => {
@@ -310,11 +336,28 @@
         const time = new Date();
         time.setTime(Number(timestamp));
 
-        messages.push(`(${nick}) <strong>${utils.bytesToUtf8(text)}</strong> <i>[${time.toString()}]</i>`);
-        updateMessages(messages, messagesDiv)
+        console.log("wakuMessage:", wakuMessage)
+        console.log("wakuMessage.verify", wakuMessage.verify)
+        console.log("wakuMessage.proof", wakuMessage.rateLimitProof)
+
+        let proofState, verify;
+        if (typeof wakuMessage.verify === "undefined") {
+            proofState = "no proof attached";
+        } else {
+            verify = wakuMessage.verify.bind(wakuMessage);
+            proofState = "verifying...";
+        }
+
+        messages.push({
+            msg: `(${nick}) <strong>${utils.bytesToUtf8(text)}</strong> <i>[${time.toString()}]</i>`,
+            epoch: wakuMessage.epoch,
+            verify,
+            proofState
+        });
+        updateMessages()
     }
 
-    let node;
+    const ContentTopic = "/toy-chat/2/luzhou/proto";
     (async () => {
         statusDiv.innerHTML = '<p>Creating Waku node.</p>';
         node = await createLightNode();
@@ -322,7 +365,6 @@
         statusDiv.innerHTML = '<p>Starting Waku node.</p>';
         await node.start();
         statusDiv.innerHTML = '<p>Waku node started.</p>';
-        dialButton.disabled = false;
         updateFields()
     })()
 
@@ -336,6 +378,9 @@
         await node.dial(ma, ["filter", "lightpush"])
         await waitForRemotePeer(node, ["filter", "lightpush"]);
         statusDiv.innerHTML = '<p>Waku node connected.</p>';
+
+        await rlnInstancePromise;
+        const decoder = new RLNDecoder(rlnInstance, new DecoderV0(ContentTopic));
         await node.filter.subscribe([decoder], callback)
         statusDiv.innerHTML = '<p>Waku node subscribed.</p>';
         nodeConnected = true;
