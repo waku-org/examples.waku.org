@@ -10,10 +10,11 @@
 <body>
 
 <div><h1>Waku RLN</h1>
+    <div><span id='status'></span></div>
     <div><h2>Blockchain</h2>
         <div><h3>Wallet</h3>
             <p>Address: <span id='address'></span></p>
-            <button disabled id='connect-wallet' type='button'>Connect Wallet</button>
+            <button id='connect-wallet' type='button'>Connect Wallet</button>
         </div>
         <div><h3>Contract Data</h3>
             <p>Latest membership id on contract: <span id='latest-membership-id'></span></p>
@@ -42,7 +43,7 @@
     </div>
 
     <div><h1>Waku</h1>
-        <div id='status'></div>
+        <div id="waku-status"></div>
 
         <label for='remote-multiaddr'>Remote peer's multiaddr</label>
         <input id='remote-multiaddr'
@@ -84,6 +85,8 @@
 
     import {ethers} from "https://unpkg.com/ethers@5.0.7/dist/ethers-all.esm.min.js"
 
+    const statusSpan = document.getElementById('status')
+
     // Blockchain Elements
     const addressDiv = document.getElementById('address');
     const connectWalletButton = document.getElementById('connect-wallet');
@@ -106,7 +109,7 @@
     const registerButton = document.getElementById('register-button');
 
     // Waku Elements
-    const statusDiv = document.getElementById('status');
+    const statusDiv = document.getElementById('waku-status');
 
     const remoteMultiAddrInput = document.getElementById('remote-multiaddr')
     const dialButton = document.getElementById('dial')
@@ -125,10 +128,15 @@
     const rlnInstancePromise = create();
 
     // Load zero-kit WASM blob.
+
+    statusSpan.innerText = 'WASM Blob download in progress...'
     rlnInstancePromise.then((_rlnInstance) => {
         rlnInstance = _rlnInstance
-        generateCredsButton.disabled = false;
-        connectWalletButton.disabled = false;
+        statusSpan.innerText = 'WASM Blob download in progress... done!'
+        updateFields()
+        setTimeout(() => {
+            statusSpan.innerText = ''
+        }, 5000)
     })
 
     const ContentTopic = "/toy-chat/2/luzhou/proto";
@@ -156,6 +164,8 @@
             }
         }
 
+        generateCredsButton.disabled = !rlnInstance
+
         registerButton.disabled = !(membershipKey && retrievedRLNEvents && !membershipId)
 
         importButton.disabled = !(membershipIdInput.value
@@ -170,7 +180,7 @@
 
         dialButton.disabled = !(node && node.isStarted() && retrievedRLNEvents)
 
-        retrieveRLNDetailsButton.disabled = !retrievedRLNEvents;
+        retrieveRLNDetailsButton.disabled = !rlnInstance && !retrievedRLNEvents;
     }
 
     // Blockchain
@@ -394,7 +404,7 @@
         textInput.value = null;
         setTimeout(() => {
             sendingStatusSpan.innerText = ''
-        }, 1000)
+        }, 5000)
     };
 </script>
 </body>
