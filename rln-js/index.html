@@ -9,21 +9,24 @@
 
 <body>
 
-<div><h1>RLN</h1>
-    <div><h2>Wallet</h2>
-        <div id='wallet'></div>
-        <button disabled id='connect-wallet' type='button'>Connect Wallet</button>
+<div><h1>Waku RLN</h1>
+    <div><span id='status'></span></div>
+    <div><h2>Blockchain</h2>
+        <div><h3>Wallet</h3>
+            <p>Address: <span id='address'></span></p>
+            <button id='connect-wallet' type='button'>Connect Wallet</button>
+        </div>
+        <div><h3>Contract Data</h3>
+            <p>Latest membership id on contract: <span id='latest-membership-id'></span></p>
+            <button disabled id='retrieve-rln-details' type='button'>Retrieve contract state from blockchain
+            </button>
+        </div>
     </div>
 
-    <div><h2>RLN</h2>
-        <button disabled id='retrieve-rln-details' type='button'>Retrieve RLN contract state from blockchain</button>
-    </div>
-
-    <p>You can either generate new credentials:</p><br/>
-    <button disabled id='generate-credentials' type='button'>Generate RLN Credentials</button>
-    <p>Or import existing ones:</p><br/>
-
-    <div>
+    <div><h2>Credentials</h2>
+        <p>You can either generate new credentials:</p>
+        <button disabled id='generate-credentials' type='button'>Generate RLN Credentials</button>
+        <p>Or import existing ones:</p>
         <label for="membership-id">Membership ID (your index in the RLN smart contract):</label>
         <input id="membership-id" name="membership-id" type="text"><br>
         <label for="id-key">RLN Identity Key (hex string):</label>
@@ -31,106 +34,127 @@
         <label for="commitment-key">RLN Commitment Key (hex string):</label>
         <input id="commitment-key" name="commitment-key" type="text"><br>
         <button disabled id='import-button' type='button'>Import RLN Credentials</button>
-    </div>
 
-    <div><h2>Credentials</h2>
-        <div><h3>Membership id</h3>
-            <div id="id"></div>
-        </div>
-        <div><h3>Key</h3>
-            <div id="key"></div>
-        </div>
-        <div><h3>Commitment</h3>
-            <div id="commitment"></div>
-        </div>
+        <p><strong>Membership id: </strong><span id="id">none</span></p>
+        <p><strong>Key: </strong><span id="key">none</span></p>
+        <p><strong>Commitment: </strong><span id="commitment">none</span></p>
+
         <button disabled id='register-button' type='button'>Register Credentials in Contract</button>
     </div>
-</div>
 
-<div><h1>Waku</h1>
-    <div id='status'></div>
-    <br/>
+    <div><h1>Waku</h1>
+        <div id="waku-status"></div>
 
-    <label for='remote-multiaddr'>Remote peer's multiaddr</label>
-    <input id='remote-multiaddr'
-           type='text'
-           value="/dns4/node-01.ac-cn-hongkong-c.wakuv2.test.statusim.net/tcp/443/wss/p2p/16Uiu2HAkvWiyFsgRhuJEb9JfjYxEkoHLgnUQmr1N5mKWnYjxYRVm">
-    <button id='dial' type='button' disabled>Dial</button>
-    <br/>
-    <label for='nick-input'>Your nickname</label>
-    <input id='nick-input' placeholder='Choose a nickname' type='text'>
-    <button disabled id='set-nick' type='button'>Set nickname</button>
-    <br/>
+        <label for='remote-multiaddr'>Remote peer's multiaddr</label>
+        <input id='remote-multiaddr'
+               type='text'
+               value="/dns4/node-01.ac-cn-hongkong-c.wakuv2.test.statusim.net/tcp/443/wss/p2p/16Uiu2HAkvWiyFsgRhuJEb9JfjYxEkoHLgnUQmr1N5mKWnYjxYRVm">
+        <button disabled id='dial' type='button'>Dial</button>
+        <br/>
+        <label for='nick-input'>Your nickname</label>
+        <input id='nick-input' placeholder='Choose a nickname' type='text'>
+        <button disabled id='set-nick' type='button'>Set nickname</button>
+        <br/>
 
-    <label for='textInput'>Message text</label>
-    <input disabled id='textInput' placeholder='Type your message here' type='text'>
-    <button disabled id='sendButton' type='button'>Send message using Light Push</button>
-    <br/>
-    <div id="messages"></div>
+        <label for='textInput'>Message text</label>
+        <input disabled id='textInput' placeholder='Type your message here' type='text'>
+        <button disabled id='sendButton' type='button'>Send message using Light Push</button>
+        <span id='sending-status'></span>
+        <br/>
+        <div id="messages"></div>
+    </div>
 </div>
 
 <script type='module'>
     import {utils} from 'https://unpkg.com/js-waku@0.29.0-29436ea/bundle/index.js';
     import {createLightNode} from 'https://unpkg.com/js-waku@0.29.0-29436ea/bundle/lib/create_waku.js'
     import {waitForRemotePeer} from 'https://unpkg.com/js-waku@0.29.0-29436ea/bundle/lib/wait_for_remote_peer.js'
-    import {EncoderV0, DecoderV0} from 'https://unpkg.com/js-waku@0.29.0-29436ea/bundle/lib/waku_message/version_0.js'
+    import {
+        EncoderV0,
+        DecoderV0
+    } from 'https://unpkg.com/js-waku@0.29.0-29436ea/bundle/lib/waku_message/version_0.js'
 
     import {protobuf} from "https://taisukef.github.io/protobuf-es.js/dist/protobuf-es.js";
 
-    import {create, MembershipKey, RLNEncoder} from "https://unpkg.com/@waku/rln@0.0.10/bundle/index.js";
+    import {
+        create,
+        MembershipKey,
+        RLNDecoder,
+        RLNEncoder
+    } from "https://unpkg.com/@waku/rln@0.0.10/bundle/index.js";
 
     import {ethers} from "https://unpkg.com/ethers@5.0.7/dist/ethers-all.esm.min.js"
 
-    // RLN Elements
+    const statusSpan = document.getElementById('status')
+
+    // Blockchain Elements
+    const addressDiv = document.getElementById('address');
+    const connectWalletButton = document.getElementById('connect-wallet');
+
+    const latestMembershipSpan = document.getElementById('latest-membership-id')
+    const retrieveRLNDetailsButton = document.getElementById('retrieve-rln-details')
+
+    // Credentials Elements
     const generateCredsButton = document.getElementById('generate-credentials')
-    const idDiv = document.getElementById('id');
-    const keyDiv = document.getElementById('key');
-    const commitmentDiv = document.getElementById('commitment');
+
     const membershipIdInput = document.getElementById('membership-id')
     const identityKeyInput = document.getElementById('id-key')
     const commitmentKeyInput = document.getElementById('commitment-key')
     const importButton = document.getElementById('import-button')
-    const connectWalletButton = document.getElementById('connect-wallet');
-    const retrieveRLNDetailsButton = document.getElementById('retrieve-rln-details')
+
+    const idDiv = document.getElementById('id');
+    const keyDiv = document.getElementById('key');
+    const commitmentDiv = document.getElementById('commitment');
+
     const registerButton = document.getElementById('register-button');
 
     // Waku Elements
-    const statusDiv = document.getElementById('status');
+    const statusDiv = document.getElementById('waku-status');
 
-    const dialButton = document.getElementById('dial')
     const remoteMultiAddrInput = document.getElementById('remote-multiaddr')
+    const dialButton = document.getElementById('dial')
 
     const nicknameInput = document.getElementById('nick-input')
     const setNickButton = document.getElementById('set-nick')
 
     const textInput = document.getElementById('textInput');
     const sendButton = document.getElementById('sendButton');
-    const walletDiv = document.getElementById('wallet');
+    const sendingStatusSpan = document.getElementById('sending-status');
 
     const messagesDiv = document.getElementById('messages')
 
-    let membershipId;
-    let membershipKey;
-    let encoder;
-    let nodeConnected;
-    let nick;
+    let membershipId, membershipKey, encoder, node, nodeConnected, nick, rlnInstance;
     let retrievedRLNEvents = false;
-    let rlnInstance;
+    const rlnInstancePromise = create();
 
     // Load zero-kit WASM blob.
-    (async () => {
-        rlnInstance = await create()
-        generateCredsButton.disabled = false;
-        connectWalletButton.disabled = false;
-    })();
 
+    statusSpan.innerText = 'WASM Blob download in progress...'
+    rlnInstancePromise.then((_rlnInstance) => {
+        rlnInstance = _rlnInstance
+        statusSpan.innerText = 'WASM Blob download in progress... done!'
+        updateFields()
+        setTimeout(() => {
+            statusSpan.innerText = ''
+        }, 5000)
+    })
+
+    const ContentTopic = "/toy-chat/2/luzhou/proto";
+
+    // Protobuf
+    const ProtoChatMessage = new protobuf.Type("ChatMessage")
+        .add(new protobuf.Field("timestamp", 1, "uint64"))
+        .add(new protobuf.Field("nick", 2, "string"))
+        .add(new protobuf.Field("text", 3, "bytes"));
+
+    // Function to update the fields to guide the user by disabling buttons.
     const updateFields = () => {
         if (membershipKey) {
             keyDiv.innerHTML = utils.bytesToHex(membershipKey.IDKey)
             commitmentDiv.innerHTML = utils.bytesToHex(membershipKey.IDCommitment)
             idDiv.innerHTML = membershipId || "-"
 
-            if (membershipId) {
+            if (membershipId && rlnInstance) {
                 encoder = new RLNEncoder(
                     new EncoderV0(ContentTopic),
                     rlnInstance,
@@ -139,6 +163,10 @@
                 );
             }
         }
+
+        generateCredsButton.disabled = !rlnInstance
+
+        registerButton.disabled = !(membershipKey && retrievedRLNEvents && !membershipId)
 
         importButton.disabled = !(membershipIdInput.value
             && identityKeyInput.value
@@ -149,7 +177,13 @@
         sendButton.disabled = !readyToSend;
 
         setNickButton.disabled = !nicknameInput.value;
+
+        dialButton.disabled = !(node && node.isStarted() && retrievedRLNEvents)
+
+        retrieveRLNDetailsButton.disabled = !rlnInstance && !retrievedRLNEvents;
     }
+
+    // Blockchain
 
     generateCredsButton.onclick = () => {
         membershipKey = rlnInstance.generateMembershipKey()
@@ -168,24 +202,12 @@
         updateFields()
     }
 
-    // Protobuf
-    const ProtoChatMessage = new protobuf.Type("ChatMessage")
-        .add(new protobuf.Field("timestamp", 1, "uint64"))
-        .add(new protobuf.Field("nick", 2, "string"))
-        .add(new protobuf.Field("text", 3, "bytes"));
-
-    // Wallet
     const checkChain = async (chainId) => {
         retrieveRLNDetailsButton.disabled = retrievedRLNEvents || chainId !== 5;
         registerButton.disabled = !(chainId === 5 && retrievedRLNEvents);
         if (chainId !== 5) {
             alert("Switch to Goerli")
         }
-    }
-
-    const checkCurrentChain = async () => {
-        const network = await provider.getNetwork();
-        checkChain(network.chainId);
     }
 
     const rlnDeployBlk = 7677135;
@@ -207,22 +229,27 @@
         try {
             const idCommitment = ethers.utils.zeroPad(ethers.utils.arrayify(pubkey), 32);
             rlnInstance.insertMember(idCommitment);
-            console.debug("IDCommitment registered in tree", idCommitment, index.toNumber());
+            const indexInt = index.toNumber()
+            if (!latestMembershipSpan.innerText || indexInt > latestMembershipSpan.innerText) {
+                latestMembershipSpan.innerText = indexInt
+            }
+            console.debug("IDCommitment registered in tree", idCommitment, indexInt);
         } catch (err) {
-            alert(err); // TODO: the merkle tree can be in a wrong state. The app should be disabled
+            console.error(err); // TODO: the merkle tree can be in a wrong state. The app should be disabled
         }
     }
 
     const setAccounts = acc => {
         accounts = acc;
-        walletDiv.innerHTML = accounts.length ? accounts[0] : "";
+        addressDiv.innerHTML = accounts.length ? accounts[0] : "";
     }
 
     connectWalletButton.onclick = async () => {
         try {
             accounts = await provider.send("eth_requestAccounts", []);
             setAccounts(accounts);
-            checkCurrentChain();
+            const network = await provider.getNetwork();
+            checkChain(network.chainId);
         } catch (e) {
             console.log("No web3 provider available", e);
         }
@@ -239,18 +266,13 @@
             handleMembership(event.args.pubkey, event.args.index, event);
         });
 
-        alert("Loaded all events from contract");
         retrievedRLNEvents = true;
-        // TODO: at this point it should be possible to register a credential and send messages
-        // TODO: emit an event to enable message form and register button
-
-        retrieveRLNDetailsButton.disabled = true;
-        registerButton.disabled = false;
 
         // reacting to new registrations
         rlnContract.on(filter, (pubkey, index, event) => {
             handleMembership(event.args.pubkey, event.args.index, event);
         });
+        updateFields()
     }
 
     window.ethereum.on('accountsChanged', setAccounts);
@@ -294,15 +316,28 @@
         updateFields()
     }
 
-    const ContentTopic = "/toy-chat/2/luzhou/proto";
-    const decoder = new DecoderV0(ContentTopic);
-
     let messages = [];
 
-    const updateMessages = (msgs, div) => {
-        div.innerHTML = "<ul>"
-        messages.forEach(msg => div.innerHTML += "<li>" + msg + "</li>")
-        div.innerHTML += "</ul>"
+    const updateMessages = () => {
+        messagesDiv.innerHTML = "<ul>"
+        messages.forEach(msg => {
+            messagesDiv.innerHTML += `<li>${msg.msg} - [epoch: ${msg.epoch}, proof: ${msg.proofState} ]</li>`
+
+            if (msg.proofState === "verifying...") {
+                console.log("Verifying proof")
+                const res = msg.verify()
+                console.log("proof verified!", res)
+                if (res === undefined) {
+                    msg.proofState = "no proof attached"
+                } else if (res) {
+                    msg.proofState = "verified."
+                } else {
+                    msg.proofState = "invalid!"
+                }
+                updateMessages()
+            }
+        })
+        messagesDiv.innerHTML += "</ul>"
     }
 
     const callback = (wakuMessage) => {
@@ -310,11 +345,24 @@
         const time = new Date();
         time.setTime(Number(timestamp));
 
-        messages.push(`(${nick}) <strong>${utils.bytesToUtf8(text)}</strong> <i>[${time.toString()}]</i>`);
-        updateMessages(messages, messagesDiv)
+        let proofState, verify;
+        if (typeof wakuMessage.verify === "undefined") {
+            proofState = "no proof attached";
+        } else {
+            verify = wakuMessage.verify.bind(wakuMessage);
+            proofState = "verifying...";
+        }
+
+        messages.push({
+            msg: `(${nick}) <strong>${utils.bytesToUtf8(text)}</strong> <i>[${time.toString()}]</i>`,
+            epoch: wakuMessage.epoch,
+            verify,
+            proofState
+        });
+        updateMessages()
     }
 
-    let node;
+
     (async () => {
         statusDiv.innerHTML = '<p>Creating Waku node.</p>';
         node = await createLightNode();
@@ -322,7 +370,6 @@
         statusDiv.innerHTML = '<p>Starting Waku node.</p>';
         await node.start();
         statusDiv.innerHTML = '<p>Waku node started.</p>';
-        dialButton.disabled = false;
         updateFields()
     })()
 
@@ -336,6 +383,9 @@
         await node.dial(ma, ["filter", "lightpush"])
         await waitForRemotePeer(node, ["filter", "lightpush"]);
         statusDiv.innerHTML = '<p>Waku node connected.</p>';
+
+        await rlnInstancePromise;
+        const decoder = new RLNDecoder(rlnInstance, new DecoderV0(ContentTopic));
         await node.filter.subscribe([decoder], callback)
         statusDiv.innerHTML = '<p>Waku node subscribed.</p>';
         nodeConnected = true;
@@ -347,9 +397,14 @@
         const msg = ProtoChatMessage.create({text, nick, timestamp: timestamp.valueOf()});
         const payload = ProtoChatMessage.encode(msg).finish();
         console.log("Sending message with proof...")
+        sendingStatusSpan.innerText = 'sending...'
         await node.lightPush.push(encoder, {payload, timestamp});
+        sendingStatusSpan.innerText = 'sent!'
         console.log("Message sent!")
         textInput.value = null;
+        setTimeout(() => {
+            sendingStatusSpan.innerText = ''
+        }, 5000)
     };
 </script>
 </body>
