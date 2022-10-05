@@ -58,6 +58,7 @@
         <label for='textInput'>Message text</label>
         <input disabled id='textInput' placeholder='Type your message here' type='text'>
         <button disabled id='sendButton' type='button'>Send message using Light Push</button>
+        <span id='sending-status'></span>
         <br/>
         <div id="messages"></div>
     </div>
@@ -115,6 +116,7 @@
 
     const textInput = document.getElementById('textInput');
     const sendButton = document.getElementById('sendButton');
+    const sendingStatusSpan = document.getElementById('sending-status');
 
     const messagesDiv = document.getElementById('messages')
 
@@ -385,9 +387,14 @@
         const msg = ProtoChatMessage.create({text, nick, timestamp: timestamp.valueOf()});
         const payload = ProtoChatMessage.encode(msg).finish();
         console.log("Sending message with proof...")
+        sendingStatusSpan.innerText = 'sending...'
         await node.lightPush.push(encoder, {payload, timestamp});
+        sendingStatusSpan.innerText = 'sent!'
         console.log("Message sent!")
         textInput.value = null;
+        setTimeout(() => {
+            sendingStatusSpan.innerText = ''
+        }, 1000)
     };
 </script>
 </body>
