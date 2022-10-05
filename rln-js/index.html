@@ -218,7 +218,6 @@
             const idCommitment = ethers.utils.zeroPad(ethers.utils.arrayify(pubkey), 32);
             rlnInstance.insertMember(idCommitment);
             const indexInt = index.toNumber()
-            console.log("index", index)
             if (!latestMembershipSpan.innerText || indexInt > latestMembershipSpan.innerText) {
                 latestMembershipSpan.innerText = indexInt
             }
@@ -312,9 +311,6 @@
         messages.forEach(msg => {
             messagesDiv.innerHTML += `<li>${msg.msg} - [epoch: ${msg.epoch}, proof: ${msg.proofState} ]</li>`
 
-            console.log("msg.verify", msg.verify)
-            console.log("msg.proof", msg.rateLimitProof)
-
             if (msg.proofState === "verifying...") {
                 console.log("Verifying proof")
                 const res = msg.verify()
@@ -336,10 +332,6 @@
         const {timestamp, nick, text} = ProtoChatMessage.decode(wakuMessage.payload)
         const time = new Date();
         time.setTime(Number(timestamp));
-
-        console.log("wakuMessage:", wakuMessage)
-        console.log("wakuMessage.verify", wakuMessage.verify)
-        console.log("wakuMessage.proof", wakuMessage.rateLimitProof)
 
         let proofState, verify;
         if (typeof wakuMessage.verify === "undefined") {
