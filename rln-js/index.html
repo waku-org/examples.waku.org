@@ -132,9 +132,6 @@
         rlnInstance = _rlnInstance
         statusSpan.innerText = 'WASM Blob download in progress... done!'
         updateFields()
-        setTimeout(() => {
-            statusSpan.innerText = ''
-        }, 5000)
     })
 
     const ContentTopic = "/toy-chat/2/luzhou/proto";
