@@ -53,7 +53,6 @@
         <br/>
         <label for='nick-input'>Your nickname</label>
         <input id='nick-input' placeholder='Choose a nickname' type='text'>
-        <button disabled id='set-nick' type='button'>Set nickname</button>
         <br/>
 
         <label for='textInput'>Message text</label>
@@ -115,7 +114,6 @@
     const dialButton = document.getElementById('dial')
 
     const nicknameInput = document.getElementById('nick-input')
-    const setNickButton = document.getElementById('set-nick')
 
     const textInput = document.getElementById('textInput');
     const sendButton = document.getElementById('sendButton');
@@ -123,7 +121,7 @@
 
     const messagesDiv = document.getElementById('messages')
 
-    let membershipId, membershipKey, encoder, node, nodeConnected, nick, rlnInstance;
+    let membershipId, membershipKey, encoder, node, nodeConnected, rlnInstance;
     let retrievedRLNEvents = false;
     const rlnInstancePromise = create();
 
@@ -134,9 +132,6 @@
         rlnInstance = _rlnInstance
         statusSpan.innerText = 'WASM Blob download in progress... done!'
         updateFields()
-        setTimeout(() => {
-            statusSpan.innerText = ''
-        }, 5000)
     })
 
     const ContentTopic = "/toy-chat/2/luzhou/proto";
@@ -172,11 +167,9 @@
             && identityKeyInput.value
             && commitmentKeyInput.value);
 
-        const readyToSend = (membershipKey && membershipId && nodeConnected && nick)
+        const readyToSend = (membershipKey && membershipId && nodeConnected && nicknameInput.value)
         textInput.disabled = !readyToSend;
         sendButton.disabled = !readyToSend;
-
-        setNickButton.disabled = !nicknameInput.value;
 
         dialButton.disabled = !(node && node.isStarted() && retrievedRLNEvents)
 
@@ -311,10 +304,6 @@
 
     // Waku
     nicknameInput.onchange = updateFields
-    setNickButton.onclick = () => {
-        nick = nicknameInput.value;
-        updateFields()
-    }
 
     let messages = [];
 
@@ -324,15 +313,22 @@
             messagesDiv.innerHTML += `<li>${msg.msg} - [epoch: ${msg.epoch}, proof: ${msg.proofState} ]</li>`
 
             if (msg.proofState === "verifying...") {
-                console.log("Verifying proof")
-                const res = msg.verify()
-                console.log("proof verified!", res)
-                if (res === undefined) {
-                    msg.proofState = "no proof attached"
-                } else if (res) {
-                    msg.proofState = "verified."
-                } else {
-                    msg.proofState = "invalid!"
+                try {
+                    console.log("Verifying proof")
+                    console.time("proof_verify_timer")
+                    const res = msg.verify()
+                    console.time("proof_verify_timer")
+                    console.log("proof verified!", res)
+                    if (res === undefined) {
+                        msg.proofState = "no proof attached"
+                    } else if (res) {
+                        msg.proofState = "verified."
+                    } else {
+                        msg.proofState = "invalid!"
+                    }
+                } catch (e) {
+                    msg.proofState = "Error encountered, check console"
+                    console.error("Error verifying proof:", e)
                 }
                 updateMessages()
             }
@@ -346,9 +342,10 @@
         time.setTime(Number(timestamp));
 
         let proofState, verify;
-        if (typeof wakuMessage.verify === "undefined") {
+        if (typeof wakuMessage.rateLimitProof === "undefined") {
             proofState = "no proof attached";
         } else {
+            console.log("Proof received:", wakuMessage.rateLimitProof)
             verify = wakuMessage.verify.bind(wakuMessage);
             proofState = "verifying...";
         }
@@ -389,12 +386,13 @@
         await node.filter.subscribe([decoder], callback)
         statusDiv.innerHTML = '<p>Waku node subscribed.</p>';
         nodeConnected = true;
+        updateFields()
     }
 
     sendButton.onclick = async () => {
         const text = utils.utf8ToBytes(textInput.value);
         const timestamp = new Date();
-        const msg = ProtoChatMessage.create({text, nick, timestamp: timestamp.valueOf()});
+        const msg = ProtoChatMessage.create({text, nick: nicknameInput.value, timestamp: timestamp.valueOf()});
         const payload = ProtoChatMessage.encode(msg).finish();
         console.log("Sending message with proof...")
         sendingStatusSpan.innerText = 'sending...'
