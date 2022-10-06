@@ -53,7 +53,6 @@
         <br/>
         <label for='nick-input'>Your nickname</label>
         <input id='nick-input' placeholder='Choose a nickname' type='text'>
-        <button disabled id='set-nick' type='button'>Set nickname</button>
         <br/>
 
         <label for='textInput'>Message text</label>
@@ -115,7 +114,6 @@
     const dialButton = document.getElementById('dial')
 
     const nicknameInput = document.getElementById('nick-input')
-    const setNickButton = document.getElementById('set-nick')
 
     const textInput = document.getElementById('textInput');
     const sendButton = document.getElementById('sendButton');
@@ -123,7 +121,7 @@
 
     const messagesDiv = document.getElementById('messages')
 
-    let membershipId, membershipKey, encoder, node, nodeConnected, nick, rlnInstance;
+    let membershipId, membershipKey, encoder, node, nodeConnected, rlnInstance;
     let retrievedRLNEvents = false;
     const rlnInstancePromise = create();
 
@@ -172,11 +170,9 @@
             && identityKeyInput.value
             && commitmentKeyInput.value);
 
-        const readyToSend = (membershipKey && membershipId && nodeConnected && nick)
+        const readyToSend = (membershipKey && membershipId && nodeConnected && nicknameInput.value)
         textInput.disabled = !readyToSend;
         sendButton.disabled = !readyToSend;
-
-        setNickButton.disabled = !nicknameInput.value;
 
         dialButton.disabled = !(node && node.isStarted() && retrievedRLNEvents)
 
@@ -311,10 +307,6 @@
 
     // Waku
     nicknameInput.onchange = updateFields
-    setNickButton.onclick = () => {
-        nick = nicknameInput.value;
-        updateFields()
-    }
 
     let messages = [];
 
@@ -397,12 +389,13 @@
         await node.filter.subscribe([decoder], callback)
         statusDiv.innerHTML = '<p>Waku node subscribed.</p>';
         nodeConnected = true;
+        updateFields()
     }
 
     sendButton.onclick = async () => {
         const text = utils.utf8ToBytes(textInput.value);
         const timestamp = new Date();
-        const msg = ProtoChatMessage.create({text, nick, timestamp: timestamp.valueOf()});
+        const msg = ProtoChatMessage.create({text, nick: nicknameInput.value, timestamp: timestamp.valueOf()});
         const payload = ProtoChatMessage.encode(msg).finish();
         console.log("Sending message with proof...")
         sendingStatusSpan.innerText = 'sending...'
