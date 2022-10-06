@@ -324,15 +324,22 @@
             messagesDiv.innerHTML += `<li>${msg.msg} - [epoch: ${msg.epoch}, proof: ${msg.proofState} ]</li>`
 
             if (msg.proofState === "verifying...") {
-                console.log("Verifying proof")
-                const res = msg.verify()
-                console.log("proof verified!", res)
-                if (res === undefined) {
-                    msg.proofState = "no proof attached"
-                } else if (res) {
-                    msg.proofState = "verified."
-                } else {
-                    msg.proofState = "invalid!"
+                try {
+                    console.log("Verifying proof")
+                    console.time("proof_verify_timer")
+                    const res = msg.verify()
+                    console.time("proof_verify_timer")
+                    console.log("proof verified!", res)
+                    if (res === undefined) {
+                        msg.proofState = "no proof attached"
+                    } else if (res) {
+                        msg.proofState = "verified."
+                    } else {
+                        msg.proofState = "invalid!"
+                    }
+                } catch (e) {
+                    msg.proofState = "Error encountered, check console"
+                    console.error("Error verifying proof:", e)
                 }
                 updateMessages()
             }
@@ -346,9 +353,10 @@
         time.setTime(Number(timestamp));
 
         let proofState, verify;
-        if (typeof wakuMessage.verify === "undefined") {
+        if (typeof wakuMessage.rateLimitProof === "undefined") {
             proofState = "no proof attached";
         } else {
+            console.log("Proof received:", wakuMessage.rateLimitProof)
             verify = wakuMessage.verify.bind(wakuMessage);
             proofState = "verifying...";
         }
