@@ -1,0 +1,51 @@
+html {
+  scroll-behavior: smooth;
+}
+
+h1 {
+  margin: 1rem 2.5rem 1rem 0;
+}
+
+.value {
+  font-size: 1.3em;
+}
+
+body > footer {
+  text-align: right;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.rcenter {
+  align-items: center;
+}
+
+.mu1 {
+  margin-top: 4em;
+}
+
+.w50 {
+  width: 46%;
+}
+.w30 {
+  width: 35%;
+}
+.w70 {
+  width: 60%;
+}
+
+.mf label {
+  width: 100%;
+}
+
+.mf input {
+  width: 80%;
+}
+
+.mf input.p100 {
+  width: 100%;
+}
