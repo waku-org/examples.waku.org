@@ -379,7 +379,7 @@
     const callback = (wakuMessage) => {
         const {timestamp, nick, text} = ProtoChatMessage.decode(wakuMessage.payload)
         const time = new Date();
-        time.setTime(Number(timestamp));
+        time.setTime(Number(timestamp) * 1000);
 
         let proofState, verify;
         if (typeof wakuMessage.rateLimitProof === "undefined") {
@@ -432,7 +432,7 @@
     sendButton.onclick = async () => {
         const text = utils.utf8ToBytes(textInput.value);
         const timestamp = new Date();
-        const msg = ProtoChatMessage.create({text, nick: nicknameInput.value, timestamp: timestamp.valueOf()});
+        const msg = ProtoChatMessage.create({text, nick: nicknameInput.value, timestamp: Math.floor(timestamp.valueOf() / 1000)});
         const payload = ProtoChatMessage.encode(msg).finish();
         console.log("Sending message with proof...")
         sendingStatusSpan.innerText = 'sending...'
