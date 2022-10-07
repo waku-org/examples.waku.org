@@ -80,5 +80,5 @@ def buildExample(example=STAGE_NAME) {
 def copyExample(example=STAGE_NAME) {
   sh "mkdir -p build/docs/${example}"
   sh "cp ${example}/index.html build/docs/${example}/"
-  sh "[ -f ${example}/style.css ] && cp ${example}/style.css build/docs/${example}/"
+  sh "[ -f ${example}/style.css ] && cp ${example}/style.css build/docs/${example}/ || exit 0"
 }
