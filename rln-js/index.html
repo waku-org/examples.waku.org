@@ -118,7 +118,7 @@
         MembershipKey,
         RLNDecoder,
         RLNEncoder
-    } from "https://unpkg.com/@waku/rln@0.0.12-ccac829/bundle/index.js";
+    } from "https://unpkg.com/@waku/rln@0.0.12-6875952/bundle/index.js";
 
     import {ethers} from "https://unpkg.com/ethers@5.0.7/dist/ethers-all.esm.min.js"
 
@@ -354,11 +354,11 @@
 
             if (msg.proofState === "verifying...") {
                 try {
-                    console.log("Verifying proof")
+                    console.log("Verifying proof without roots")
                     console.time("proof_verify_timer")
-                    const res = msg.verify()
+                    const res = msg.verifyNoRoot()
                     console.timeEnd("proof_verify_timer")
-                    console.log("proof verified!", res)
+                    console.log("proof verified without roots", res)
                     if (res === undefined) {
                         msg.proofState = "no proof attached"
                     } else if (res) {
@@ -371,6 +371,7 @@
                     console.error("Error verifying proof:", e)
                 }
                 updateMessages()
+                console.log("Verifying proof with roots", msg.verify())
             }
         })
         messagesDiv.innerHTML += "</ul>"
@@ -381,12 +382,13 @@
         const time = new Date();
         time.setTime(Number(timestamp) * 1000);
 
-        let proofState, verify;
+        let proofState, verify, verifyNoRoot;
         if (typeof wakuMessage.rateLimitProof === "undefined") {
             proofState = "no proof attached";
         } else {
             console.log("Proof received:", wakuMessage.rateLimitProof)
             verify = wakuMessage.verify.bind(wakuMessage);
+            verifyNoRoot = wakuMessage.verifyNoRoot.bind(wakuMessage);
             proofState = "verifying...";
         }
 
@@ -394,6 +396,7 @@
             msg: `(${nick}) <strong>${utils.bytesToUtf8(text)}</strong> <i>[${time.toISOString()}]</i>`,
             epoch: wakuMessage.epoch,
             verify,
+            verifyNoRoot,
             proofState
         });
         updateMessages()
