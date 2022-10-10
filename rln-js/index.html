@@ -5,102 +5,102 @@
     <meta charset='UTF-8'/>
     <meta content='width=device-width, initial-scale=1.0' name='viewport'/>
     <title>JS-Waku light node example</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
-    <link rel="stylesheet" href="style.css">
+    <link href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
 </head>
 
 <body>
 
-    <div class="row rcenter">
-        <h1>Waku RLN</h1>
-        <button id='connect-wallet' type='button'>Connect Wallet</button>
+<div class="row rcenter">
+    <h1>Waku RLN</h1>
+    <button id='connect-wallet' type='button'>Connect Wallet</button>
+</div>
+
+<span id='status'></span>
+
+<h2 class="mu1">Blockchain</h2>
+<hr/>
+
+<div class="row rcenter">
+    <h4>Address</h4>
+    <code class="value" id="address"></code>
+</div>
+
+<div class="row mu1 rcenter">
+    <h4>Contract Data</h4>
+    <button disabled id='retrieve-rln-details' type='button'>
+        Retrieve contract state from blockchain
+    </button>
+</div>
+
+<div class="row rcenter">
+    <h4>Latest membership id on contract</h4>
+    <code class="value" id="latest-membership-id">Not loaded yet</code>
+</div>
+
+
+<h2 class="mu1">Credentials</h2>
+<hr/>
+
+<div class="row">
+    <div class="w50">
+        <h4>You can either generate new credentials:</h4>
+        <button disabled id='generate-credentials' type='button'>Generate RLN Credentials</button>
+        <br/>
+        <br/>
+        <button disabled id='register-button' type='button'>Register Credentials in Contract</button>
     </div>
-
-    <span id='status'></span>
-
-    <h2 class="mu1">Blockchain</h2>
-    <hr />
-
-    <div class="row rcenter">
-        <h4>Address</h4>
-        <code id="address" class="value"></code>
+    <div class="w50">
+        <h4>Or import existing ones:</h4>
+        <label for="membership-id">Membership ID (your index in the RLN smart contract):</label>
+        <input id="membership-id" name="membership-id" type="text"/>
+        <label for="id-key">RLN Identity Key (hex string):</label>
+        <input id="id-key" name="id-key" type="text"/>
+        <label for="commitment-key">RLN Commitment Key (hex string):</label>
+        <input id="commitment-key" name="commitment-key" type="text"/>
+        <button disabled id='import-button' type='button'>Import RLN Credentials</button>
     </div>
+</div>
+<div class="row rcenter mu1">
+    <h4>Membership id</h4>
+    <code class="value" id="id">none</code>
+</div>
+<div class="row rcenter">
+    <h4>Key</h4>
+    <code class="value" id="key">none</code>
+</div>
+<div class="row rcenter">
+    <h4>Commitment</h4>
+    <code class="value" id="commitment">none</code>
+</div>
 
-    <div class="row mu1 rcenter">
-        <h4>Contract Data</h4>
-        <button disabled id='retrieve-rln-details' type='button'>
-            Retrieve contract state from blockchain
-        </button>
-    </div>
 
-    <div class="row rcenter">
-        <h4>Latest membership id on contract</h4>
-        <code id="latest-membership-id" class="value">Not loaded yet</code>
-    </div>
+<h2 class="mu1">Waku</h2>
+<hr/>
+<div id="waku-status"></div>
 
+<div class="row rcenter mu1 mf">
+    <label for='remote-multiaddr'>Remote peer's multiaddr</label>
+    <input id='remote-multiaddr'
+           type='text'
+           value="/dns4/node-01.ac-cn-hongkong-c.wakuv2.test.statusim.net/tcp/443/wss/p2p/16Uiu2HAkvWiyFsgRhuJEb9JfjYxEkoHLgnUQmr1N5mKWnYjxYRVm">
+    <button disabled id='dial' type='button'>Dial</button>
+</div>
 
-    <h2 class="mu1">Credentials</h2>
-    <hr />
+<div class="row rcenter mf">
+    <label for='nick-input'>Your nickname</label>
+    <input class="p100" id='nick-input' placeholder='Choose a nickname' type='text'>
+</div>
 
-    <div class="row">
-        <div class="w50">
-            <h4>You can either generate new credentials:</h4>
-            <button disabled id='generate-credentials' type='button'>Generate RLN Credentials</button>
-            <br />
-            <br />
-            <button disabled id='register-button' type='button'>Register Credentials in Contract</button>
-        </div>
-        <div class="w50">
-            <h4>Or import existing ones:</h4>
-            <label for="membership-id">Membership ID (your index in the RLN smart contract):</label>
-            <input id="membership-id" name="membership-id" type="text" />
-            <label for="id-key">RLN Identity Key (hex string):</label>
-            <input id="id-key" name="id-key" type="text" />
-            <label for="commitment-key">RLN Commitment Key (hex string):</label>
-            <input id="commitment-key" name="commitment-key" type="text" />
-            <button disabled id='import-button' type='button'>Import RLN Credentials</button>
-        </div>
-    </div>
-    <div class="row rcenter mu1">
-        <h4>Membership id</h4>
-        <code id="id" class="value">none</code>
-    </div>
-    <div class="row rcenter">
-        <h4>Key</h4>
-        <code id="key" class="value">none</code>
-    </div>
-    <div class="row rcenter">
-        <h4>Commitment</h4>
-        <code id="commitment" class="value">none</code>
-    </div>
+<div class="row rcenter  mf">
+    <label for='textInput'>Message text</label>
+    <input class="p100" disabled id='textInput' placeholder='Type your message here' type='text'>
+    <button disabled id='sendButton' type='button'>Send message using Light Push</button>
+</div>
+<span id='sending-status'></span>
 
-          
-    <h2 class="mu1">Waku</h2>
-    <hr />
-    <div id="waku-status"></div>
-
-    <div class="row rcenter mu1 mf">
-        <label for='remote-multiaddr'>Remote peer's multiaddr</label>
-        <input id='remote-multiaddr'
-            type='text'
-            value="/dns4/node-01.ac-cn-hongkong-c.wakuv2.test.statusim.net/tcp/443/wss/p2p/16Uiu2HAkvWiyFsgRhuJEb9JfjYxEkoHLgnUQmr1N5mKWnYjxYRVm">
-        <button disabled id='dial' type='button'>Dial</button>
-    </div>
-    
-    <div class="row rcenter mf">
-        <label for='nick-input'>Your nickname</label>
-        <input id='nick-input' placeholder='Choose a nickname' type='text' class="p100">
-    </div>
-
-    <div class="row rcenter  mf">
-        <label for='textInput'>Message text</label>
-        <input disabled id='textInput' placeholder='Type your message here' type='text' class="p100">
-        <button disabled id='sendButton' type='button'>Send message using Light Push</button>
-    </div>
-    <span id='sending-status'></span>
-
-    <h4 class="mu1">Messages</h4>
-    <div id="messages"></div>
+<h4 class="mu1">Messages</h4>
+<div id="messages"></div>
 
 <script type='module'>
     import {utils} from 'https://unpkg.com/js-waku@0.29.0-29436ea/bundle/index.js';
@@ -118,7 +118,7 @@
         MembershipKey,
         RLNDecoder,
         RLNEncoder
-    } from "https://unpkg.com/@waku/rln@0.0.12/bundle/index.js";
+    } from "https://unpkg.com/@waku/rln@0.0.12-ccac829/bundle/index.js";
 
     import {ethers} from "https://unpkg.com/ethers@5.0.7/dist/ethers-all.esm.min.js"
 
@@ -357,7 +357,7 @@
                     console.log("Verifying proof")
                     console.time("proof_verify_timer")
                     const res = msg.verify()
-                    console.time("proof_verify_timer")
+                    console.timeEnd("proof_verify_timer")
                     console.log("proof verified!", res)
                     if (res === undefined) {
                         msg.proofState = "no proof attached"
@@ -432,7 +432,11 @@
     sendButton.onclick = async () => {
         const text = utils.utf8ToBytes(textInput.value);
         const timestamp = new Date();
-        const msg = ProtoChatMessage.create({text, nick: nicknameInput.value, timestamp: Math.floor(timestamp.valueOf() / 1000)});
+        const msg = ProtoChatMessage.create({
+            text,
+            nick: nicknameInput.value,
+            timestamp: Math.floor(timestamp.valueOf() / 1000)
+        });
         const payload = ProtoChatMessage.encode(msg).finish();
         console.log("Sending message with proof...")
         sendingStatusSpan.innerText = 'sending...'
