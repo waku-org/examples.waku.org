@@ -76,7 +76,7 @@ async function handleMessage(
   message: string,
   nick: string,
   commandHandler: (cmd: string) => void,
-  sender: (wakuMsg: WakuMessage) => Promise<void>
+  sender: (wakuMsg: Partial<WakuMessage>) => Promise<void>
 ) {
   if (message.startsWith("/")) {
     commandHandler(message);

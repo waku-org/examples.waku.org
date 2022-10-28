@@ -219,8 +219,7 @@ async function initWaku(setter: (waku: WakuLight) => void) {
 
 function selectFleetEnv() {
   // Works with react-scripts
-  // TODO: Re-enable the switch once nwaku v0.12 is deployed
-  if (true || process?.env?.NODE_ENV === "development") {
+  if (process?.env?.NODE_ENV === "development") {
     return Fleet.Test;
   } else {
     return Fleet.Prod;
