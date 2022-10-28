@@ -5,11 +5,6 @@ import { PrivateMessage, PublicKeyMessage } from "./messaging/wire";
 import { validatePublicKeyMessage } from "./crypto";
 import { Message } from "./messaging/Messages";
 import { equals } from "uint8arrays/equals";
-import { PeerDiscoveryStaticPeers } from "js-waku/lib/peer_discovery_static_list";
-import {
-  getPredefinedBootstrapNodes,
-  Fleet,
-} from "js-waku/lib/predefined_bootstrap_nodes";
 import { waitForRemotePeer } from "js-waku/lib/wait_for_remote_peer";
 import { createLightNode } from "js-waku/lib/create_waku";
 
@@ -17,13 +12,7 @@ export const PublicKeyContentTopic = "/eth-pm/1/public-key/proto";
 export const PrivateMessageContentTopic = "/eth-pm/1/private-message/proto";
 
 export async function initWaku(): Promise<WakuLight> {
-  const waku = await createLightNode({
-    libp2p: {
-      peerDiscovery: [
-        new PeerDiscoveryStaticPeers(getPredefinedBootstrapNodes(Fleet.Test)),
-      ],
-    },
-  });
+  const waku = await createLightNode({ defaultBootstrap: true });
   await waku.start();
   await waitForRemotePeer(waku, [Protocols.Filter, Protocols.LightPush]);
 

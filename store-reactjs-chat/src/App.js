@@ -2,11 +2,6 @@ import { utils } from "js-waku";
 import * as React from "react";
 import protobuf from "protobufjs";
 import { createLightNode } from "js-waku/lib/create_waku";
-import {
-  Fleet,
-  getPredefinedBootstrapNodes,
-} from "js-waku/lib/predefined_bootstrap_nodes";
-import { PeerDiscoveryStaticPeers } from "js-waku/lib/peer_discovery_static_list";
 import { waitForRemotePeer } from "js-waku/lib/wait_for_remote_peer";
 import { DecoderV0 } from "js-waku/lib/waku_message/version_0";
 
@@ -28,13 +23,7 @@ function App() {
 
     setWakuStatus("Starting");
 
-    createLightNode({
-      libp2p: {
-        peerDiscovery: [
-          new PeerDiscoveryStaticPeers(getPredefinedBootstrapNodes(Fleet.Test)),
-        ],
-      },
-    }).then((waku) => {
+    createLightNode({ defaultBootstrap: true }).then((waku) => {
       waku.start().then(() => {
         setWaku(waku);
         setWakuStatus("Connecting");
