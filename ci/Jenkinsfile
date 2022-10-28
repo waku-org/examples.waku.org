@@ -37,7 +37,6 @@ pipeline {
         stage('eth-pm') { steps { script { buildExample() } } }
         stage('relay-angular-chat') { steps { script { buildExample() } } }
         stage('relay-reactjs-chat') { steps { script { buildExample() } } }
-        stage('rln-react-ts') { steps { script { buildExample() } } }
         stage('store-reactjs-chat') { steps { script { buildExample() } } }
         stage('web-chat') { steps { script { buildExample() } } }
       }
