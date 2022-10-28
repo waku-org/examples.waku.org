@@ -5,7 +5,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build": "ng build --base-href /relay-angular-chat --deploy-url /relay-angular-chat/",
     "watch": "ng build --watch --configuration development",
     "test": "exit 0",
     "test:local": "ng test",
