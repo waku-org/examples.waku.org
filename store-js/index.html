@@ -13,10 +13,10 @@
 <div id='timestamp'></div>
 
 <script type='module'>
-    import {Protocols} from 'https://unpkg.com/js-waku@0.29.0/bundle/index.js';
-    import {createWaku} from 'https://unpkg.com/js-waku@0.29.0/bundle/lib/create_waku.js'
-    import {waitForRemotePeer} from 'https://unpkg.com/js-waku@0.29.0/bundle/lib/wait_for_remote_peer.js'
-    import {DecoderV0} from 'https://unpkg.com/js-waku@0.29.0/bundle/lib/waku_message/version_0.js'
+    import {Protocols} from 'https://unpkg.com/js-waku@0.30.0/bundle/index.js';
+    import {createLightNode} from 'https://unpkg.com/js-waku@0.30.0/bundle/lib/create_waku.js'
+    import {waitForRemotePeer} from 'https://unpkg.com/js-waku@0.30.0/bundle/lib/wait_for_remote_peer.js'
+    import {DecoderV0} from 'https://unpkg.com/js-waku@0.30.0/bundle/lib/waku_message/version_0.js'
 
     /**
      * This example demonstrates how to use the js-waku minified bundle
@@ -28,7 +28,7 @@
     const timestampDiv = document.getElementById('timestamp');
 
     timestampDiv.innerHTML = '<p>Creating waku.</p>';
-    const node = await createWaku({defaultBootstrap: true});
+    const node = await createLightNode({defaultBootstrap: true});
 
     timestampDiv.innerHTML = '<p>Starting waku.</p>';
     await node.start();
@@ -46,25 +46,10 @@
         return true;
     };
 
-    const startTime = new Date();
-    // Only retrieve a week of messages
-    startTime.setTime(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    try {
-        await node.store
-            .queryOrderedCallback([new DecoderV0("/relay-ping/1/ping/null")],
-                callback,
-                {
-                    pageDirection: 'backward',
-                    pageSize: 1,
-                    timeFilter: {
-                        startTime,
-                        endTime: new Date()
-                    }
-                });
-    } catch (e) {
-        // Known issue: https://github.com/status-im/nwaku/issues/1157
-        console.log(e)
-    }
+    await node.store
+        .queryOrderedCallback([new DecoderV0("/relay-ping/1/ping/null")],
+            callback,
+            {pageDirection: 'backward'});
 </script>
 </body>
 
