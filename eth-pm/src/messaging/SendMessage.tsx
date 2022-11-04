@@ -7,11 +7,11 @@ import {
   TextField,
 } from "@material-ui/core";
 import React, { ChangeEvent, useState, KeyboardEvent } from "react";
-import { utils } from "js-waku";
-import type { WakuPrivacy } from "js-waku/lib/interfaces";
-import { AsymEncoder } from "js-waku/lib/waku_message/version_1";
+import type { WakuPrivacy } from "@waku/interfaces";
+import { AsymEncoder } from "@waku/message-encryption";
 import { PrivateMessage } from "./wire";
 import { PrivateMessageContentTopic } from "../waku";
+import { hexToBytes } from "@waku/byte-utils";
 
 const useStyles = makeStyles((theme) => ({
   formControl: {
@@ -113,7 +113,7 @@ async function sendMessage(
   callback: (res: boolean) => void
 ) {
   const privateMessage = new PrivateMessage({
-    toAddress: utils.hexToBytes(recipientAddress),
+    toAddress: hexToBytes(recipientAddress),
     message: message,
   });
   const payload = privateMessage.encode();
