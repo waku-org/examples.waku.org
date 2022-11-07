@@ -6,14 +6,14 @@ import {
   PublicKeyMessageEncryptionKey,
 } from "./crypto";
 import { PublicKeyMessage } from "./messaging/wire";
-import type { WakuLight } from "js-waku/lib/interfaces";
+import type { WakuPrivacy } from "js-waku/lib/interfaces";
 import { SymEncoder } from "js-waku/lib/waku_message/version_1";
 import { PublicKeyContentTopic } from "./waku";
 import type { TypedDataSigner } from "@ethersproject/abstract-signer";
 
 interface Props {
   encryptionKeyPair: KeyPair | undefined;
-  waku: WakuLight | undefined;
+  waku: WakuPrivacy | undefined;
   address: string | undefined;
   signer: TypedDataSigner | undefined;
 }
@@ -52,7 +52,7 @@ export default function BroadcastPublicKey({
       PublicKeyMessageEncryptionKey
     );
 
-    waku.lightPush.push(publicKeyMessageEncoder, { payload });
+    await waku.relay.send(publicKeyMessageEncoder, { payload });
   };
 
   return (

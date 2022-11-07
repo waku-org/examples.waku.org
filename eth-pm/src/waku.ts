@@ -1,20 +1,23 @@
 import { Dispatch, SetStateAction } from "react";
 import { Protocols, utils } from "js-waku";
-import type { WakuLight, Message as WakuMessage } from "js-waku/lib/interfaces";
+import type {
+  Message as WakuMessage,
+  WakuPrivacy,
+} from "js-waku/lib/interfaces";
 import { PrivateMessage, PublicKeyMessage } from "./messaging/wire";
 import { validatePublicKeyMessage } from "./crypto";
 import { Message } from "./messaging/Messages";
 import { equals } from "uint8arrays/equals";
 import { waitForRemotePeer } from "js-waku/lib/wait_for_remote_peer";
-import { createLightNode } from "js-waku/lib/create_waku";
+import { createPrivacyNode } from "js-waku/lib/create_waku";
 
 export const PublicKeyContentTopic = "/eth-pm/1/public-key/proto";
 export const PrivateMessageContentTopic = "/eth-pm/1/private-message/proto";
 
-export async function initWaku(): Promise<WakuLight> {
-  const waku = await createLightNode({ defaultBootstrap: true });
+export async function initWaku(): Promise<WakuPrivacy> {
+  const waku = await createPrivacyNode({ defaultBootstrap: true });
   await waku.start();
-  await waitForRemotePeer(waku, [Protocols.Filter, Protocols.LightPush]);
+  await waitForRemotePeer(waku, [Protocols.Relay]);
 
   return waku;
 }

@@ -8,7 +8,7 @@ import {
 } from "@material-ui/core";
 import React, { ChangeEvent, useState, KeyboardEvent } from "react";
 import { utils } from "js-waku";
-import type { WakuLight } from "js-waku/lib/interfaces";
+import type { WakuPrivacy } from "js-waku/lib/interfaces";
 import { AsymEncoder } from "js-waku/lib/waku_message/version_1";
 import { PrivateMessage } from "./wire";
 import { PrivateMessageContentTopic } from "../waku";
@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export interface Props {
-  waku: WakuLight | undefined;
+  waku: WakuPrivacy | undefined;
   // address, public key
   recipients: Map<string, Uint8Array>;
 }
@@ -106,7 +106,7 @@ export default function SendMessage({ waku, recipients }: Props) {
 }
 
 async function sendMessage(
-  waku: WakuLight,
+  waku: WakuPrivacy,
   recipientAddress: string,
   recipientPublicKey: Uint8Array,
   message: string,
@@ -124,7 +124,7 @@ async function sendMessage(
   );
 
   console.log("pushing");
-  const res = await waku.lightPush.push(encoder, { payload });
+  const res = await waku.relay.send(encoder, { payload });
   console.log("Message sent", res);
   callback(Boolean(res.recipients.length));
 }
