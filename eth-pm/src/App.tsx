@@ -2,7 +2,7 @@ import "@ethersproject/shims";
 
 import React, { useEffect, useState } from "react";
 import "./App.css";
-import type { WakuLight } from "js-waku/lib/interfaces";
+import type { WakuPrivacy } from "js-waku/lib/interfaces";
 import { AsymDecoder, SymDecoder } from "js-waku/lib/waku_message/version_1";
 import { KeyPair, PublicKeyMessageEncryptionKey } from "./crypto";
 import { Message } from "./messaging/Messages";
@@ -67,7 +67,7 @@ const useStyles = makeStyles({
 });
 
 function App() {
-  const [waku, setWaku] = useState<WakuLight>();
+  const [waku, setWaku] = useState<WakuPrivacy>();
   const [provider, setProvider] = useState<Web3Provider>();
   const [encryptionKeyPair, setEncryptionKeyPair] = useState<
     KeyPair | undefined
@@ -80,11 +80,9 @@ function App() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [address, setAddress] = useState<string>();
   const [peerStats, setPeerStats] = useState<{
-    filterPeers: number;
-    lightPushPeers: number;
+    relayPeers: number;
   }>({
-    filterPeers: 0,
-    lightPushPeers: 0,
+    relayPeers: 0,
   });
 
   const classes = useStyles();
@@ -118,17 +116,7 @@ function App() {
 
     let unsubscribe: undefined | (() => Promise<void>);
 
-    waku.filter
-      .subscribe([publicKeyMessageDecoder], observerPublicKeyMessage)
-      .then(
-        (_unsubscribe) => {
-          console.log("subscribed to ", PublicKeyContentTopic);
-          unsubscribe = _unsubscribe;
-        },
-        (e) => {
-          console.error("Failed to subscribe", e);
-        }
-      );
+    waku.relay.addObserver(publicKeyMessageDecoder, observerPublicKeyMessage);
 
     return function cleanUp() {
       if (typeof unsubscribe === "undefined") return;
@@ -163,14 +151,7 @@ function App() {
 
     let unsubscribe: undefined | (() => Promise<void>);
 
-    waku.filter.subscribe([privateMessageDecoder], observerPrivateMessage).then(
-      (_unsubscribe) => {
-        unsubscribe = _unsubscribe;
-      },
-      (e) => {
-        console.error("Failed to subscribe", e);
-      }
-    );
+    waku.relay.addObserver(privateMessageDecoder, observerPrivateMessage);
 
     return function cleanUp() {
       if (typeof unsubscribe === "undefined") return;
@@ -182,12 +163,10 @@ function App() {
     if (!waku) return;
 
     const interval = setInterval(async () => {
-      const lightPushPeers = await waku.store.peers();
-      const filterPeers = await waku.filter.peers();
+      const peers = waku.relay.getPeers();
 
       setPeerStats({
-        filterPeers: filterPeers.length,
-        lightPushPeers: lightPushPeers.length,
+        relayPeers: peers.length,
       });
     }, 1000);
     return () => clearInterval(interval);
@@ -215,8 +194,7 @@ function App() {
               />
             </IconButton>
             <Typography className={classes.peers} aria-label="connected-peers">
-              Peers: {peerStats.filterPeers} filter, {peerStats.lightPushPeers}{" "}
-              light push
+              (Relay) Peers: {peerStats.relayPeers}
             </Typography>
             <Typography variant="h6" className={classes.title}>
               Ethereum Private Message

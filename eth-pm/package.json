@@ -17,9 +17,8 @@
     "uint8arrays": "^3.1.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "eject": "react-scripts eject",
+    "start": "GENERATE_SOURCEMAP=false PORT=3001 craco start",
+    "build": "GENERATE_SOURCEMAP=false craco build",
     "fix": "run-s fix:*",
     "test": "run-s build test:*",
     "test:lint": "eslint src --ext .ts --ext .tsx",
@@ -49,6 +48,7 @@
     ]
   },
   "devDependencies": {
+    "@craco/craco": "^6.4.5",
     "@ethersproject/shims": "^5.5.0",
     "@types/jest": "^27.4.0",
     "@types/node": "^17.0.19",
