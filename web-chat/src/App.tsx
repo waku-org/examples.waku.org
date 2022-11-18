@@ -1,6 +1,5 @@
 import { useEffect, useReducer, useState } from "react";
 import "./App.css";
-import { PageDirection, Protocols } from "js-waku";
 import handleCommand from "./command";
 import Room from "./Room";
 import { WakuContext } from "./WakuContext";
@@ -10,13 +9,14 @@ import { Message } from "./Message";
 import {
   Fleet,
   getPredefinedBootstrapNodes,
-} from "js-waku/lib/predefined_bootstrap_nodes";
-import { waitForRemotePeer } from "js-waku/lib/wait_for_remote_peer";
-import { PeerDiscoveryStaticPeers } from "js-waku/lib/peer_discovery_static_list";
-import type { WakuLight } from "js-waku/lib/interfaces";
+} from "@waku/core/lib/predefined_bootstrap_nodes";
+import { waitForRemotePeer } from "@waku/core/lib/wait_for_remote_peer";
+import { Protocols, WakuLight } from "@waku/interfaces";
 import process from "process";
-import { createLightNode } from "js-waku/lib/create_waku";
-import { DecoderV0, MessageV0 } from "js-waku/lib/waku_message/version_0";
+import { createLightNode } from "@waku/create";
+import { DecoderV0, MessageV0 } from "@waku/core/lib/waku_message/version_0";
+import { PageDirection } from "@waku/interfaces";
+import { bootstrap } from "@libp2p/bootstrap";
 
 const themes = {
   AuthorName: {
@@ -203,9 +203,7 @@ async function initWaku(setter: (waku: WakuLight) => void) {
     const waku = await createLightNode({
       libp2p: {
         peerDiscovery: [
-          new PeerDiscoveryStaticPeers(
-            getPredefinedBootstrapNodes(selectFleetEnv())
-          ),
+          bootstrap({ list: getPredefinedBootstrapNodes(selectFleetEnv()) }),
         ],
       },
     });

@@ -1,4 +1,4 @@
-import { utils } from "js-waku";
+import { utf8ToBytes, bytesToUtf8 } from "@waku/byte-utils";
 import * as proto from "./proto/chat_message";
 
 /**
@@ -20,7 +20,7 @@ export class ChatMessage {
     text: string
   ): ChatMessage {
     const timestampNumber = BigInt(Math.floor(timestamp.valueOf() / 1000));
-    const payload = utils.utf8ToBytes(text);
+    const payload = utf8ToBytes(text);
 
     return new ChatMessage({
       timestamp: timestampNumber,
@@ -59,6 +59,6 @@ export class ChatMessage {
       return "";
     }
 
-    return utils.bytesToUtf8(this.proto.payload);
+    return bytesToUtf8(this.proto.payload);
   }
 }

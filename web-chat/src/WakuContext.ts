@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import type { WakuLight } from "js-waku/lib/interfaces";
+import type { WakuLight } from "@waku/interfaces";
 
 export type WakuContextType = {
   waku?: WakuLight;

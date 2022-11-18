@@ -1,5 +1,5 @@
 import { multiaddr } from "@multiformats/multiaddr";
-import type { WakuLight } from "js-waku/lib/interfaces";
+import type { WakuLight } from "@waku/interfaces";
 
 function help(): string[] {
   return [
@@ -44,7 +44,9 @@ function connect(
     if (!peerId) {
       return ["Peer Id needed to dial"];
     }
-    waku.addPeerToAddressBook(peerId, [peerMultiaddr]);
+    waku
+      .dial(peerMultiaddr)
+      .catch((e) => console.error(`Failed to dial ${peerMultiaddr}`, e));
     return [
       `${peerId}: ${peerMultiaddr.toString()} added to address book, autodial in progress`,
     ];

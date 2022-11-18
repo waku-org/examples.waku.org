@@ -1,4 +1,4 @@
-import { MessageV0 } from "js-waku/lib/waku_message/version_0";
+import { MessageV0 } from "@waku/core/lib/waku_message/version_0";
 import { ChatMessage } from "./chat_message";
 
 export class Message {
