@@ -21,7 +21,7 @@
     "uint8arrays": "^3.1.0"
   },
   "scripts": {
-    "start": "GENERATE_SOURCEMAP=false PORT=3001 craco start",
+    "start": "GENERATE_SOURCEMAP=false PORT=3004 craco start",
     "build": "GENERATE_SOURCEMAP=false craco build",
     "fix": "run-s fix:*",
     "test": "run-s build test:*",
