@@ -47,7 +47,7 @@ export class ChatMessage {
   }
 
   get timestamp(): Date {
-    return new Date(Number(this.proto.timestamp * BigInt(1000)));
+    return new Date(Number(BigInt(this.proto.timestamp) * BigInt(1000)));
   }
 
   get nick(): string {
