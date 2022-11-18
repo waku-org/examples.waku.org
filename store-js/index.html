@@ -13,8 +13,9 @@
 <div id='timestamp'></div>
 
 <script type='module'>
-    import {createLightNode} from 'https://unpkg.com/@waku/create@0.0.4/bundle/index.js'
+    import {defaultLibp2p, defaultPeerDiscovery} from 'https://unpkg.com/@waku/create@0.0.4/bundle/index.js'
     import {waitForRemotePeer} from 'https://unpkg.com/@waku/core@0.0.6/bundle/lib/wait_for_remote_peer.js'
+    import {wakuStore, WakuNode} from 'https://unpkg.com/@waku/core@0.0.6/bundle/index.js'
     import {DecoderV0} from 'https://unpkg.com/@waku/core@0.0.6/bundle/lib/waku_message/version_0.js'
 
     /**
@@ -27,7 +28,13 @@
     const timestampDiv = document.getElementById('timestamp');
 
     timestampDiv.innerHTML = '<p>Creating waku.</p>';
-    const node = await createLightNode({defaultBootstrap: true});
+
+    const libp2p = await defaultLibp2p(
+        undefined,
+        {peerDiscovery: [defaultPeerDiscovery()]},
+    );
+    const store = wakuStore();
+    const node = new WakuNode({}, libp2p, store,);
 
     timestampDiv.innerHTML = '<p>Starting waku.</p>';
     await node.start();
