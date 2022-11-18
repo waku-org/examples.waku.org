@@ -1,8 +1,8 @@
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, Subject } from "rxjs";
-import { createPrivacyNode } from "js-waku/lib/create_waku";
-import { waitForRemotePeer } from "js-waku/lib/wait_for_remote_peer";
-import type { WakuPrivacy } from "js-waku/lib/interfaces.js";
+import { createPrivacyNode } from "@waku/create";
+import { waitForRemotePeer } from "@waku/core/lib/wait_for_remote_peer";
+import type { WakuPrivacy } from "@waku/interfaces";
 
 @Injectable({
   providedIn: "root",

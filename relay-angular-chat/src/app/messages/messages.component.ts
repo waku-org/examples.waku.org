@@ -1,9 +1,9 @@
 import { Component, OnInit } from "@angular/core";
 import { WakuService } from "../waku.service";
-import type { WakuPrivacy } from "js-waku/lib/interfaces";
+import type { WakuPrivacy } from "@waku/interfaces";
 import protobuf from "protobufjs";
-import { DecoderV0, EncoderV0 } from "js-waku/lib/waku_message/version_0";
-import type { MessageV0 } from "js-waku/lib/waku_message/version_0";
+import { DecoderV0, EncoderV0 } from "@waku/core/lib/waku_message/version_0";
+import type { MessageV0 } from "@waku/core/lib/waku_message/version_0";
 
 const ProtoChatMessage = new protobuf.Type("ChatMessage")
   .add(new protobuf.Field("timestamp", 1, "uint32"))
