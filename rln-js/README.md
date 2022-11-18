@@ -15,6 +15,16 @@
 - Pure Javascript/HTML.
 - Use minified bundle of js from unpkg.com, no import, no package manager.
 
-To test the example, simply download the `index.html` file from this folder and open it in a browser.
+To test the example:
+
+```shell
+git clone https://github.com/waku-org/js-waku-examples
+cd js-waku-examples/rln-js
+npm install
+npm run start
+# open  http://127.0.0.1:8080 In your browser
+```
+
+**There are a known issue using this webapp with Firefox + MetaMask. Try Chrome or Brave if you encounter any issue**.
 
 The `master` branch's HEAD is deployed at https://examples.waku.org/rln-js/.
