@@ -13,10 +13,9 @@
 <div id='timestamp'></div>
 
 <script type='module'>
-    import {Protocols} from 'https://unpkg.com/js-waku@0.30.0/bundle/index.js';
-    import {createLightNode} from 'https://unpkg.com/js-waku@0.30.0/bundle/lib/create_waku.js'
-    import {waitForRemotePeer} from 'https://unpkg.com/js-waku@0.30.0/bundle/lib/wait_for_remote_peer.js'
-    import {DecoderV0} from 'https://unpkg.com/js-waku@0.30.0/bundle/lib/waku_message/version_0.js'
+    import {createLightNode} from 'https://unpkg.com/@waku/create@0.0.4/bundle/index.js'
+    import {waitForRemotePeer} from 'https://unpkg.com/@waku/core@0.0.6/bundle/lib/wait_for_remote_peer.js'
+    import {DecoderV0} from 'https://unpkg.com/@waku/core@0.0.6/bundle/lib/waku_message/version_0.js'
 
     /**
      * This example demonstrates how to use the js-waku minified bundle
@@ -34,7 +33,7 @@
     await node.start();
 
     timestampDiv.innerHTML = '<p>Connecting to a peer.</p>';
-    await waitForRemotePeer(node, [Protocols.Store]);
+    await waitForRemotePeer(node, ["store"]);
 
     timestampDiv.innerHTML = '<p>Retrieving messages.</p>';
     const callback = (wakuMessage) => {
