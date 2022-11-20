@@ -12,7 +12,7 @@
     "@waku/create": "^0.0.4",
     "@waku/interfaces": "^0.0.5",
     "process": "^0.11.10",
-    "protons-runtime": "^3.1.0",
+    "protons-runtime": "^4.0.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "server-name-generator": "^1.0.5",
