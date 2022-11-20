@@ -1,4 +1,4 @@
-import type { Message as WakuMessage } from "js-waku/lib/interfaces";
+import type { Message as WakuMessage } from "@waku/interfaces";
 import { ChatContentTopic } from "./App";
 import ChatList from "./ChatList";
 import MessageInput from "./MessageInput";
@@ -7,7 +7,7 @@ import { TitleBar } from "@livechat/ui-kit";
 import { Message } from "./Message";
 import { ChatMessage } from "./chat_message";
 import { useEffect, useState } from "react";
-import { EncoderV0 } from "js-waku/lib/waku_message/version_0";
+import { EncoderV0 } from "@waku/core/lib/waku_message/version_0";
 
 interface Props {
   messages: Message[];

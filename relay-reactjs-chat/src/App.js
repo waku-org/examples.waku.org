@@ -1,8 +1,8 @@
 import * as React from "react";
 import protobuf from "protobufjs";
-import { createPrivacyNode } from "js-waku/lib/create_waku";
-import { waitForRemotePeer } from "js-waku/lib/wait_for_remote_peer";
-import { DecoderV0, EncoderV0 } from "js-waku/lib/waku_message/version_0";
+import { createPrivacyNode } from "@waku/create";
+import { waitForRemotePeer } from "@waku/core/lib/wait_for_remote_peer";
+import { DecoderV0, EncoderV0 } from "@waku/core/lib/waku_message/version_0";
 
 const ContentTopic = `/js-waku-examples/1/chat/proto`;
 const Encoder = new EncoderV0(ContentTopic);

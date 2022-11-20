@@ -13,8 +13,8 @@
 <div id='status'></div>
 
 <label for='textInput'>Message text</label>
-<input id='textInput' placeholder='Type your message here' type='text' disabled>
-<button id='sendButton' type='button' disabled>Send Message using Relay</button>
+<input disabled id='textInput' placeholder='Type your message here' type='text'>
+<button disabled id='sendButton' type='button'>Send Message using Relay</button>
 
 <div><h1>Messages</h1></div>
 <div id='messages'></div>
@@ -26,10 +26,10 @@
      * Recommended payload is protobuf. Using simple utf-8 string for demo purposes only.
      */
 
-    import {utils} from 'https://unpkg.com/js-waku@0.30.0/bundle/index.js';
-    import {createPrivacyNode} from 'https://unpkg.com/js-waku@0.30.0/bundle/lib/create_waku.js'
-    import {waitForRemotePeer} from 'https://unpkg.com/js-waku@0.30.0/bundle/lib/wait_for_remote_peer.js'
-    import {DecoderV0, EncoderV0} from "https://unpkg.com/js-waku@0.30.0/bundle/lib/waku_message/version_0.js";
+    import {bytesToUtf8, utf8ToBytes} from 'https://unpkg.com/@waku/byte-utils@0.0.2/bundle/index.js';
+    import {createPrivacyNode} from 'https://unpkg.com/@waku/create@0.0.4/bundle/index.js'
+    import {waitForRemotePeer} from 'https://unpkg.com/@waku/core@0.0.6/bundle/lib/wait_for_remote_peer.js'
+    import {DecoderV0, EncoderV0} from "https://unpkg.com/@waku/core@0.0.6/bundle/lib/waku_message/version_0.js";
 
     const statusDiv = document.getElementById('status');
     const messagesDiv = document.getElementById('messages');
@@ -76,7 +76,7 @@
             // structure of their choice.
             //
             // https://js-waku.wakuconnect.dev/classes/waku_message.WakuMessage.html#payloadAsUtf8
-            const text = utils.bytesToUtf8(message.payload);
+            const text = bytesToUtf8(message.payload);
             messagesDiv.innerHTML = `<p>${text}</p><br />` + messagesDiv.innerHTML;
         }, [contentTopic]);
 
@@ -92,7 +92,7 @@
         // function that sends the text input over Waku Relay, the gossipsub
         // protocol.
         sendButton.onclick = async () => {
-            const payload = utils.utf8ToBytes(textInput.value)
+            const payload = utf8ToBytes(textInput.value)
             await waku.relay.send(encoder, {payload});
             console.log('Message sent!');
 

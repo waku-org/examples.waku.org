@@ -1,5 +1,5 @@
 import Messages, { Message } from "./Messages";
-import type { WakuPrivacy } from "js-waku/lib/interfaces";
+import type { WakuPrivacy } from "@waku/interfaces";
 import SendMessage from "./SendMessage";
 import { makeStyles } from "@material-ui/core";
 

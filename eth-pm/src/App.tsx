@@ -2,8 +2,8 @@ import "@ethersproject/shims";
 
 import React, { useEffect, useState } from "react";
 import "./App.css";
-import type { WakuPrivacy } from "js-waku/lib/interfaces";
-import { AsymDecoder, SymDecoder } from "js-waku/lib/waku_message/version_1";
+import type { WakuPrivacy } from "@waku/interfaces";
+import { AsymDecoder, SymDecoder } from "@waku/message-encryption";
 import { KeyPair, PublicKeyMessageEncryptionKey } from "./crypto";
 import { Message } from "./messaging/Messages";
 import "fontsource-roboto";

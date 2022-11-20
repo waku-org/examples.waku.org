@@ -1,14 +1,15 @@
 import "@ethersproject/shims";
 
 import { PublicKeyMessage } from "./messaging/wire";
-import { generatePrivateKey, getPublicKey, utils } from "js-waku";
+import { generatePrivateKey, getPublicKey } from "@waku/message-encryption";
 import { PublicKeyContentTopic } from "./waku";
 import { keccak256, _TypedDataEncoder, recoverAddress } from "ethers/lib/utils";
 import { equals } from "uint8arrays/equals";
 import type { TypedDataSigner } from "@ethersproject/abstract-signer";
+import { bytesToHex, hexToBytes, utf8ToBytes } from "@waku/byte-utils";
 
-export const PublicKeyMessageEncryptionKey = utils.hexToBytes(
-  keccak256(utils.utf8ToBytes(PublicKeyContentTopic))
+export const PublicKeyMessageEncryptionKey = hexToBytes(
+  keccak256(utf8ToBytes(PublicKeyContentTopic))
 );
 
 export interface KeyPair {
@@ -43,8 +44,8 @@ export async function createPublicKeyMessage(
 
   return new PublicKeyMessage({
     encryptionPublicKey: encryptionPublicKey,
-    ethAddress: utils.hexToBytes(address),
-    signature: utils.hexToBytes(signature),
+    ethAddress: hexToBytes(address),
+    signature: hexToBytes(signature),
   });
 }
 
@@ -57,7 +58,7 @@ function buildMsgParams(encryptionPublicKey: Uint8Array, fromAddress: string) {
     value: {
       message:
         "By signing this message you certify that messages addressed to `ownerAddress` must be encrypted with `encryptionPublicKey`",
-      encryptionPublicKey: utils.bytesToHex(encryptionPublicKey),
+      encryptionPublicKey: bytesToHex(encryptionPublicKey),
       ownerAddress: fromAddress,
     },
     // Refers to the keys of the *types* object below.
@@ -86,7 +87,7 @@ export async function signEncryptionKey(
 
   console.log("TYPED SIGNED:" + JSON.stringify(result));
 
-  return utils.hexToBytes(result);
+  return hexToBytes(result);
 }
 
 /**
@@ -95,7 +96,7 @@ export async function signEncryptionKey(
 export function validatePublicKeyMessage(msg: PublicKeyMessage): boolean {
   const { domain, types, value } = buildMsgParams(
     msg.encryptionPublicKey,
-    "0x" + utils.bytesToHex(msg.ethAddress)
+    "0x" + bytesToHex(msg.ethAddress)
   );
 
   try {
@@ -103,9 +104,9 @@ export function validatePublicKeyMessage(msg: PublicKeyMessage): boolean {
 
     const recovered = recoverAddress(hash, msg.signature);
     console.log("Recovered", recovered);
-    console.log("ethAddress", "0x" + utils.bytesToHex(msg.ethAddress));
+    console.log("ethAddress", "0x" + bytesToHex(msg.ethAddress));
 
-    return equals(utils.hexToBytes(recovered), msg.ethAddress);
+    return equals(hexToBytes(recovered), msg.ethAddress);
   } catch (e) {
     console.error("Could not recover public key from signature", e);
     return false;

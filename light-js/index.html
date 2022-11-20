@@ -34,10 +34,10 @@
 <div id="messages"></div>
 
 <script type='module'>
-    import {utils} from 'https://unpkg.com/js-waku@0.30.0/bundle/index.js';
-    import {createLightNode} from 'https://unpkg.com/js-waku@0.30.0/bundle/lib/create_waku.js'
-    import {waitForRemotePeer} from 'https://unpkg.com/js-waku@0.30.0/bundle/lib/wait_for_remote_peer.js'
-    import {EncoderV0, DecoderV0} from 'https://unpkg.com/js-waku@0.30.0/bundle/lib/waku_message/version_0.js'
+    import * as utils from 'https://unpkg.com/@waku/byte-utils@0.0.2/bundle/index.js';
+    import {createLightNode} from 'https://unpkg.com/@waku/create@0.0.4/bundle/index.js'
+    import {waitForRemotePeer} from 'https://unpkg.com/@waku/core@0.0.6/bundle/lib/wait_for_remote_peer.js'
+    import {EncoderV0, DecoderV0} from 'https://unpkg.com/@waku/core@0.0.6/bundle/lib/waku_message/version_0.js'
 
     const peerIdDiv = document.getElementById('peer-id');
     const remotePeerIdDiv = document.getElementById('remote-peer-id');

@@ -6,8 +6,8 @@ import {
   PublicKeyMessageEncryptionKey,
 } from "./crypto";
 import { PublicKeyMessage } from "./messaging/wire";
-import type { WakuPrivacy } from "js-waku/lib/interfaces";
-import { SymEncoder } from "js-waku/lib/waku_message/version_1";
+import type { WakuPrivacy } from "@waku/interfaces";
+import { SymEncoder } from "@waku/message-encryption";
 import { PublicKeyContentTopic } from "./waku";
 import type { TypedDataSigner } from "@ethersproject/abstract-signer";
 

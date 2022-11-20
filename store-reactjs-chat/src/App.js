@@ -1,9 +1,9 @@
-import { utils } from "js-waku";
 import * as React from "react";
 import protobuf from "protobufjs";
-import { createLightNode } from "js-waku/lib/create_waku";
-import { waitForRemotePeer } from "js-waku/lib/wait_for_remote_peer";
-import { DecoderV0 } from "js-waku/lib/waku_message/version_0";
+import {createLightNode} from "@waku/create";
+import {waitForRemotePeer} from "@waku/core/lib/wait_for_remote_peer";
+import {DecoderV0} from "@waku/core/lib/waku_message/version_0";
+import {bytesToUtf8} from "@waku/byte-utils"
 
 const ContentTopic = "/toy-chat/2/huilong/proto";
 const Decoder = new DecoderV0(ContentTopic);
@@ -109,7 +109,7 @@ function decodeMessage(wakuMessage) {
   const time = new Date();
   time.setTime(Number(timestamp));
 
-  const utf8Text = utils.bytesToUtf8(text);
+  const utf8Text = bytesToUtf8(text);
 
   return {
     text: utf8Text,
