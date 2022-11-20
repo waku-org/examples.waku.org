@@ -4,15 +4,15 @@
   "private": true,
   "homepage": "/store-reactjs-chat",
   "dependencies": {
-    "@testing-library/jest-dom": "^5.16.4",
-    "@testing-library/react": "^13.2.0",
-    "@testing-library/user-event": "^14.1.1",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^14.4.3",
     "@waku/byte-utils": "^0.0.2",
     "@waku/core": "^0.0.6",
     "@waku/create": "^0.0.4",
-    "protobufjs": "^7.1.0",
-    "react": "^18.1.0",
-    "react-dom": "^18.1.0",
+    "protobufjs": "^7.1.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
   },
@@ -43,7 +43,7 @@
     ]
   },
   "devDependencies": {
-    "@testing-library/dom": "^8.16.1",
-    "typescript": "^4.7.4"
+    "@testing-library/dom": "^8.19.0",
+    "typescript": "^4.9.3"
   }
 }
