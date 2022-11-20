@@ -6,19 +6,19 @@
   "dependencies": {
     "@ethersproject/abstract-signer": "5.7.0",
     "@ethersproject/providers": "5.7.0",
-    "@material-ui/core": "^4.12.3",
-    "@material-ui/icons": "^4.11.2",
+    "@material-ui/core": "^4.12.4",
+    "@material-ui/icons": "^4.11.3",
+    "@waku/byte-utils": "0.0.2",
+    "@waku/core": "0.0.6",
+    "@waku/create": "0.0.4",
+    "@waku/interfaces": "0.0.5",
+    "@waku/message-encryption": "0.0.4",
     "ethers": "5.7.1",
     "fontsource-roboto": "^4.0.0",
-    "@waku/create": "0.0.4",
-    "@waku/core": "0.0.6",
-    "@waku/interfaces": "0.0.5",
-    "@waku/byte-utils": "0.0.2",
-    "@waku/message-encryption": "0.0.4",
-    "protobufjs": "^7.1.0",
+    "protobufjs": "^7.1.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "uint8arrays": "^3.1.0"
+    "uint8arrays": "^4.0.2"
   },
   "scripts": {
     "start": "GENERATE_SOURCEMAP=false PORT=3004 craco start",
@@ -53,16 +53,16 @@
   },
   "devDependencies": {
     "@craco/craco": "^6.4.5",
-    "@ethersproject/shims": "^5.5.0",
-    "@types/jest": "^27.4.0",
-    "@types/node": "^17.0.19",
-    "@types/react": "^18.0.17",
-    "@types/react-dom": "^18.0.6",
-    "cspell": "^6.0.0",
-    "eslint": "^8.9.0",
+    "@ethersproject/shims": "^5.7.0",
+    "@types/jest": "^27.5.2",
+    "@types/node": "^17.0.45",
+    "@types/react": "^18.0.25",
+    "@types/react-dom": "^18.0.9",
+    "cspell": "^6.14.3",
+    "eslint": "^8.28.0",
     "npm-run-all": "^4.1.5",
-    "prettier": "^2.5.1",
+    "prettier": "^2.7.1",
     "react-scripts": "5.0.1",
-    "typescript": "^4.8.2"
+    "typescript": "^4.9.3"
   }
 }
