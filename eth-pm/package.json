@@ -18,7 +18,7 @@
     "protobufjs": "^7.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "uint8arrays": "^3.1.0"
+    "uint8arrays": "^4.0.2"
   },
   "scripts": {
     "start": "GENERATE_SOURCEMAP=false PORT=3004 craco start",
