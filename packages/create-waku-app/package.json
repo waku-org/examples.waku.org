@@ -1,0 +1,22 @@
+{
+    "name": "create-waku-app",
+    "version": "0.1.0",
+    "description": "Helper package to bootstrap Waku app ",
+    "main": "index.js",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+      "waku",
+      "decentralised",
+      "communication",
+      "web3",
+      "ethereum",
+      "dapps"
+    ],
+    "license": "MIT OR Apache-2.0",
+    "dependencies": {
+      "commander": "^9.4.1"
+    }
+  }
+  
