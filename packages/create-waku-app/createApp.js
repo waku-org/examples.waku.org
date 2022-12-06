@@ -5,6 +5,7 @@ const execSync = require("child_process").execSync;
 const { Command } = require("commander");
 const validateProjectName = require("validate-npm-package-name");
 
+const DEFAULT_TEMPLATE = "web-chat";
 const supportedExamplesDir = path.resolve(__dirname, "./examples");
 
 const init = (name, description, version, supportedExamples) => {
@@ -25,7 +26,7 @@ const init = (name, description, version, supportedExamples) => {
         .parse();
 
     const options = program.opts();
-    const template = options.template || "web-chat";
+    const template = options.template || DEFAULT_TEMPLATE;
 
     if (!supportedExamples[template]) {
         const supportedExamplesMessage = Object.keys(supportedExamples).reduce((acc, v) => {
