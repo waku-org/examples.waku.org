@@ -1,7 +1,9 @@
-const fs = require("fs-extra");
 const path = require("path");
-const { Command } = require('commander');
-const validateProjectName = require('validate-npm-package-name');
+const fs = require("fs-extra");
+const execSync = require("child_process").execSync;
+
+const { Command } = require("commander");
+const validateProjectName = require("validate-npm-package-name");
 
 const supportedExamplesDir = path.resolve("./examples");
 
@@ -51,7 +53,42 @@ function createApp(name, template) {
     console.log(`Initializing ${appName} from ${template} template.`);
 
     fs.copySync(templateDir, appRoot);
-    // initNpmOrYarn(appRoot);
+
+    moveToDir(appRoot);
+
+    runNpmInApp(appRoot);
+    runGitInit(appRoot);
+}
+
+function runNpmInApp(root) {
+    try {
+        execSync(`npm install --prefix ${root}`, { stdio: "ignore" });
+        console.log("Successfully installed npm dependencies.");
+    } catch (e) {
+        console.warn("Failed to install npm dependencies", e);
+    }
+}
+
+function runGitInit(root) {
+    if (isInGitRepository()) {
+        return;
+    }
+
+    try {
+        execSync(`git init ${root}`, { stdio: "ignore" });
+        console.log("Successfully initialized git repo.");
+    } catch (e) {
+        console.warn("Git repo not initialized", e);
+    }
+}
+
+function isInGitRepository() {
+    try {
+        execSync("git rev-parse --is-inside-work-tree", { stdio: "ignore" });
+        return true;
+    } catch (e) {
+        return false;
+    }
 }
 
 function terminateIfProjectNameInvalid(name) {
