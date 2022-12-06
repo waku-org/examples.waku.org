@@ -1,6 +1,6 @@
 {
-    "name": "create-dementor-app",
-    "version": "0.1.13",
+    "name": "@waku/create-app",
+    "version": "0.1.0",
     "description": "Helper package to bootstrap Waku app ",
     "repository": {
         "type": "git",
