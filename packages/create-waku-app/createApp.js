@@ -5,7 +5,7 @@ const execSync = require("child_process").execSync;
 const { Command } = require("commander");
 const validateProjectName = require("validate-npm-package-name");
 
-const supportedExamplesDir = path.resolve("./examples");
+const supportedExamplesDir = path.resolve(__dirname, "./examples");
 
 const init = (name, description, version, supportedExamples) => {
     let appName;
@@ -52,15 +52,15 @@ function createApp(name, template) {
 
     console.log(`Initializing ${appName} from ${template} template.`);
 
+    fs.ensureDirSync(appName);
     fs.copySync(templateDir, appRoot);
-
-    moveToDir(appRoot);
 
     runNpmInApp(appRoot);
     runGitInit(appRoot);
 }
 
 function runNpmInApp(root) {
+    console.log("Installing npm packages.");
     try {
         execSync(`npm install --prefix ${root}`, { stdio: "ignore" });
         console.log("Successfully installed npm dependencies.");
@@ -74,6 +74,7 @@ function runGitInit(root) {
         return;
     }
 
+    console.log("Initiating git repository.");
     try {
         execSync(`git init ${root}`, { stdio: "ignore" });
         console.log("Successfully initialized git repo.");
