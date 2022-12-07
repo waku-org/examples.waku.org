@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang='en'>
+    <head>
+        <meta charset='UTF-8'/>
+        <meta content='width=device-width, initial-scale=1.0' name='viewport'/>
+        <title>JS-Waku light chat</title>
+    </head>
+
+    <body>
+        <h2>Status</h2>
+        <div id='status'></div>
+
+        <h2>Local Peer Id</h2>
+        <div id='peer-id'></div>
+
+        <h2>Remote Peer Id</h2>
+        <div id='remote-peer-id'></div>
+
+        <h2>Remote peer's multiaddr</h2>
+        <div id='remote-multiaddr'></div>
+
+        <div id="messages"></div>
+
+        <div class="inputArea">
+            <input type="text" />
+        </div>
+
+        <div class="controls">
+            <button>Send</button>
+            <button>Exit chat</button>
+        </div>
+
+        <script type='module' src="./index.js"></script>
+    </body>
+</html>
