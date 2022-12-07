@@ -59,15 +59,15 @@
         const waku = await createPrivacyNode({defaultBootstrap: true});
         await waku.start();
 
-        // Had a hook to process all incoming messages on a specified content topic.
+        // Add a hook to process all incoming messages on a specified content topic.
         //
-        // https://js-waku.wakuconnect.dev/classes/waku_relay.WakuRelay.html#addObserver
+        // https://js.waku.org/classes/index.waku_relay.WakuRelay.html#addObserver
         waku.relay.addObserver(decoder, (message) => {
 
             // Checks there is a payload on the message.
             // Waku Message is encoded in protobuf, in proto v3 fields are always optional.
             //
-            // https://js-waku.wakuconnect.dev/classes/waku_message.WakuMessage.html#payload
+            // https://js.waku.org/interfaces/index.proto_message.WakuMessage-1.html#payload
             if (!message.payload)
                 return;
 
@@ -75,7 +75,7 @@
             // use `wakuMessage.payload` (Uint8Array) which enables encoding a data
             // structure of their choice.
             //
-            // https://js-waku.wakuconnect.dev/classes/waku_message.WakuMessage.html#payloadAsUtf8
+            // https://js.waku.org/functions/index.utils.bytesToUtf8.html
             const text = bytesToUtf8(message.payload);
             messagesDiv.innerHTML = `<p>${text}</p><br />` + messagesDiv.innerHTML;
         }, [contentTopic]);
@@ -85,7 +85,7 @@
         // Best effort method that waits for the Waku node to be connected to remote
         // waku nodes (peers) and for appropriate handshakes to be done.
         //
-        // https://js-waku.wakuconnect.dev/classes/waku.Waku.html#waitForRemotePeer
+        // https://js.waku.org/functions/lib_wait_for_remote_peer.waitForRemotePeer.html
         await waitForRemotePeer(waku);
 
         // We are now connected to a remote peer, let's define the `sendMessage`
