@@ -61,6 +61,12 @@ function createApp(name, template) {
 }
 
 function runNpmInApp(root) {
+    const packageJsonPath = path.resolve(root, "package.json");
+
+    if (!fs.existsSync(packageJsonPath)) {
+        return;
+    }
+
     console.log("Installing npm packages.");
     try {
         execSync(`npm install --prefix ${root}`, { stdio: "ignore" });
