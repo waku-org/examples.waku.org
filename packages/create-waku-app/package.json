@@ -34,7 +34,7 @@
         "ethereum",
         "dapps"
     ],
-    "license": "MIT",
+    "license": "MIT OR Apache-2.0",
     "wakuExamples": {
         "eth-pm": "../../eth-pm",
         "light-js": "../../light-js",
