@@ -12,23 +12,24 @@ async function run() {
 
     console.log("Started copying supported Waku examples.");
 
-    const copyPromises = supportedExamples.map(([name, relativePath]) => {
+    const copyPromises = supportedExamples.map(async ([name, relativePath]) => {
         const resolvedPath = path.resolve(__dirname, relativePath);
         const destinationPath = path.resolve(examplesFolder, name);
-        
-        return fs.copy(resolvedPath, destinationPath, { filter: nodeModulesFiler }).catch((error) => {
+
+        try {
+            await fs.copy(resolvedPath, destinationPath, { filter: nodeModulesFiler });
+        } catch (error) {
             console.error(`Failed to copy example ${name} to ${destinationPath} with ${error.message}`);
             throw Error(error.message);
-        });
+        }
     });
 
-    await Promise.all(copyPromises)
-        .then(() => {
-            console.log("Finished copying examples.");
-        })
-        .catch((error) => {
-            console.error("Failed to copy examples due to " + error.message);
-        });
+    try {
+        await Promise.all(copyPromises);
+        console.log("Finished copying examples.");
+    } catch (error) {
+        console.error("Failed to copy examples due to " + error.message);
+    }
 }
 
 function nodeModulesFiler(src) {
