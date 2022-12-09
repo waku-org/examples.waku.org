@@ -1,1 +1,1 @@
-declare module 'protons';
+declare module "protons";
