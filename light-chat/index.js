@@ -32,12 +32,11 @@ async function runApp() {
 
     ui.onSendMessage(sendMessage);
 
-    ui.onExit(() => {
+    ui.onExit(async () => {
         ui.setStatus("disconnecting...");
-        unsubscribeFromMessages().then(() => {
-            ui.setStatus("disconnected");
-            ui.resetMessages();
-        });
+        await unsubscribeFromMessages();
+        ui.setStatus("disconnected");
+        ui.resetMessages();
     });
 }
 
@@ -124,13 +123,12 @@ function initUI() {
             exitButton.addEventListener("click", cb); 
         },
         onSendMessage: (cb) => {
-            sendButton.addEventListener("click", () => {
-                cb({
+            sendButton.addEventListener("click", async () => {
+                await cb({
                     nick: nickText.value,
                     text: messageText.value,
-                }).then(() => {
-                    messageText.value = "";
                 });
+                messageText.value = "";
             });
         },
         // UI renderers
