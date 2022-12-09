@@ -1,62 +1,65 @@
 <!DOCTYPE html>
-<html lang='en'>
-
-<head>
-    <meta charset='UTF-8'/>
-    <meta content='width=device-width, initial-scale=1.0' name='viewport'/>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>JS-Waku store script tag example</title>
-</head>
+  </head>
 
-<body>
+  <body>
+    <div><h1>Timestamp of the latest message seen in store</h1></div>
+    <div id="timestamp"></div>
 
-<div><h1>Timestamp of the latest message seen in store</h1></div>
-<div id='timestamp'></div>
+    <script type="module">
+      import {
+        defaultLibp2p,
+        defaultPeerDiscovery,
+      } from "https://unpkg.com/@waku/create@0.0.4/bundle/index.js";
+      import { waitForRemotePeer } from "https://unpkg.com/@waku/core@0.0.6/bundle/lib/wait_for_remote_peer.js";
+      import {
+        wakuStore,
+        WakuNode,
+      } from "https://unpkg.com/@waku/core@0.0.6/bundle/index.js";
+      import { DecoderV0 } from "https://unpkg.com/@waku/core@0.0.6/bundle/lib/waku_message/version_0.js";
 
-<script type='module'>
-    import {defaultLibp2p, defaultPeerDiscovery} from 'https://unpkg.com/@waku/create@0.0.4/bundle/index.js'
-    import {waitForRemotePeer} from 'https://unpkg.com/@waku/core@0.0.6/bundle/lib/wait_for_remote_peer.js'
-    import {wakuStore, WakuNode} from 'https://unpkg.com/@waku/core@0.0.6/bundle/index.js'
-    import {DecoderV0} from 'https://unpkg.com/@waku/core@0.0.6/bundle/lib/waku_message/version_0.js'
+      /**
+       * This example demonstrates how to use the js-waku minified bundle
+       * available on unpkg.com.
+       *
+       * It is a simple script that uses Waku Store to retrieve ping relay messages
+       * and displays the timestamp of the most recent ping relay message.
+       */
+      const timestampDiv = document.getElementById("timestamp");
 
-    /**
-     * This example demonstrates how to use the js-waku minified bundle
-     * available on unpkg.com.
-     *
-     * It is a simple script that uses Waku Store to retrieve ping relay messages
-     * and displays the timestamp of the most recent ping relay message.
-     */
-    const timestampDiv = document.getElementById('timestamp');
+      timestampDiv.innerHTML = "<p>Creating waku.</p>";
 
-    timestampDiv.innerHTML = '<p>Creating waku.</p>';
+      const libp2p = await defaultLibp2p(undefined, {
+        peerDiscovery: [defaultPeerDiscovery()],
+      });
+      const store = wakuStore();
+      const node = new WakuNode({}, libp2p, store);
 
-    const libp2p = await defaultLibp2p(
-        undefined,
-        {peerDiscovery: [defaultPeerDiscovery()]},
-    );
-    const store = wakuStore();
-    const node = new WakuNode({}, libp2p, store,);
+      timestampDiv.innerHTML = "<p>Starting waku.</p>";
+      await node.start();
 
-    timestampDiv.innerHTML = '<p>Starting waku.</p>';
-    await node.start();
+      timestampDiv.innerHTML = "<p>Connecting to a peer.</p>";
+      await waitForRemotePeer(node, ["store"]);
 
-    timestampDiv.innerHTML = '<p>Connecting to a peer.</p>';
-    await waitForRemotePeer(node, ["store"]);
-
-    timestampDiv.innerHTML = '<p>Retrieving messages.</p>';
-    const callback = (wakuMessage) => {
+      timestampDiv.innerHTML = "<p>Retrieving messages.</p>";
+      const callback = (wakuMessage) => {
         // When `backward` direction is passed, first message is the most recent
         timestampDiv.innerHTML = wakuMessage.timestamp;
 
         // When returning true, `queryHistory` stops retrieving pages
         // In our case, we only want one message, hence one page.
         return true;
-    };
+      };
 
-    await node.store
-        .queryOrderedCallback([new DecoderV0("/relay-ping/1/ping/null")],
-            callback,
-            {pageDirection: 'backward'});
-</script>
-</body>
-
+      await node.store.queryOrderedCallback(
+        [new DecoderV0("/relay-ping/1/ping/null")],
+        callback,
+        { pageDirection: "backward" }
+      );
+    </script>
+  </body>
 </html>
