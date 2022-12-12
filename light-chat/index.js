@@ -54,11 +54,9 @@ async function initWakuContext({
         .add(new protobuf.Field("nick", 2, "string"))
         .add(new protobuf.Field("text", 3, "bytes"));
 
-    const node = await wakuCreate.createLightNode();
+    const node = await wakuCreate.createLightNode({ defaultBootstrap: true });
 
     await node.start();
-
-    await node.dial(multiAddr, protocols);
     await waitForRemotePeer(node, protocols);
 
     // Set a filter by using Decoder for a given ContentTopic
