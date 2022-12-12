@@ -1,8 +1,8 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed } from "@angular/core/testing";
 
-import { WakuService } from './waku.service';
+import { WakuService } from "./waku.service";
 
-describe('WakuService', () => {
+describe("WakuService", () => {
   let service: WakuService;
 
   beforeEach(() => {
@@ -10,7 +10,7 @@ describe('WakuService', () => {
     service = TestBed.inject(WakuService);
   });
 
-  it('should be created', () => {
+  it("should be created", () => {
     expect(service).toBeTruthy();
   });
 });

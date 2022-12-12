@@ -83,6 +83,7 @@
     <div class="row rcenter">
       <h4>Key</h4>
       <code class="value" id="key">none</code>
+
     </div>
     <div class="row rcenter">
       <h4>Commitment</h4>
@@ -203,6 +204,7 @@
         node,
         nodeConnected,
         rlnInstance;
+
       const allMemberships = [];
       let retrievedRLNEvents = false;
       const rlnInstancePromise = create();
@@ -252,6 +254,7 @@
         );
 
         importManually.disabled = !(
+
           membershipIdInput.value &&
           identityKeyInput.value &&
           commitmentKeyInput.value
@@ -287,6 +290,7 @@
       commitmentKeyInput.onchange = updateFields;
 
       importManually.onclick = () => {
+
         const idKey = utils.hexToBytes(identityKeyInput.value);
         const idCommitment = utils.hexToBytes(commitmentKeyInput.value);
         membershipKey = new MembershipKey(idKey, idCommitment);
@@ -345,6 +349,7 @@
       const handleMembership = (pubkey, index) => {
         try {
           allMemberships.push({ pubkey, index });
+
           const idCommitment = ethers.utils.zeroPad(
             ethers.utils.arrayify(pubkey),
             32
@@ -381,6 +386,7 @@
           checkChain(network.chainId);
 
           importFromWalletButton.disabled = false;
+
         } catch (e) {
           console.log("No web3 provider available", e);
         }
