@@ -83,7 +83,6 @@
     <div class="row rcenter">
       <h4>Key</h4>
       <code class="value" id="key">none</code>
-
     </div>
     <div class="row rcenter">
       <h4>Commitment</h4>
@@ -209,6 +208,9 @@
       let retrievedRLNEvents = false;
       const rlnInstancePromise = create();
 
+      const signatureMessage =
+        "The signature of this message will be used to generate your RLN credentials. Anyone accessing it may send messages on your behalf, please only share with the RLN dApp";
+
       // Load zero-kit WASM blob.
 
       statusSpan.innerText = "WASM Blob download in progress...";
@@ -254,7 +256,6 @@
         );
 
         importManually.disabled = !(
-
           membershipIdInput.value &&
           identityKeyInput.value &&
           commitmentKeyInput.value
@@ -275,10 +276,9 @@
       generateCredsButton.onclick = async () => {
         // sign message with ethers
         const signer = provider.getSigner();
-        const message =
-          "The signature of this message will be used to generate your RLN credentials. Ensure that this signature is only shared with the RLN dApp.";
-        const signature = await signer.signMessage(message);
-        console.log({ signature });
+
+        const signature = await signer.signMessage(signatureMessage);
+
         // provide the signature as a seed
         membershipKey = rlnInstance.generateSeededMembershipKey(signature);
 
@@ -290,7 +290,6 @@
       commitmentKeyInput.onchange = updateFields;
 
       importManually.onclick = () => {
-
         const idKey = utils.hexToBytes(identityKeyInput.value);
         const idCommitment = utils.hexToBytes(commitmentKeyInput.value);
         membershipKey = new MembershipKey(idKey, idCommitment);
@@ -301,9 +300,7 @@
       importFromWalletButton.onclick = async () => {
         const signer = provider.getSigner();
 
-        const message =
-          "The signature of this message will be used to generate your RLN credentials. Ensure that this signature is only shared with the RLN dApp.";
-        const signature = await signer.signMessage(message);
+        const signature = await signer.signMessage(signatureMessage);
 
         membershipKey = await rlnInstance.generateSeededMembershipKey(
           signature
@@ -386,7 +383,6 @@
           checkChain(network.chainId);
 
           importFromWalletButton.disabled = false;
-
         } catch (e) {
           console.log("No web3 provider available", e);
         }
