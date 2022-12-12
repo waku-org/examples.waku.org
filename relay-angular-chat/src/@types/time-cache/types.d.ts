@@ -1,8 +1,7 @@
 declare module "time-cache" {
-
   interface ITimeCache {
     put(key: string, value: any, validity: number): void;
-    get(key: string): any;  
+    get(key: string): any;
     has(key: string): boolean;
   }
 
@@ -11,5 +10,4 @@ declare module "time-cache" {
   function TimeCache(options: object): TimeCache;
 
   export = TimeCache;
-
 }

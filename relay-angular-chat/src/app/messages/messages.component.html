@@ -1,4 +1,6 @@
-<button (click)="sendMessage()" [disabled]="wakuStatus !== 'Connected'">Send Message</button>
+<button (click)="sendMessage()" [disabled]="wakuStatus !== 'Connected'">
+  Send Message
+</button>
 <h2>Messages</h2>
 <ul class="messages">
   <li *ngFor="let message of messages">
