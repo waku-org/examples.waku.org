@@ -44,18 +44,20 @@
 
     <div class="row">
       <div class="w50">
-        <h4>You can either generate new credentials:</h4>
-        <button disabled id="generate-credentials" type="button">
-          Generate RLN Credentials
-        </button>
+        <h4>Generate new, or import existing, credentials from wallet:</h4>
         <br />
+        <div id="import-from-wallet">
+          <button id="import-from-wallet-button" type="button">
+            Fetch credentials from wallet
+          </button>
+        </div>
         <br />
         <button disabled id="register-button" type="button">
           Register Credentials in Contract
         </button>
       </div>
       <div class="w50">
-        <h4>Or import existing ones:</h4>
+        <h4>Import existing credentials manually:</h4>
         <div>
           <label for="membership-id"
             >Membership ID (your index in the RLN smart contract):</label
@@ -67,11 +69,6 @@
           <input id="commitment-key" name="commitment-key" type="text" />
           <button disabled id="import-manually-button" type="button">
             Import RLN Credentials
-          </button>
-        </div>
-        <div id="import-from-wallet">
-          <button disabled id="import-from-wallet-button" type="button">
-            Import RLN Credentials from Wallet
           </button>
         </div>
       </div>
@@ -165,9 +162,6 @@
       );
 
       // Credentials Elements
-      const generateCredsButton = document.getElementById(
-        "generate-credentials"
-      );
 
       const membershipIdInput = document.getElementById("membership-id");
       const identityKeyInput = document.getElementById("id-key");
@@ -247,8 +241,6 @@
           }
         }
 
-        generateCredsButton.disabled = !rlnInstance;
-
         registerButton.disabled = !(
           membershipKey &&
           retrievedRLNEvents &&
@@ -272,18 +264,6 @@
       };
 
       // Blockchain
-
-      generateCredsButton.onclick = async () => {
-        // sign message with ethers
-        const signer = provider.getSigner();
-
-        const signature = await signer.signMessage(signatureMessage);
-
-        // provide the signature as a seed
-        membershipKey = rlnInstance.generateSeededMembershipKey(signature);
-
-        updateFields();
-      };
 
       membershipIdInput.onchange = updateFields;
       identityKeyInput.onchange = updateFields;
