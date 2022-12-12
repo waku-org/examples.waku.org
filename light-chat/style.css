@@ -129,6 +129,22 @@ h3 {
     background-color: #c84740;
 }
 
+.success {
+    color: #3ba183;
+}
+
+.progress {
+    color: #9ea13b;
+}
+
+.terminated {
+    color: black;
+}
+
+.error {
+    color: #c84740;
+}
+
 .footer {
     display: flex;
     width: 100%;

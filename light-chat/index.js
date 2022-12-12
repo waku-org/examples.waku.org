@@ -7,14 +7,14 @@ const MULTI_ADDR = "/dns4/node-01.ac-cn-hongkong-c.wakuv2.test.statusim.net/tcp/
 const CONTENT_TOPIC = "/toy-chat/2/huilong/proto";
 const PROTOCOLS = ["filter", "lightpush"];
 
-runApp().catch((err) => {
+const ui = initUI();
+runApp(ui).catch((err) => {
     console.error(err);
+    ui.setStatus(`error: ${err.message}`, "error");
 });
 
-async function runApp() {
-    const ui = initUI();
-
-    ui.setStatus("connecting...");
+async function runApp(ui) {
+    ui.setStatus("connecting...", "progress");
 
     const { info, sendMessage, unsubscribeFromMessages } = await initWakuContext({
         protocols: PROTOCOLS,
@@ -23,7 +23,7 @@ async function runApp() {
         onMessageReceived: ui.renderMessage,
     });
 
-    ui.setStatus("connected");
+    ui.setStatus("connected", "success");
 
     ui.setLocalPeer(info.localPeerId);
     ui.setRemotePeer(info.remotePeerId);
@@ -33,9 +33,9 @@ async function runApp() {
     ui.onSendMessage(sendMessage);
 
     ui.onExit(async () => {
-        ui.setStatus("disconnecting...");
+        ui.setStatus("disconnecting...", "progress");
         await unsubscribeFromMessages();
-        ui.setStatus("disconnected");
+        ui.setStatus("disconnected", "terminated");
         ui.resetMessages();
     });
 }
@@ -130,8 +130,8 @@ function initUI() {
             });
         },
         // UI renderers
-        setStatus: (value) => {
-            statusBlock.innerText = value.toString();
+        setStatus: (value, className) => {
+            statusBlock.innerHTML = `<span class=${className || ""}>${value}</span>`;
         },
         setLocalPeer: (id) => {
             localPeerBlock.innerText = id.toString();
