@@ -26,7 +26,7 @@ async function runApp(ui) {
     ui.setStatus("connected", "success");
 
     ui.setLocalPeer(info.localPeerId);
-    ui.setRemotePeer(info.remotePeerId);
+    ui.setRemotePeer(info.remotePeerIds);
     ui.setRemoteMultiAddr(info.multiAddr);
     ui.setContentTopic(info.contentTopic);
 
@@ -71,7 +71,7 @@ async function initWakuContext({
     const localPeerId = node.libp2p.peerId.toString();
 
     const remotePeers = await node.libp2p.peerStore.all();
-    const remotePeerId = remotePeers[0].id.toString();
+    const remotePeerIds = remotePeers.map(peer => peer.id.toString());
 
     return {
         unsubscribeFromMessages,
@@ -79,7 +79,7 @@ async function initWakuContext({
             multiAddr,
             contentTopic,
             localPeerId,
-            remotePeerId,
+            remotePeerIds,
         },
         sendMessage: async ({ text, nick }) => {
             if (!text || !nick) {
@@ -136,8 +136,8 @@ function initUI() {
         setLocalPeer: (id) => {
             localPeerBlock.innerText = id.toString();
         },
-        setRemotePeer: (id) => {
-            remotePeerId.innerText = id.toString();
+        setRemotePeer: (ids) => {
+            remotePeerId.innerText = ids.join("\n");
         },
         setRemoteMultiAddr: (multiAddr) => {
             remoteMultiAddr.innerText = multiAddr.toString();
