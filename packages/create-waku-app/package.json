@@ -1,0 +1,55 @@
+{
+    "name": "@waku/create-app",
+    "version": "0.1.0",
+    "description": "Helper package to bootstrap Waku app ",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/waku-org/js-waku-examples.git",
+        "directory": "packages/create-app"
+    },
+    "engines": {
+        "node": ">=16"
+    },
+    "bugs": {
+        "url": "https://github.com/waku-org/js-waku-examples/issues"
+    },
+    "files": [
+        "index.js",
+        "createApp.js",
+        "examples"
+    ],
+    "main": "index.js",
+    "bin": {
+        "create-waku-app": "./index.js"
+    },
+    "scripts": {
+        "build": "node ./build.js",
+        "prepublishOnly": "npm run build"
+    },
+    "keywords": [
+        "waku",
+        "decentralised",
+        "communication",
+        "web3",
+        "ethereum",
+        "dapps"
+    ],
+    "license": "MIT OR Apache-2.0",
+    "wakuExamples": {
+        "eth-pm": "../../eth-pm",
+        "light-js": "../../light-js",
+        "relay-angular-chat": "../../relay-angular-chat",
+        "relay-js": "../../relay-js",
+        "relay-reactjs-chat": "../../relay-reactjs-chat",
+        "rln-js": "../../rln-js",
+        "store-js": "../../store-js",
+        "store-reactjs-chat": "../../store-reactjs-chat",
+        "web-chat": "../../web-chat"
+    },
+    "dependencies": {
+        "commander": "^9.4.1",
+        "fs-extra": "^11.1.0",
+        "semver": "^7.3.8",
+        "validate-npm-package-name": "^5.0.0"
+    }
+}
