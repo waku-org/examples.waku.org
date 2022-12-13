@@ -5,7 +5,7 @@ const execSync = require("child_process").execSync;
 const { Command } = require("commander");
 const validateProjectName = require("validate-npm-package-name");
 
-const DEFAULT_TEMPLATE = "web-chat";
+const DEFAULT_TEMPLATE = "light-chat";
 const supportedExamplesDir = path.resolve(__dirname, "./examples");
 
 const init = (name, description, version, supportedExamples) => {

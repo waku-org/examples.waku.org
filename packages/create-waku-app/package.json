@@ -44,7 +44,8 @@
         "rln-js": "../../rln-js",
         "store-js": "../../store-js",
         "store-reactjs-chat": "../../store-reactjs-chat",
-        "web-chat": "../../web-chat"
+        "web-chat": "../../web-chat",
+        "light-chat": "../../light-chat"
     },
     "dependencies": {
         "commander": "^9.4.1",
