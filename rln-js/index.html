@@ -48,7 +48,7 @@
         <br />
         <div id="import-from-wallet">
           <button id="import-from-wallet-button" type="button">
-            Fetch credentials from wallet
+            Generate RLN Credentials
           </button>
         </div>
         <br />
@@ -202,7 +202,7 @@
       let retrievedRLNEvents = false;
       const rlnInstancePromise = create();
 
-      const signatureMessage =
+      const DEFAULT_SIGNATURE_MESSAGE =
         "The signature of this message will be used to generate your RLN credentials. Anyone accessing it may send messages on your behalf, please only share with the RLN dApp";
 
       // Load zero-kit WASM blob.
