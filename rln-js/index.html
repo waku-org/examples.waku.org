@@ -44,29 +44,33 @@
 
     <div class="row">
       <div class="w50">
-        <h4>You can either generate new credentials:</h4>
-        <button disabled id="generate-credentials" type="button">
-          Generate RLN Credentials
-        </button>
+        <h4>Generate new, or import existing, credentials from wallet:</h4>
         <br />
+        <div id="import-from-wallet">
+          <button id="import-from-wallet-button" type="button">
+            Generate RLN Credentials
+          </button>
+        </div>
         <br />
         <button disabled id="register-button" type="button">
           Register Credentials in Contract
         </button>
       </div>
       <div class="w50">
-        <h4>Or import existing ones:</h4>
-        <label for="membership-id"
-          >Membership ID (your index in the RLN smart contract):</label
-        >
-        <input id="membership-id" name="membership-id" type="text" />
-        <label for="id-key">RLN Identity Key (hex string):</label>
-        <input id="id-key" name="id-key" type="text" />
-        <label for="commitment-key">RLN Commitment Key (hex string):</label>
-        <input id="commitment-key" name="commitment-key" type="text" />
-        <button disabled id="import-button" type="button">
-          Import RLN Credentials
-        </button>
+        <h4>Import existing credentials manually:</h4>
+        <div>
+          <label for="membership-id"
+            >Membership ID (your index in the RLN smart contract):</label
+          >
+          <input id="membership-id" name="membership-id" type="text" />
+          <label for="id-key">RLN Identity Key (hex string):</label>
+          <input id="id-key" name="id-key" type="text" />
+          <label for="commitment-key">RLN Commitment Key (hex string):</label>
+          <input id="commitment-key" name="commitment-key" type="text" />
+          <button disabled id="import-manually-button" type="button">
+            Import RLN Credentials
+          </button>
+        </div>
       </div>
     </div>
     <div class="row rcenter mu1">
@@ -140,7 +144,7 @@
         MembershipKey,
         RLNDecoder,
         RLNEncoder,
-      } from "https://unpkg.com/@waku/rln@0.0.12-6875952/bundle/index.js";
+      } from "https://unpkg.com/@waku/rln@0.0.13/bundle/index.js";
 
       import { ethers } from "https://unpkg.com/ethers@5.7.2/dist/ethers.esm.min.js";
 
@@ -158,14 +162,14 @@
       );
 
       // Credentials Elements
-      const generateCredsButton = document.getElementById(
-        "generate-credentials"
-      );
 
       const membershipIdInput = document.getElementById("membership-id");
       const identityKeyInput = document.getElementById("id-key");
       const commitmentKeyInput = document.getElementById("commitment-key");
-      const importButton = document.getElementById("import-button");
+      const importManually = document.getElementById("import-manually-button");
+      const importFromWalletButton = document.getElementById(
+        "import-from-wallet-button"
+      );
 
       const idDiv = document.getElementById("id");
       const keyDiv = document.getElementById("key");
@@ -193,8 +197,13 @@
         node,
         nodeConnected,
         rlnInstance;
+
+      const allMemberships = [];
       let retrievedRLNEvents = false;
       const rlnInstancePromise = create();
+
+      const DEFAULT_SIGNATURE_MESSAGE =
+        "The signature of this message will be used to generate your RLN credentials. Anyone accessing it may send messages on your behalf, please only share with the RLN dApp";
 
       // Load zero-kit WASM blob.
 
@@ -232,15 +241,13 @@
           }
         }
 
-        generateCredsButton.disabled = !rlnInstance;
-
         registerButton.disabled = !(
           membershipKey &&
           retrievedRLNEvents &&
           !membershipId
         );
 
-        importButton.disabled = !(
+        importManually.disabled = !(
           membershipIdInput.value &&
           identityKeyInput.value &&
           commitmentKeyInput.value
@@ -258,20 +265,35 @@
 
       // Blockchain
 
-      generateCredsButton.onclick = () => {
-        membershipKey = rlnInstance.generateMembershipKey();
-        updateFields();
-      };
-
       membershipIdInput.onchange = updateFields;
       identityKeyInput.onchange = updateFields;
       commitmentKeyInput.onchange = updateFields;
 
-      importButton.onclick = () => {
+      importManually.onclick = () => {
         const idKey = utils.hexToBytes(identityKeyInput.value);
         const idCommitment = utils.hexToBytes(commitmentKeyInput.value);
         membershipKey = new MembershipKey(idKey, idCommitment);
         membershipId = membershipIdInput.value;
+        updateFields();
+      };
+
+      importFromWalletButton.onclick = async () => {
+        const signer = provider.getSigner();
+
+        const signature = await signer.signMessage(signatureMessage);
+
+        membershipKey = await rlnInstance.generateSeededMembershipKey(
+          signature
+        );
+
+        const idCommitment = ethers.utils.hexlify(membershipKey.IDCommitment);
+
+        allMemberships.forEach((m) => {
+          if (m.pubkey._hex === idCommitment) {
+            membershipId = m.index.toString();
+          }
+        });
+
         updateFields();
       };
 
@@ -303,6 +325,8 @@
 
       const handleMembership = (pubkey, index) => {
         try {
+          allMemberships.push({ pubkey, index });
+
           const idCommitment = ethers.utils.zeroPad(
             ethers.utils.arrayify(pubkey),
             32
@@ -337,6 +361,8 @@
           setAccounts(accounts);
           const network = await provider.getNetwork();
           checkChain(network.chainId);
+
+          importFromWalletButton.disabled = false;
         } catch (e) {
           console.log("No web3 provider available", e);
         }
