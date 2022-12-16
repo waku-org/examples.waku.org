@@ -34,12 +34,12 @@
         bytesToUtf8,
         utf8ToBytes,
       } from "https://unpkg.com/@waku/byte-utils@0.0.2/bundle/index.js";
-      import { createPrivacyNode } from "https://unpkg.com/@waku/create@0.0.4/bundle/index.js";
-      import { waitForRemotePeer } from "https://unpkg.com/@waku/core@0.0.6/bundle/lib/wait_for_remote_peer.js";
+      import { createRelayNode } from "https://unpkg.com/@waku/create@0.0.5/bundle/index.js";
       import {
-        DecoderV0,
-        EncoderV0,
-      } from "https://unpkg.com/@waku/core@0.0.6/bundle/lib/waku_message/version_0.js";
+        waitForRemotePeer,
+        createDecoder,
+        createEncoder,
+      } from "https://unpkg.com/@waku/core@0.0.7/bundle/index.js";
 
       const statusDiv = document.getElementById("status");
       const messagesDiv = document.getElementById("messages");
@@ -55,8 +55,8 @@
 
       // Prepare encoder and decoder, `V0` for clear text messages.
 
-      const encoder = new EncoderV0(contentTopic);
-      const decoder = new DecoderV0(contentTopic);
+      const encoder = createEncoder(contentTopic);
+      const decoder = createDecoder(contentTopic);
 
       try {
         statusDiv.innerHTML = "<p>Starting</p>";
@@ -66,7 +66,7 @@
         // We are currently working on migrating this method to DNS Discovery.
         //
         // https://js.waku.org/functions/lib_create_waku.createPrivacyNode.html
-        const waku = await createPrivacyNode({ defaultBootstrap: true });
+        const waku = await createRelayNode({ defaultBootstrap: true });
         await waku.start();
 
         // Add a hook to process all incoming messages on a specified content topic.
