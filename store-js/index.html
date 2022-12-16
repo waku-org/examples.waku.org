@@ -14,13 +14,13 @@
       import {
         defaultLibp2p,
         defaultPeerDiscovery,
-      } from "https://unpkg.com/@waku/create@0.0.4/bundle/index.js";
-      import { waitForRemotePeer } from "https://unpkg.com/@waku/core@0.0.6/bundle/lib/wait_for_remote_peer.js";
+      } from "https://unpkg.com/@waku/create@0.0.5/bundle/index.js";
       import {
         wakuStore,
         WakuNode,
-      } from "https://unpkg.com/@waku/core@0.0.6/bundle/index.js";
-      import { DecoderV0 } from "https://unpkg.com/@waku/core@0.0.6/bundle/lib/waku_message/version_0.js";
+        waitForRemotePeer,
+        createDecoder,
+      } from "https://unpkg.com/@waku/core@0.0.7/bundle/index.js";
 
       /**
        * This example demonstrates how to use the js-waku minified bundle
@@ -56,7 +56,7 @@
       };
 
       await node.store.queryOrderedCallback(
-        [new DecoderV0("/relay-ping/1/ping/null")],
+        [createDecoder("/relay-ping/1/ping/null")],
         callback,
         { pageDirection: "backward" }
       );
