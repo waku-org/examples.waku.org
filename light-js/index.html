@@ -39,12 +39,12 @@
 
     <script type="module">
       import * as utils from "https://unpkg.com/@waku/byte-utils@0.0.2/bundle/index.js";
-      import { createLightNode } from "https://unpkg.com/@waku/create@0.0.4/bundle/index.js";
-      import { waitForRemotePeer } from "https://unpkg.com/@waku/core@0.0.6/bundle/lib/wait_for_remote_peer.js";
+      import { createLightNode } from "https://unpkg.com/@waku/create@0.0.5/bundle/index.js";
       import {
-        EncoderV0,
-        DecoderV0,
-      } from "https://unpkg.com/@waku/core@0.0.6/bundle/lib/waku_message/version_0.js";
+        waitForRemotePeer,
+        createEncoder,
+        createDecoder,
+      } from "https://unpkg.com/@waku/core@0.0.7/bundle/index.js";
 
       const peerIdDiv = document.getElementById("peer-id");
       const remotePeerIdDiv = document.getElementById("remote-peer-id");
@@ -58,8 +58,8 @@
       const sendButton = document.getElementById("sendButton");
 
       const ContentTopic = "/js-waku-examples/1/chat/utf8";
-      const decoder = new DecoderV0(ContentTopic);
-      const encoder = new EncoderV0(ContentTopic);
+      const decoder = createDecoder(ContentTopic);
+      const encoder = createEncoder(ContentTopic);
       let messages = [];
       let unsubscribe;
 
