@@ -6,14 +6,14 @@ import {
   PublicKeyMessageEncryptionKey,
 } from "./crypto";
 import { PublicKeyMessage } from "./messaging/wire";
-import type { WakuPrivacy } from "@waku/interfaces";
-import { SymEncoder } from "@waku/message-encryption";
+import type { RelayNode } from "@waku/interfaces";
+import { createEncoder } from "@waku/message-encryption/symmetric";
 import { PublicKeyContentTopic } from "./waku";
 import type { TypedDataSigner } from "@ethersproject/abstract-signer";
 
 interface Props {
   encryptionKeyPair: KeyPair | undefined;
-  waku: WakuPrivacy | undefined;
+  waku: RelayNode | undefined;
   address: string | undefined;
   signer: TypedDataSigner | undefined;
 }
@@ -47,7 +47,7 @@ export default function BroadcastPublicKey({
     })();
     const payload = _publicKeyMessage.encode();
 
-    const publicKeyMessageEncoder = new SymEncoder(
+    const publicKeyMessageEncoder = createEncoder(
       PublicKeyContentTopic,
       PublicKeyMessageEncryptionKey
     );
