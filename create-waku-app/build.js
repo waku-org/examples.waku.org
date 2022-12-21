@@ -2,7 +2,7 @@
 const path = require("path");
 const fs = require("fs-extra");
 
-const examplesSource = path.resolve(__dirname, "../../examples");
+const examplesSource = path.resolve(__dirname, "../examples");
 const examplesDestination = path.resolve(__dirname, "./examples");
 
 function run() {
