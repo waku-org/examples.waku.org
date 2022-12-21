@@ -1,19 +1,20 @@
 import { Dispatch, SetStateAction } from "react";
-import type { Message as WakuMessage, WakuPrivacy } from "@waku/interfaces";
+import type { RelayNode } from "@waku/interfaces";
 import { Protocols } from "@waku/interfaces";
 import { PrivateMessage, PublicKeyMessage } from "./messaging/wire";
 import { validatePublicKeyMessage } from "./crypto";
 import { Message } from "./messaging/Messages";
 import { equals } from "uint8arrays/equals";
-import { waitForRemotePeer } from "@waku/core/lib/wait_for_remote_peer";
-import { createPrivacyNode } from "@waku/create";
+import { waitForRemotePeer } from "@waku/core";
+import { createRelayNode } from "@waku/create";
 import { bytesToHex, hexToBytes } from "@waku/byte-utils";
+import type { DecodedMessage } from "@waku/message-encryption";
 
 export const PublicKeyContentTopic = "/eth-pm/1/public-key/proto";
 export const PrivateMessageContentTopic = "/eth-pm/1/private-message/proto";
 
-export async function initWaku(): Promise<WakuPrivacy> {
-  const waku = await createPrivacyNode({ defaultBootstrap: true });
+export async function initWaku(): Promise<RelayNode> {
+  const waku = await createRelayNode({ defaultBootstrap: true });
   await waku.start();
   await waitForRemotePeer(waku, [Protocols.Relay]);
 
@@ -23,7 +24,7 @@ export async function initWaku(): Promise<WakuPrivacy> {
 export function handlePublicKeyMessage(
   myAddress: string | undefined,
   setter: Dispatch<SetStateAction<Map<string, Uint8Array>>>,
-  msg: WakuMessage
+  msg: DecodedMessage
 ) {
   console.log("Public Key Message received:", msg);
   if (!msg.payload) return;
@@ -49,7 +50,7 @@ export function handlePublicKeyMessage(
 export async function handlePrivateMessage(
   setter: Dispatch<SetStateAction<Message[]>>,
   address: string,
-  wakuMsg: WakuMessage
+  wakuMsg: DecodedMessage
 ) {
   console.log("Private Message received:", wakuMsg);
   if (!wakuMsg.payload) return;
