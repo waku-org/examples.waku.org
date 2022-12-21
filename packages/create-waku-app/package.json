@@ -49,6 +49,7 @@
     },
     "dependencies": {
         "commander": "^9.4.1",
+        "enquirer": "^2.3.6",
         "fs-extra": "^11.1.0",
         "semver": "^7.3.8",
         "validate-npm-package-name": "^5.0.0"

@@ -1,16 +1,18 @@
 const path = require("path");
 const fs = require("fs-extra");
+const enquirer = require("enquirer");
 const execSync = require("child_process").execSync;
 
 const { Command } = require("commander");
 const validateProjectName = require("validate-npm-package-name");
 
-const DEFAULT_TEMPLATE = "light-chat";
 const supportedExamplesDir = path.resolve(__dirname, "./examples");
 
-const init = (name, description, version, supportedExamples) => {
+const init = async (name, description, version, supportedExamples) => {
     let appName;
-    const program = new Command()
+    let template; 
+
+    const options = new Command()
         .name(name)
         .description(description)
         .version(version, "-v, --version", "output the version number")
@@ -20,13 +22,28 @@ const init = (name, description, version, supportedExamples) => {
         })
         .option(
             "-t, --template <path-to-template>", 
-            "specify a template for the created project"
+            "specify a template for the created project or you can skip and select template manually"
         )
         .allowUnknownOption()
-        .parse();
+        .parse()
+        .opts();
 
-    const options = program.opts();
-    const template = options.template || DEFAULT_TEMPLATE;
+    template = options.template;
+
+    if (!template) {
+        const templatePrompt = new enquirer.Select({
+            name: "template",
+            message: "Select template",
+            choices: Object.keys(supportedExamples),
+        });
+
+        try {
+            template = await templatePrompt.run();
+        } catch (e) {
+            console.error(`Failed at selecting a template: ${e.message}`);
+            process.exit(1);
+        }
+    }
 
     if (!supportedExamples[template]) {
         const supportedExamplesMessage = Object.keys(supportedExamples).reduce((acc, v) => {
