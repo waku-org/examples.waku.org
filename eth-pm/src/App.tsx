@@ -2,8 +2,9 @@ import "@ethersproject/shims";
 
 import React, { useEffect, useState } from "react";
 import "./App.css";
-import type { WakuPrivacy } from "@waku/interfaces";
-import { AsymDecoder, SymDecoder } from "@waku/message-encryption";
+import type { RelayNode, IDecoder } from "@waku/interfaces";
+import { createDecoder as createSymmetricDecoder } from "@waku/message-encryption/symmetric";
+import { createDecoder, DecodedMessage } from "@waku/message-encryption/ecies";
 import { KeyPair, PublicKeyMessageEncryptionKey } from "./crypto";
 import { Message } from "./messaging/Messages";
 import "fontsource-roboto";
@@ -67,13 +68,13 @@ const useStyles = makeStyles({
 });
 
 function App() {
-  const [waku, setWaku] = useState<WakuPrivacy>();
+  const [waku, setWaku] = useState<RelayNode>();
   const [provider, setProvider] = useState<Web3Provider>();
   const [encryptionKeyPair, setEncryptionKeyPair] = useState<
     KeyPair | undefined
   >();
   const [privateMessageDecoder, setPrivateMessageDecoder] =
-    useState<AsymDecoder>();
+    useState<IDecoder<DecodedMessage>>();
   const [publicKeys, setPublicKeys] = useState<Map<string, Uint8Array>>(
     new Map()
   );
@@ -109,7 +110,7 @@ function App() {
       setPublicKeys
     );
 
-    const publicKeyMessageDecoder = new SymDecoder(
+    const publicKeyMessageDecoder = createSymmetricDecoder(
       PublicKeyContentTopic,
       PublicKeyMessageEncryptionKey
     );
@@ -134,7 +135,7 @@ function App() {
     if (!encryptionKeyPair) return;
 
     setPrivateMessageDecoder(
-      new AsymDecoder(PrivateMessageContentTopic, encryptionKeyPair.privateKey)
+      createDecoder(PrivateMessageContentTopic, encryptionKeyPair.privateKey)
     );
   }, [encryptionKeyPair]);
 

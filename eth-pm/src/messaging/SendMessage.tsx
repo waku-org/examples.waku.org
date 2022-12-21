@@ -7,8 +7,8 @@ import {
   TextField,
 } from "@material-ui/core";
 import React, { ChangeEvent, useState, KeyboardEvent } from "react";
-import type { WakuPrivacy } from "@waku/interfaces";
-import { AsymEncoder } from "@waku/message-encryption";
+import type { RelayNode } from "@waku/interfaces";
+import { createEncoder } from "@waku/message-encryption/ecies";
 import { PrivateMessage } from "./wire";
 import { PrivateMessageContentTopic } from "../waku";
 import { hexToBytes } from "@waku/byte-utils";
@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export interface Props {
-  waku: WakuPrivacy | undefined;
+  waku: RelayNode | undefined;
   // address, public key
   recipients: Map<string, Uint8Array>;
 }
@@ -106,7 +106,7 @@ export default function SendMessage({ waku, recipients }: Props) {
 }
 
 async function sendMessage(
-  waku: WakuPrivacy,
+  waku: RelayNode,
   recipientAddress: string,
   recipientPublicKey: Uint8Array,
   message: string,
@@ -118,10 +118,7 @@ async function sendMessage(
   });
   const payload = privateMessage.encode();
 
-  const encoder = new AsymEncoder(
-    PrivateMessageContentTopic,
-    recipientPublicKey
-  );
+  const encoder = createEncoder(PrivateMessageContentTopic, recipientPublicKey);
 
   console.log("pushing");
   const res = await waku.relay.send(encoder, { payload });
