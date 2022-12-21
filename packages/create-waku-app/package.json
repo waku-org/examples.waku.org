@@ -35,18 +35,6 @@
         "dapps"
     ],
     "license": "MIT OR Apache-2.0",
-    "wakuExamples": {
-        "eth-pm": "../../eth-pm",
-        "light-js": "../../light-js",
-        "relay-angular-chat": "../../relay-angular-chat",
-        "relay-js": "../../relay-js",
-        "relay-reactjs-chat": "../../relay-reactjs-chat",
-        "rln-js": "../../rln-js",
-        "store-js": "../../store-js",
-        "store-reactjs-chat": "../../store-reactjs-chat",
-        "web-chat": "../../web-chat",
-        "light-chat": "../../light-chat"
-    },
     "dependencies": {
         "commander": "^9.4.1",
         "enquirer": "^2.3.6",

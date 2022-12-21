@@ -16,4 +16,4 @@ if (!semver.satisfies(currentNodeVersion, supportedNodeVersion)) {
 
 const { init } = require("./createApp");
 
-init(packageJson.name, packageJson.description, packageJson.version, packageJson.wakuExamples);
+init(packageJson.name, packageJson.description, packageJson.version);

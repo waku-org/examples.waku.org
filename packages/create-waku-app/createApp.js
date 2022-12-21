@@ -7,10 +7,11 @@ const { Command } = require("commander");
 const validateProjectName = require("validate-npm-package-name");
 
 const supportedExamplesDir = path.resolve(__dirname, "./examples");
+const supportedExamples = readDirNames(supportedExamplesDir);
 
-const init = async (name, description, version, supportedExamples) => {
+const init = async (name, description, version) => {
     let appName;
-    let template; 
+    let template;
 
     const options = new Command()
         .name(name)
@@ -133,6 +134,16 @@ function terminateIfAppExists(appRoot) {
         console.error(`Cannot create a project because it already exists by the name: ${appRoot}`);
         process.exit(1);
     }
+}
+
+function readDirNames(target) {
+    return fs.readdirSync(target, { withFileTypes: true })
+        .filter(dir => dir.isDirectory())
+        .map(dir => dir.name)
+        .reduce((acc, name) => {
+            acc[name] = path.resolve(target, name);
+            return acc;
+        }, {});
 }
 
 module.exports = { init };
