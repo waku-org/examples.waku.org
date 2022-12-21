@@ -1,12 +1,12 @@
 import * as React from "react";
 import protobuf from "protobufjs";
-import { createPrivacyNode } from "@waku/create";
-import { waitForRemotePeer } from "@waku/core/lib/wait_for_remote_peer";
-import { DecoderV0, EncoderV0 } from "@waku/core/lib/waku_message/version_0";
+import { createRelayNode } from "@waku/create";
+import { waitForRemotePeer } from "@waku/core";
+import { createDecoder, createEncoder } from "@waku/core";
 
 const ContentTopic = `/js-waku-examples/1/chat/proto`;
-const Encoder = new EncoderV0(ContentTopic);
-const Decoder = new DecoderV0(ContentTopic);
+const Encoder = createEncoder(ContentTopic);
+const Decoder = createDecoder(ContentTopic);
 
 const SimpleChatMessage = new protobuf.Type("SimpleChatMessage")
   .add(new protobuf.Field("timestamp", 1, "uint32"))
@@ -25,7 +25,7 @@ function App() {
 
     setWakuStatus("Starting");
     (async () => {
-      const waku = await createPrivacyNode({ defaultBootstrap: true });
+      const waku = await createRelayNode({ defaultBootstrap: true });
 
       setWaku(waku);
       await waku.start();
