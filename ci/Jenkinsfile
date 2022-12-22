@@ -79,7 +79,5 @@ def buildExample(example=STAGE_NAME) {
 
 def copyExample(example=STAGE_NAME) {
   sh "mkdir -p build/docs/${example}"
-  sh "cp examples/${example}/*.html build/docs/${example}/"
-  sh "cp examples/${example}/*.js build/docs/${example}/"
-  sh "cp examples/${example}/*.css build/docs/${example}/"
+  sh "cp examples/${example}/*.(js|css|html) build/docs/${example}/"
 }
