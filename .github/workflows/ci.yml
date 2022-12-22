@@ -37,12 +37,12 @@ jobs:
 
       - name: install
         run: pnpm install --frozen-lockfile
-        working-directory: examples/${{ matrix.example }}
+        working-directory: ! 'examples/%{ matrix.example }'
 
       - name: build
         run: pnpm run build
-        working-directory: examples/${{ matrix.example }}
+        working-directory: ! 'examples/%{ matrix.example }'
 
       - name: test
         run: pnpm --if-present test
-        working-directory: examples/${{ matrix.example }}
+        working-directory: ! 'examples/%{ matrix.example }'
