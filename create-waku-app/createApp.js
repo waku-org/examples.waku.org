@@ -23,7 +23,7 @@ const init = async (name, description, version) => {
         })
         .option(
             "-t, --template <path-to-template>", 
-            "specify a template for the created project or you can skip and select template manually"
+            "specify a template for the created project or you can use the wizard."
         )
         .allowUnknownOption()
         .parse()
