@@ -280,7 +280,7 @@
       importFromWalletButton.onclick = async () => {
         const signer = provider.getSigner();
 
-        const signature = await signer.signMessage(signatureMessage);
+        const signature = await signer.signMessage(DEFAULT_SIGNATURE_MESSAGE);
 
         membershipKey = await rlnInstance.generateSeededMembershipKey(
           signature
@@ -401,6 +401,7 @@
           registerButton.disabled = true;
 
           const pubkey = ethers.BigNumber.from(membershipKey.IDCommitment);
+
           const price = await rlnContract.MEMBERSHIP_DEPOSIT();
 
           const signer = provider.getSigner();
