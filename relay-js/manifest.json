@@ -1,6 +1,6 @@
 {
-  "short_name": "Waku v2 Chat",
-  "name": "Chat app powered by js-waku",
+  "short_name": "Relay js",
+  "name": "This example uses Waku Relay to send and receive simple text messages.",
   "icons": [
     {
       "src": "favicon.ico",

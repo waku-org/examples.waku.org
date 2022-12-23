@@ -1,6 +1,6 @@
 {
-  "short_name": "Waku v2 Chat",
-  "name": "Chat app powered by js-waku",
+  "short_name": "Light chat",
+  "name": "Send messages between several users (or just one) using light client targeted protocols.",
   "icons": [
     {
       "src": "favicon.ico",
