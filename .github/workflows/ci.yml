@@ -24,25 +24,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - uses: pnpm/action-setup@v2.2.2
-        with:
-          version: 7
-
       - name: Install NodeJS
         uses: actions/setup-node@v2
         with:
           node-version: "16"
-          cache: "pnpm"
-          cache-dependency-path: "*/pnpm-lock.yaml"
+          cache: "npm"
+          cache-dependency-path: "*/package-lock.json"
 
       - name: install
-        run: pnpm install --frozen-lockfile
+        run: npm ci
         working-directory: ${{ matrix.example }}
 
       - name: build
-        run: pnpm run build
+        run: npm run build
         working-directory: ${{ matrix.example }}
 
       - name: test
-        run: pnpm --if-present test
+        run: npm run test --if-present
         working-directory: ${{ matrix.example }}
