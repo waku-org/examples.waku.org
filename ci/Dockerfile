@@ -4,8 +4,6 @@ LABEL maintainer="jakub@status.im"
 
 RUN apk --no-cache add openssh git
 
-RUN npm install -g pnpm
-
 # Jenkins user needs a specific UID/GID to work
 RUN addgroup -g 1001 jenkins \
  && adduser -u 1001 -G jenkins -D jenkins
