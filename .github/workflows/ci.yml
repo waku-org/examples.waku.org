@@ -32,7 +32,7 @@ jobs:
           cache-dependency-path: "*/package-lock.json"
 
       - name: install
-        run: npm ci
+        run: npm install
         working-directory: ${{ matrix.example }}
 
       - name: build
