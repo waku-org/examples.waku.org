@@ -48,6 +48,7 @@ pipeline {
         stage('store-js') { steps { script { copyExample() } } }
         stage('light-js') { steps { script { copyExample() } } }
         stage('rln-js') { steps { script { copyExample() } } }
+        stage('light-chat') { steps { script { copyExample() } } }
       }
     }
 
@@ -68,7 +69,7 @@ pipeline {
 
 def buildExample(example=STAGE_NAME) {
   def dest = "${WORKSPACE}/build/docs/${example}"
-  dir("${example}") {
+  dir("examples/${example}") {
     sh 'npm install --silent'
     sh 'npm run build'
     sh "mkdir -p ${dest}"
@@ -78,6 +79,5 @@ def buildExample(example=STAGE_NAME) {
 
 def copyExample(example=STAGE_NAME) {
   sh "mkdir -p build/docs/${example}"
-  sh "cp ${example}/index.html build/docs/${example}/"
-  sh "[ -f ${example}/style.css ] && cp ${example}/style.css build/docs/${example}/ || exit 0"
+  sh "cp examples/${example}/*.(js|css|html) build/docs/${example}/"
 }
