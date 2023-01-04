@@ -33,12 +33,12 @@ jobs:
 
       - name: install
         run: npm install
-        working-directory: "! 'examples/%{ matrix.example }'"
+        working-directory: "examples/${{ matrix.example }}"
 
       - name: build
         run: npm run build
-        working-directory: "! 'examples/%{ matrix.example }'"
+        working-directory: "examples/${{ matrix.example }}"
 
       - name: test
         run: npm run test --if-present
-        working-directory: "! 'examples/%{ matrix.example }'"
+        working-directory: "examples/${{ matrix.example }}"
