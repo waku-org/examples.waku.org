@@ -51,6 +51,9 @@
       "last 1 safari version"
     ]
   },
+  "overrides": {
+    "react-refresh": "0.14.0"
+  },
   "devDependencies": {
     "@craco/craco": "^6.4.5",
     "@ethersproject/shims": "^5.7.0",
