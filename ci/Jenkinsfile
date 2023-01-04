@@ -26,7 +26,7 @@ pipeline {
   stages {
     stage('Pre') {
       steps {
-        sh 'pnpm install --silent'
+        sh 'npm install --silent'
         /* TODO: Build the main page. */
         sh 'mkdir -p build/docs'
       }
@@ -70,8 +70,8 @@ pipeline {
 def buildExample(example=STAGE_NAME) {
   def dest = "${WORKSPACE}/build/docs/${example}"
   dir("examples/${example}") {
-    sh 'pnpm install --silent'
-    sh 'pnpm run build'
+    sh 'npm install --silent'
+    sh 'npm run build'
     sh "mkdir -p ${dest}"
     sh "cp -r build/. ${dest}"
   }
