@@ -1,6 +1,6 @@
 {
-  "short_name": "Waku v2 Chat",
-  "name": "Chat app powered by js-waku",
+  "short_name": "Store js",
+  "name": "This example uses Waku Store to retrieve the latest ping relay message (used for keep alive purposes) and displays its timestamp.",
   "icons": [
     {
       "src": "favicon.ico",

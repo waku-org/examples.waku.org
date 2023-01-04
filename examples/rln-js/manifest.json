@@ -1,6 +1,6 @@
 {
-  "short_name": "Waku v2 Chat",
-  "name": "Chat app powered by js-waku",
+  "short_name": "Rln js",
+  "name": "Use RLN in the browser, compatible with nwaku chat2 and go-waku chat2 RLN implementations.",
   "icons": [
     {
       "src": "favicon.ico",
