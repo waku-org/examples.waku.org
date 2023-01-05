@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>JS-Waku light node example</title>
+  </head>
+  <body>
+    <p>Press F12 to open the console</p>
+    <p><b>Waku Status:</b> <span id="waku-status">connecting...</span></p>
+    <p id="handshake-span">
+      <b>Handshake Status:</b> <span id="handshake-status">-</span>
+    </p>
+    <canvas id="qr-canvas"></canvas>
+    <a href="#" id="qr-url" style="display: none" target="_blank"
+      >Open QR code link in new window instead of scanning it.</a
+    >
+
+    <div id="chat-area" style="display: none">
+      <label for="nick-input">Your nickname</label>
+      <input id="nick-input" placeholder="Choose a nickname" type="text" />
+      <label for="text-input">Message text</label>
+      <input id="text-input" placeholder="Type your message here" type="text" />
+      <button id="send-btn" type="button" disabled>
+        Send message using Light Push
+      </button>
+      <span id="sending-status"></span>
+
+      <h4 class="mu1">Messages</h4>
+      <div id="messages"></div>
+    </div>
+
+    <script src="./index.js"></script>
+  </body>
+</html>
