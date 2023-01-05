@@ -45,6 +45,7 @@ jobs:
   
   release_create_waku:
     runs-on: ubuntu-latest
+    needs: [examples_build_and_test]
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@v2.3.3
