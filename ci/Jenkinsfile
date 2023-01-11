@@ -78,6 +78,11 @@ def buildExample(example=STAGE_NAME) {
 }
 
 def copyExample(example=STAGE_NAME) {
-  sh "mkdir -p build/docs/${example}"
-  sh "cp examples/${example}/*.\\(js|css|html\\) build/docs/${example}/"
+  def source = "examples/${example}"
+  def dest = "build/docs/${example}"
+
+  sh "mkdir -p ${dest}"
+  sh "[ -e ${source}/*.js] && cp ${source}/*.js ${dest}/"
+  sh "[ -e ${source}/*.css] && cp ${source}/*.css ${dest}/"
+  sh "[ -e ${source}/*.html] && cp ${source}/*.html ${dest}/"
 }
