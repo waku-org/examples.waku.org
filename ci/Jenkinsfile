@@ -82,7 +82,22 @@ def copyExample(example=STAGE_NAME) {
   def dest = "build/docs/${example}"
 
   sh "mkdir -p ${dest}"
-  sh "[ -e ${source}/*.js] && cp ${source}/*.js ${dest}/"
-  sh "[ -e ${source}/*.css] && cp ${source}/*.css ${dest}/"
-  sh "[ -e ${source}/*.html] && cp ${source}/*.html ${dest}/"
+  
+  try {
+    sh "cp ${source}/*.js ${dest}/"
+  } catch (e) {
+    echo "No JS files found."
+  }
+
+  try {
+    sh "[ -e ${source}/*.css] && cp ${source}/*.css ${dest}/"
+  } catch (e) {
+    echo "No CSS files found."
+  }
+
+  try {
+    sh "cp ${source}/*.html ${dest}/"
+  } catch (e) {
+    echo "No HTML files found."
+  }
 }
