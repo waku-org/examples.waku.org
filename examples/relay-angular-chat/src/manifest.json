@@ -1,6 +1,6 @@
 {
-  "short_name": "Relay chat",
-  "name": "A barebone messaging app to illustrate the Angular Relay guide.",
+  "name": "Relay Chat",
+  "description": "A barebone messaging app to illustrate the Angular Relay guide.",
   "icons": [
     {
       "src": "favicon.ico",
@@ -13,8 +13,7 @@
       "sizes": "192x192"
     }
   ],
-  "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
+  "theme_color": "#ffffff",
   "background_color": "#ffffff"
 }
