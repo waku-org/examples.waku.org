@@ -198,7 +198,7 @@ async function main() {
       confirmAuthCodeFlow(pairingObj);
 
       try {
-        handshakeStatusSpan.innerHTML = "executing handshake...";
+        handshakeStatusSpan.innerHTML = "waiting for handshake...";
 
         [encoder, decoder] = await pExecute;
 
