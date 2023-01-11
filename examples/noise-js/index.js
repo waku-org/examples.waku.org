@@ -10,9 +10,6 @@ import { Protocols } from "js-waku";
 import * as noise from "@waku/noise";
 import protobuf from "protobufjs";
 import QRCode from "qrcode";
-// TODO: Get rid of these
-import hexToArrayBuffer from "hex-to-array-buffer";
-import arrayBufferToHex from "array-buffer-to-hex";
 
 const messagesDiv = document.getElementById("messages");
 const nicknameInput = document.getElementById("nick-input");
@@ -34,7 +31,7 @@ function getPairingInfofromUrl() {
     throw new Error("invalid pairing information format");
 
   const qrMessageNameTag = new Uint8Array(
-    hexToArrayBuffer(pairingParts.shift())
+    utils.hexToBytes(pairingParts.shift())
   );
 
   return new noise.InitiatorParameters(
@@ -237,7 +234,7 @@ async function main() {
 
       // Data to encode in the QR code. The qrMessageNametag too to the QR string (separated by )
       const qrString =
-        arrayBufferToHex(pInfo.qrMessageNameTag) + ":" + pInfo.qrCode;
+        utils.bytesToHex(pInfo.qrMessageNameTag) + ":" + pInfo.qrCode;
       const qrURLString =
         window.location.href + "?" + encodeURIComponent(qrString);
 
