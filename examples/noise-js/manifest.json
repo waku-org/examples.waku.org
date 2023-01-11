@@ -1,6 +1,6 @@
 {
-  "short_name": "Waku Noise",
-  "name": "Example showing waku noise capabilities.",
+  "name": "Waku Noise",
+  "description": "Example showing Waku noise capabilities.",
   "icons": [
     {
       "src": "favicon.ico",
@@ -13,8 +13,7 @@
       "sizes": "192x192"
     }
   ],
-  "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
+  "theme_color": "#ffffff",
   "background_color": "#ffffff"
 }
