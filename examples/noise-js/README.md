@@ -1,7 +1,7 @@
-# Waku Noise Pairing example app
+# Waku Noise Pairing Example App
 
 ```
 npm install
 npm start
 ```
-Browse http://localhost:8080 and open the developer tools to see console logs
+Browse to http://localhost:8080
