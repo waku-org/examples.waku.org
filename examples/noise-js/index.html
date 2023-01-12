@@ -13,10 +13,25 @@
     <p id="handshake-span">
       <b>Handshake Status:</b> <span id="handshake-status">-</span>
     </p>
+
+    <div id="qr-url-container">
+      <p>
+        <b>URL for handshake:</b>
+        <input
+          type="text"
+          id="qr-url"
+          style="display: inline-block; width: 250px"
+          readonly
+        />
+      </p>
+      <button id="copy-url" style="width: 100px">Copy URL</button>
+      <button id="open-tab" style="width: 100px">Open in new</button>
+    </div>
+
     <canvas id="qr-canvas"></canvas>
-    <a href="#" id="qr-url" style="display: none" target="_blank"
+    <!-- <a href="#" id="qr-url" style="display: none" target="_blank"
       >Open QR code link in new window instead of scanning it.</a
-    >
+    > -->
 
     <div id="chat-area" style="display: none">
       <label for="nick-input">Your nickname</label>

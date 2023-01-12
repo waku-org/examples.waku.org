@@ -21,6 +21,20 @@ const qrCanvas = document.getElementById("qr-canvas");
 const qrUrl = document.getElementById("qr-url");
 const wakuStatusSpan = document.getElementById("waku-status");
 const handshakeStatusSpan = document.getElementById("handshake-status");
+const qrUrlContainer = document.getElementById("qr-url-container");
+const copyURLButton = document.getElementById("copy-url");
+const openTabButton = document.getElementById("open-tab");
+
+copyURLButton.onclick = () => {
+  const copyText = document.getElementById("qr-url");
+  copyText.select();
+  copyText.setSelectionRange(0, 99999);
+  navigator.clipboard.writeText(copyText.value);
+};
+
+openTabButton.onclick = () => {
+  window.open(qrUrl.value, "_blank");
+};
 
 function getPairingInfofromUrl() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -105,7 +119,7 @@ async function confirmAuthCodeFlow(pairingObj) {
 
 async function hideQR() {
   qrCanvas.remove();
-  qrUrl.remove();
+  qrUrlContainer.remove();
 }
 
 async function disableUI() {
@@ -181,7 +195,7 @@ async function main() {
 
     if (initiator) {
       console.log("Initiator");
-      qrCanvas.remove(); // Initiator does not require a QR code
+      hideQR(); // Initiator does not require a QR code
 
       const pairingObj = new noise.WakuPairing(
         sender,
@@ -249,8 +263,7 @@ async function main() {
           console.error(err);
         } else {
           handshakeStatusSpan.innerHTML = "waiting for handshake...";
-          qrUrl.href = qrURLString;
-          qrUrl.style.display = "block";
+          qrUrl.value = qrURLString;
         }
       });
 
