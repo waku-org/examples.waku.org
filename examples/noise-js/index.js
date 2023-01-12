@@ -23,20 +23,18 @@ const wakuStatusSpan = document.getElementById("waku-status");
 const handshakeStatusSpan = document.getElementById("handshake-status");
 
 function getPairingInfofromUrl() {
-  const urlParts = window.location.href.split("?");
-  if (urlParts.length < 2) return undefined;
+  const urlParams = new URLSearchParams(window.location.search);
 
-  const pairingParts = decodeURIComponent(urlParts[1]).split(":");
-  if (pairingParts.length < 6)
-    throw new Error("invalid pairing information format");
+  const messageNameTag = urlParams.get("messageNameTag");
+  const qrCodeString = urlParams.get("qrCode");
 
-  const qrMessageNameTag = new Uint8Array(
-    utils.hexToBytes(pairingParts.shift())
-  );
+  if (!(messageNameTag && qrCodeString)) {
+    return undefined;
+  }
 
   return new noise.InitiatorParameters(
-    pairingParts.join(":"),
-    qrMessageNameTag
+    qrCodeString,
+    utils.hexToBytes(messageNameTag)
   );
 }
 
@@ -233,10 +231,11 @@ async function main() {
       const pInfo = pairingObj.getPairingInfo();
 
       // Data to encode in the QR code. The qrMessageNametag too to the QR string (separated by )
-      const qrString =
-        utils.bytesToHex(pInfo.qrMessageNameTag) + ":" + pInfo.qrCode;
-      const qrURLString =
-        window.location.href + "?" + encodeURIComponent(qrString);
+      const messageNameTagParam = `messageNameTag=${utils.bytesToHex(
+        pInfo.qrMessageNameTag
+      )}`;
+      const qrCodeParam = `qrCode=${encodeURIComponent(pInfo.qrCode)}`;
+      const qrURLString = `${window.location.href}?${messageNameTagParam}&${qrCodeParam}`;
 
       handshakeStatusSpan.innerHTML = "generating QR code...";
 
