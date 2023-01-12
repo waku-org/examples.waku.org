@@ -98,8 +98,8 @@ function getSenderAndResponder(node) {
 }
 
 async function confirmAuthCodeFlow(pairingObj) {
-  handshakeStatusSpan.innerHTML = "executing handshake...";
   const authCode = await pairingObj.getAuthCode();
+  handshakeStatusSpan.innerHTML = "executing handshake";
   pairingObj.validateAuthCode(confirm("Confirm that authcode is: " + authCode));
 }
 
@@ -248,14 +248,14 @@ async function main() {
           disableUI();
           console.error(err);
         } else {
-          handshakeStatusSpan.innerHTML = "waiting for handshake";
+          handshakeStatusSpan.innerHTML = "waiting for handshake...";
           qrUrl.href = qrURLString;
           qrUrl.style.display = "block";
         }
       });
 
       try {
-        handshakeStatusSpan.innerHTML = "waiting for handshake";
+        handshakeStatusSpan.innerHTML = "waiting for handshake...";
 
         [encoder, decoder] = await pExecute;
 
