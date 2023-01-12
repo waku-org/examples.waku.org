@@ -90,7 +90,7 @@ def copyExample(example=STAGE_NAME) {
   }
 
   try {
-    sh "[ -e ${source}/*.css] && cp ${source}/*.css ${dest}/"
+    sh "cp ${source}/*.css ${dest}/"
   } catch (e) {
     echo "No CSS files found."
   }
