@@ -33,7 +33,7 @@ function getPairingInfofromUrl() {
   }
 
   return new noise.InitiatorParameters(
-    qrCodeString,
+    decodeURIComponent(qrCodeString),
     utils.hexToBytes(messageNameTag)
   );
 }
