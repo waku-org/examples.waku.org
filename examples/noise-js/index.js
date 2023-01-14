@@ -11,32 +11,120 @@ import * as noise from "@waku/noise";
 import protobuf from "protobufjs";
 import QRCode from "qrcode";
 
-const messagesDiv = document.getElementById("messages");
-const nicknameInput = document.getElementById("nick-input");
-const textInput = document.getElementById("text-input");
-const sendButton = document.getElementById("send-btn");
-const sendingStatusSpan = document.getElementById("sending-status");
-const chatArea = document.getElementById("chat-area");
-const qrCanvas = document.getElementById("qr-canvas");
-const qrUrl = document.getElementById("qr-url");
-const wakuStatusSpan = document.getElementById("waku-status");
-const handshakeStatusSpan = document.getElementById("handshake-status");
-const qrUrlContainer = document.getElementById("qr-url-container");
-const copyURLButton = document.getElementById("copy-url");
-const openTabButton = document.getElementById("open-tab");
+// Protobuf
+const ProtoChatMessage = new protobuf.Type("ChatMessage")
+  .add(new protobuf.Field("timestamp", 1, "uint64"))
+  .add(new protobuf.Field("nick", 2, "string"))
+  .add(new protobuf.Field("text", 3, "bytes"));
 
-copyURLButton.onclick = () => {
-  const copyText = document.getElementById("qr-url");
-  copyText.select();
-  copyText.setSelectionRange(0, 99999);
-  navigator.clipboard.writeText(copyText.value);
-};
+main();
 
-openTabButton.onclick = () => {
-  window.open(qrUrl.value, "_blank");
-};
+async function main() {
+  const ui = initUI();
+  ui.waku.connecting();
 
-function getPairingInfofromUrl() {
+  // Starting the node
+  const node = await createLightNode({
+    libp2p: {
+      peerDiscovery: [
+        new PeerDiscoveryStaticPeers(getPredefinedBootstrapNodes(Fleet.Test)),
+      ],
+    },
+  });
+
+  try {
+    await node.start();
+    await waitForRemotePeer(node, [Protocols.Filter, Protocols.LightPush]);
+
+    ui.waku.connected();
+
+    const [sender, responder] = getSenderAndResponder(node);
+    const myStaticKey = noise.generateX25519KeyPair();
+    const urlPairingInfo = getPairingInfoFromURL();
+
+    if (urlPairingInfo) {
+      ui.shareInfo.hide();
+    }
+
+    const pairingObj = new noise.WakuPairing(
+      sender,
+      responder,
+      myStaticKey,
+      urlPairingInfo || new noise.ResponderParameters()
+    );
+    const pExecute = pairingObj.execute(120000); // timeout after 2m
+
+    scheduleHandshakeAuthConfirmation(pairingObj, ui);
+
+    let encoder;
+    let decoder;
+
+    try {
+      ui.handshake.waiting();
+
+      if (!urlPairingInfo) {
+        const pairingURL = buildPairingURLFromObj(pairingObj);
+        ui.shareInfo.setURL(pairingURL);
+        ui.shareInfo.renderQR(pairingURL);
+      }
+
+      [encoder, decoder] = await pExecute;
+
+      ui.handshake.connected();
+      ui.shareInfo.hide();
+    } catch (err) {
+      ui.handshake.error(err.message);
+      ui.hide();
+    }
+
+    /*
+    // The information needs to be backed up to decrypt messages sent with
+    // codecs generated with the handshake. The `handshakeResult` variable
+    // contains private information that needs to be stored safely
+    const contentTopic = pairingObj.contentTopic;
+    const handshakeResult = pairingObj.getHandshakeResult();
+
+    // To restore the codecs for decrypting older messages, or continuing an existing
+    // session, use this:
+    [encoder, decoder] = WakuPairing.getSecureCodec(contentTopic, handshakeResult);
+    */
+    ui.message.display();
+
+    await node.filter.subscribe(
+      [decoder],
+      ui.message.onReceive.bind(ui.message)
+    );
+
+    ui.message.onSend(async (text, nick) => {
+      const timestamp = Math.floor(Date.now() / 1000);
+      const message = ProtoChatMessage.create({
+        nick,
+        timestamp,
+        text: utils.utf8ToBytes(text),
+      });
+      const payload = ProtoChatMessage.encode(message).finish();
+
+      await node.lightPush.push(encoder, { payload, timestamp });
+    });
+  } catch (err) {
+    ui.waku.error(err.message);
+    ui.hide();
+  }
+}
+
+function buildPairingURLFromObj(pairingObj) {
+  const pInfo = pairingObj.getPairingInfo();
+
+  // Data to encode in the QR code. The qrMessageNametag too to the QR string (separated by )
+  const messageNameTagParam = `messageNameTag=${utils.bytesToHex(
+    pInfo.qrMessageNameTag
+  )}`;
+  const qrCodeParam = `qrCode=${encodeURIComponent(pInfo.qrCode)}`;
+
+  return `${window.location.href}?${messageNameTagParam}&${qrCodeParam}`;
+}
+
+function getPairingInfoFromURL() {
   const urlParams = new URLSearchParams(window.location.search);
 
   const messageNameTag = urlParams.get("messageNameTag");
@@ -111,220 +199,161 @@ function getSenderAndResponder(node) {
   return [sender, responder];
 }
 
-async function confirmAuthCodeFlow(pairingObj) {
+async function scheduleHandshakeAuthConfirmation(pairingObj, ui) {
   const authCode = await pairingObj.getAuthCode();
-  handshakeStatusSpan.innerHTML = "executing handshake";
+  ui.handshake.connecting();
   pairingObj.validateAuthCode(confirm("Confirm that authcode is: " + authCode));
 }
 
-async function hideQR() {
-  qrCanvas.remove();
-  qrUrlContainer.remove();
-}
+function initUI() {
+  const messagesList = document.getElementById("messages");
+  const nicknameInput = document.getElementById("nick-input");
+  const textInput = document.getElementById("text-input");
+  const sendButton = document.getElementById("send-btn");
+  const sendingStatusSpan = document.getElementById("sending-status");
+  const chatArea = document.getElementById("chat-area");
+  const wakuStatusSpan = document.getElementById("waku-status");
+  const handshakeStatusSpan = document.getElementById("handshake-status");
 
-async function disableUI() {
-  hideQR();
-  chatArea.remove();
-}
+  const qrCanvas = document.getElementById("qr-canvas");
+  const qrUrlContainer = document.getElementById("qr-url-container");
+  const qrUrl = document.getElementById("qr-url");
+  const copyURLButton = document.getElementById("copy-url");
+  const openTabButton = document.getElementById("open-tab");
 
-// Function to update the fields to guide the user by disabling buttons.
-const updateFields = () => {
-  const readyToSend = nicknameInput.value !== "";
-  textInput.disabled = !readyToSend;
-  sendButton.disabled = !readyToSend;
-};
+  copyURLButton.onclick = () => {
+    const copyText = document.getElementById("qr-url"); // need to get it each time otherwise copying does not work
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(copyText.value);
+  };
 
-// Protobuf
-const ProtoChatMessage = new protobuf.Type("ChatMessage")
-  .add(new protobuf.Field("timestamp", 1, "uint64"))
-  .add(new protobuf.Field("nick", 2, "string"))
-  .add(new protobuf.Field("text", 3, "bytes"));
+  openTabButton.onclick = () => {
+    window.open(qrUrl.value, "_blank");
+  };
 
-let messages = [];
+  const disableChatUIStateIfNeeded = () => {
+    const readyToSend = nicknameInput.value !== "";
+    textInput.disabled = !readyToSend;
+    sendButton.disabled = !readyToSend;
+  };
+  nicknameInput.onchange = disableChatUIStateIfNeeded;
+  nicknameInput.onblur = disableChatUIStateIfNeeded;
 
-const updateMessages = () => {
-  messagesDiv.innerHTML = "<ul>";
-  messages.forEach((msg) => {
-    messagesDiv.innerHTML += `<li>${msg}</li>`;
-  });
-  messagesDiv.innerHTML += "</ul>";
-};
-
-const onMessage = (wakuMessage) => {
-  const { timestamp, nick, text } = ProtoChatMessage.decode(
-    wakuMessage.payload
-  );
-  const time = new Date();
-  time.setTime(Number(timestamp) * 1000);
-
-  messages.push(
-    `(${nick}) <strong>${utils.bytesToUtf8(
-      text
-    )}</strong> <i>[${time.toISOString()}]</i>`
-  );
-  updateMessages();
-};
-
-async function main() {
-  // Starting the node
-  const node = await createLightNode({
-    libp2p: {
-      peerDiscovery: [
-        new PeerDiscoveryStaticPeers(getPredefinedBootstrapNodes(Fleet.Test)),
-      ],
+  return {
+    shareInfo: {
+      setURL(url) {
+        qrUrl.value = url;
+      },
+      hide() {
+        qrCanvas.remove();
+        qrUrlContainer.remove();
+      },
+      renderQR(url) {
+        QRCode.toCanvas(qrCanvas, url, (err) => {
+          if (err) {
+            throw err;
+          }
+        });
+      },
     },
-  });
+    waku: {
+      _val(msg) {
+        wakuStatusSpan.innerText = msg;
+      },
+      _class(name) {
+        wakuStatusSpan.className = name;
+      },
+      connecting() {
+        this._val("connecting...");
+        this._class("progress");
+      },
+      connected() {
+        this._val("connected");
+        this._class("success");
+      },
+      error(msg) {
+        this._val(msg);
+        this._class("error");
+      },
+    },
+    handshake: {
+      _val(val) {
+        handshakeStatusSpan.innerText = val;
+      },
+      _class(name) {
+        handshakeStatusSpan.className = name;
+      },
+      error(msg) {
+        this._val(msg);
+        this._class("error");
+      },
+      waiting() {
+        this._val("waiting for handshake...");
+        this._class("progress");
+      },
+      generating() {
+        this._val("generating QR code...");
+        this._class("progress");
+      },
+      connecting() {
+        this._val("executing handshake...");
+        this._class("progress");
+      },
+      connected() {
+        this._val("handshake completed!");
+        this._class("success");
+      },
+    },
+    message: {
+      _render({ time, text, nick }) {
+        messagesList.innerHTML += `
+          <li>
+            (${nick})
+            <strong>${text}</strong>
+            <i>[${new Date(time).toISOString()}]</i>
+          </li>
+        `;
+      },
+      _status(text, className) {
+        sendingStatusSpan.innerText = text;
+        sendingStatusSpan.className = className;
+      },
+      onReceive({ payload }) {
+        const { timestamp, nick, text } = ProtoChatMessage.decode(payload);
 
-  try {
-    await node.start();
+        this._render({
+          nick,
+          time: timestamp * 1000,
+          text: utils.bytesToUtf8(text),
+        });
+      },
+      onSend(cb) {
+        sendButton.addEventListener("click", async () => {
+          try {
+            this._status("sending...", "progress");
+            await cb(textInput.value, nicknameInput.value);
+            this._status("sent", "success");
 
-    await waitForRemotePeer(node, [Protocols.Filter, Protocols.LightPush]);
-
-    wakuStatusSpan.innerHTML = "connected";
-
-    const [sender, responder] = getSenderAndResponder(node);
-
-    const myStaticKey = noise.generateX25519KeyPair();
-
-    const pairingParameters = getPairingInfofromUrl();
-
-    const initiator = pairingParameters ? true : false;
-
-    let encoder;
-    let decoder;
-
-    if (initiator) {
-      console.log("Initiator");
-      hideQR(); // Initiator does not require a QR code
-
-      const pairingObj = new noise.WakuPairing(
-        sender,
-        responder,
-        myStaticKey,
-        pairingParameters
-      );
-      const pExecute = pairingObj.execute(120000); // timeout after 2m
-
-      confirmAuthCodeFlow(pairingObj);
-
-      try {
-        handshakeStatusSpan.innerHTML = "waiting for handshake...";
-
-        [encoder, decoder] = await pExecute;
-
-        handshakeStatusSpan.innerHTML = "handshake completed!";
-      } catch (err) {
-        handshakeStatusSpan.innerHTML = err.message;
-        disableUI();
-        console.error(err);
-      }
-
-      /*
-      // The information needs to be backed up to decrypt messages sent with
-      // codecs generated with the handshake. The `handshakeResult` variable
-      // contains private information that needs to be stored safely
-      const contentTopic = pairingObj.contentTopic;
-      const handshakeResult = pairingObj.getHandshakeResult();
-
-      // To restore the codecs for decrypting older messages, or continuing an existing
-      // session, use this:
-      [encoder, decoder] = WakuPairing.getSecureCodec(contentTopic, handshakeResult);
-      */
-    } else {
-      console.log("Responder");
-
-      const pairingObj = new noise.WakuPairing(
-        sender,
-        responder,
-        myStaticKey,
-        new noise.ResponderParameters()
-      );
-      const pExecute = pairingObj.execute(120000); // timeout after 2m
-
-      confirmAuthCodeFlow(pairingObj);
-
-      const pInfo = pairingObj.getPairingInfo();
-
-      // Data to encode in the QR code. The qrMessageNametag too to the QR string (separated by )
-      const messageNameTagParam = `messageNameTag=${utils.bytesToHex(
-        pInfo.qrMessageNameTag
-      )}`;
-      const qrCodeParam = `qrCode=${encodeURIComponent(pInfo.qrCode)}`;
-      const qrURLString = `${window.location.href}?${messageNameTagParam}&${qrCodeParam}`;
-
-      handshakeStatusSpan.innerHTML = "generating QR code...";
-
-      console.log("Generating QR...");
-
-      QRCode.toCanvas(qrCanvas, qrURLString, (err) => {
-        if (err) {
-          handshakeStatusSpan.innerHTML = err.message;
-          disableUI();
-          console.error(err);
-        } else {
-          handshakeStatusSpan.innerHTML = "waiting for handshake...";
-          qrUrl.value = qrURLString;
-        }
-      });
-
-      try {
-        handshakeStatusSpan.innerHTML = "waiting for handshake...";
-
-        [encoder, decoder] = await pExecute;
-
-        handshakeStatusSpan.innerHTML = "handshake completed!";
-
-        hideQR();
-      } catch (err) {
-        handshakeStatusSpan.innerHTML = err.message;
-        disableUI();
-        console.error(err);
-      }
-
-      /*
-      // The information needs to be backed up to decrypt messages sent with
-      // codecs generated with the handshake. The `handshakeResult` variable
-      // contains private information that needs to be stored safely
-      const contentTopic = pairingObj.contentTopic;
-      const handshakeResult = pairingObj.getHandshakeResult();
-
-      // To restore the codecs for decrypting older messages, or continuing an existing
-      // session, use this:
-      [encoder, decoder] = WakuPairing.getSecureCodec(contentTopic, handshakeResult);
-      */
-    }
-
-    nicknameInput.onchange = updateFields;
-    nicknameInput.onblur = updateFields;
-
-    sendButton.onclick = async () => {
-      const text = utils.utf8ToBytes(textInput.value);
-      const timestamp = new Date();
-      const msg = ProtoChatMessage.create({
-        text,
-        nick: nicknameInput.value,
-        timestamp: Math.floor(timestamp.valueOf() / 1000),
-      });
-      const payload = ProtoChatMessage.encode(msg).finish();
-      sendingStatusSpan.innerText = "sending...";
-      await node.lightPush.push(encoder, { payload, timestamp });
-      sendingStatusSpan.innerText = "sent!";
-
-      onMessage({ payload });
-
-      textInput.value = null;
-      setTimeout(() => {
-        sendingStatusSpan.innerText = "";
-      }, 5000);
-    };
-
-    await node.filter.subscribe([decoder], onMessage);
-
-    chatArea.style.display = "block";
-  } catch (err) {
-    wakuStatusSpan.innerHTML = err.message;
-    disableUI();
-    return;
-  }
+            this._render({
+              time: Date.now(), // a bit different from what receiver will see but for the matter of example is good enough
+              text: textInput.value,
+              nick: nicknameInput.value,
+            });
+            textInput.value = "";
+          } catch (e) {
+            this._status(`error: ${e.message}`, "error");
+          }
+        });
+      },
+      display() {
+        chatArea.style.display = "block";
+        this._status("waiting for input", "progress");
+      },
+    },
+    hide() {
+      this.shareInfo.hide();
+      chatArea.remove();
+    },
+  };
 }
-main();

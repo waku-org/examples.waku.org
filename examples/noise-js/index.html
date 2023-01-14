@@ -7,6 +7,19 @@
     <link rel="apple-touch-icon" href="./favicon.png" />
     <link rel="manifest" href="./manifest.json" />
     <link rel="icon" href="./favicon.ico" />
+    <style>
+      .progress {
+        color: #9ea13b;
+      }
+
+      .success {
+        color: #3ba183;
+      }
+
+      .error {
+        color: #c84740;
+      }
+    </style>
   </head>
   <body>
     <p><b>Waku Node Status:</b> <span id="waku-status">connecting...</span></p>
@@ -42,7 +55,7 @@
       <span id="sending-status"></span>
 
       <h4 class="mu1">Messages</h4>
-      <div id="messages"></div>
+      <ul id="messages"></ul>
     </div>
 
     <script src="./index.js"></script>
