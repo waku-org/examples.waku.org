@@ -42,10 +42,6 @@ async function main() {
     const myStaticKey = noise.generateX25519KeyPair();
     const urlPairingInfo = getPairingInfoFromURL();
 
-    if (urlPairingInfo) {
-      ui.shareInfo.hide();
-    }
-
     const pairingObj = new noise.WakuPairing(
       sender,
       responder,
@@ -66,6 +62,7 @@ async function main() {
         const pairingURL = buildPairingURLFromObj(pairingObj);
         ui.shareInfo.setURL(pairingURL);
         ui.shareInfo.renderQR(pairingURL);
+        ui.shareInfo.show();
       }
 
       [encoder, decoder] = await pExecute;
@@ -246,8 +243,10 @@ function initUI() {
         qrUrl.value = url;
       },
       hide() {
-        qrCanvas.remove();
-        qrUrlContainer.remove();
+        qrUrlContainer.style.display = "none";
+      },
+      show() {
+        qrUrlContainer.style.display = "flex";
       },
       renderQR(url) {
         QRCode.toCanvas(qrCanvas, url, (err) => {
@@ -316,8 +315,7 @@ function initUI() {
         `;
       },
       _status(text, className) {
-        sendingStatusSpan.innerText = text;
-        sendingStatusSpan.className = className;
+        sendButton.className = className;
       },
       onReceive({ payload }) {
         const { timestamp, nick, text } = ProtoChatMessage.decode(payload);
@@ -353,7 +351,7 @@ function initUI() {
     },
     hide() {
       this.shareInfo.hide();
-      chatArea.remove();
+      chatArea.style.display = "none";
     },
   };
 }
