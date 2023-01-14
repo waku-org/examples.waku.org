@@ -100,4 +100,22 @@ def copyExample(example=STAGE_NAME) {
   } catch (e) {
     echo "No HTML files found."
   }
+
+  try {
+    sh "cp ${source}/*.json ${dest}/"
+  } catch (e) {
+    echo "No JSON files found."
+  }
+
+  try {
+    sh "cp ${source}/*.png ${dest}/"
+  } catch (e) {
+    echo "No PNG files found."
+  }
+
+  try {
+    sh "cp ${source}/*.ico ${dest}/"
+  } catch (e) {
+    echo "No ICO files found."
+  }
 }
