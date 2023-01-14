@@ -1,0 +1,14 @@
+{
+    "name": "light-chat",
+    "version": "0.1.0",
+    "private": true,
+    "homepage": "/light-chat",
+    "devDependencies": {
+        "serve": "^14.1.2",
+        "gh-pages": "^4.0.0"
+    },
+    "scripts": {
+        "start": "serve .",
+        "deploy": "gh-pages -d ."
+    }
+}
