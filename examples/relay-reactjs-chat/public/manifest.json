@@ -1,6 +1,6 @@
 {
-  "short_name": "React Relay",
-  "name": "A barebone chat app to illustrate the ReactJS Relay guide.",
+  "name": "Waku Relay",
+  "description": "A barebone chat app to illustrate the ReactJS Relay guide.",
   "icons": [
     {
       "src": "favicon.ico",
@@ -13,8 +13,7 @@
       "sizes": "192x192"
     }
   ],
-  "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
+  "theme_color": "#ffffff",
   "background_color": "#ffffff"
 }
