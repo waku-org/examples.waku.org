@@ -53,7 +53,6 @@ pipeline {
     }
 
     stage('Publish') {
-      //when { expression { GIT_BRANCH.endsWith('master') } }
       steps { script {
         sh "echo ${SITE_DOMAIN} > build/docs/CNAME"
         sshagent(credentials: ['status-im-auto-ssh']) {
@@ -80,42 +79,6 @@ def buildExample(example=STAGE_NAME) {
 def copyExample(example=STAGE_NAME) {
   def source = "examples/${example}"
   def dest = "build/docs/${example}"
-
   sh "mkdir -p ${dest}"
-  
-  try {
-    sh "cp ${source}/*.js ${dest}/"
-  } catch (e) {
-    echo "No JS files found."
-  }
-
-  try {
-    sh "cp ${source}/*.css ${dest}/"
-  } catch (e) {
-    echo "No CSS files found."
-  }
-
-  try {
-    sh "cp ${source}/*.html ${dest}/"
-  } catch (e) {
-    echo "No HTML files found."
-  }
-
-  try {
-    sh "cp ${source}/*.json ${dest}/"
-  } catch (e) {
-    echo "No JSON files found."
-  }
-
-  try {
-    sh "cp ${source}/*.png ${dest}/"
-  } catch (e) {
-    echo "No PNG files found."
-  }
-
-  try {
-    sh "cp ${source}/*.ico ${dest}/"
-  } catch (e) {
-    echo "No ICO files found."
-  }
+  sh "cp -r ${source}/. ${dest}"
 }
