@@ -4,7 +4,7 @@
 
 Here is the list of the examples using [`js-waku`](https://www.npmjs.com/package/js-waku) and the features they demonstrate: 
 
-See https://docs.wakuconnect.dev/docs/examples/ for more examples.
+See https://examples.waku.org/ for more examples.
 
 ### Web Chat App
 
