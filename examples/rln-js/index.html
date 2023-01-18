@@ -403,7 +403,9 @@
         try {
           registerButton.disabled = true;
 
-          const pubkey = ethers.BigNumber.from(membershipKey.IDCommitment);
+          const idCommitment = membershipKey.IDCommitment;
+          const reversedArray = idCommitment.slice().reverse();
+          const pubkey = ethers.utils.hexlify(reversedArray).toString();
 
           const price = await rlnContract.MEMBERSHIP_DEPOSIT();
 
