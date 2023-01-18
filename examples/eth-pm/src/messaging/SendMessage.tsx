@@ -118,7 +118,12 @@ async function sendMessage(
   });
   const payload = privateMessage.encode();
 
-  const encoder = createEncoder(PrivateMessageContentTopic, recipientPublicKey);
+  const encoder = createEncoder(
+    PrivateMessageContentTopic,
+    recipientPublicKey,
+    undefined,
+    true
+  );
 
   console.log("pushing");
   const res = await waku.relay.send(encoder, { payload });
