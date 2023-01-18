@@ -297,12 +297,6 @@
         updateFields();
       };
 
-      const changeEndianess = (hex) => {
-        const bytes = ethers.utils.arrayify(hex);
-        const reversed = bytes.reverse();
-        return ethers.utils.hexlify(reversed);
-      };
-
       const checkChain = async (chainId) => {
         retrieveRLNDetailsButton.disabled = retrievedRLNEvents || chainId !== 5;
         registerButton.disabled = !(chainId === 5 && retrievedRLNEvents);
@@ -406,8 +400,9 @@
         try {
           registerButton.disabled = true;
 
-          const _pubkey = ethers.BigNumber.from(membershipKey.IDCommitment);
-          const pubkey = changeEndianess(_pubkey.toHexString());
+          const idCommitment = membershipKey.IDCommitment;
+          const reversedArray = idCommitment.slice().reverse();
+          const pubkey = ethers.utils.hexlify(reversedArray).toString();
 
           const price = await rlnContract.MEMBERSHIP_DEPOSIT();
 
