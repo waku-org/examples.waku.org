@@ -1,6 +1,6 @@
 {
-  "short_name": "Rln js",
-  "name": "Use RLN in the browser, compatible with nwaku chat2 and go-waku chat2 RLN implementations.",
+  "name": "Waku RLN",
+  "description": "Use RLN in the browser, compatible with nwaku chat2 and go-waku chat2 RLN implementations.",
   "icons": [
     {
       "src": "favicon.ico",
@@ -13,8 +13,7 @@
       "sizes": "192x192"
     }
   ],
-  "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
+  "theme_color": "#ffffff",
   "background_color": "#ffffff"
 }
