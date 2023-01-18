@@ -85,25 +85,70 @@ async function main() {
     */
     ui.message.display();
 
-    let peerConnection;
-    let sendDataChannel;
-    let receiveDataChannel;
+    const configuration = {
+      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+    };
+    let peerConnection = new RTCPeerConnection(configuration);
+    let sendDataChannel = peerConnection.createDataChannel("chat");
+    let receiveChannel;
+
+    sendDataChannel.onopen = (event) => {
+      console.log("onopen", event);
+    };
+    sendDataChannel.onclose = (event) => {
+      console.log("onclose", event);
+    };
+
+    peerConnection.ondatachannel = (event) => {
+      receiveChannel = event.channel;
+      window.receiveChannel = receiveChannel;
+      receiveChannel.onmessage = (event) => {
+        console.log("onmessage", event);
+      };
+      receiveChannel.onopen = (event) => {
+        console.log("onopen receive", event);
+      };
+      receiveChannel.onclose = (event) => {
+        console.log("onclose receive", event);
+      };
+    };
+
+    peerConnection.onicecandidate = async (event) => {
+      console.log("onicecandidate event", event);
+      if (event.candidate) {
+        // try {
+        //     await peerConnection.addIceCandidate(new RTCIceCandidate(event.candidate));
+        // } catch(error) {
+        //     console.log("onicecandidate error", error);
+        // }
+        let message = ProtoChatMessage.create({
+          text: utils.utf8ToBytes(
+            JSON.stringify({
+              type: "candidate",
+              candidate: event.candidate,
+            })
+          ),
+        });
+        message = ProtoChatMessage.encode(message).finish();
+
+        await node.lightPush.push(encoder, { payload: message });
+      }
+    };
+
+    peerConnection.oniceconnectionstatechange = console.log;
 
     window.sendOffer = sendOffer;
+    window.sendDataChannel = sendDataChannel;
 
     async function sendOffer() {
-      peerConnection = createPeerConnectionWebRTC("sendOffer");
-      sendDataChannel = createSendDataChannel("toSend", peerConnection);
-
-      window.sendDataChannel = sendDataChannel;
-
-      const offerWebRTC = await createOffer(peerConnection);
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
 
       let offerMessage = ProtoChatMessage.create({
         text: utils.utf8ToBytes(
           JSON.stringify({
             type: "offer",
-            offer: offerWebRTC,
+            offer,
           })
         ),
       });
@@ -113,32 +158,7 @@ async function main() {
     }
 
     async function sendAnswer(data) {
-      // confirm prompt ?
-      peerConnection = createPeerConnectionWebRTC("sendAnswer");
-      sendDataChannel = createSendDataChannel("toReceive", peerConnection);
-
-      window.sendDataChannel = sendDataChannel;
-
-      peerConnection.ondatachannel = (...args) => {
-        console.log(`sendAnswer ondatachannel`, args);
-        receiveDataChannel = args[0].channel;
-
-        window.receiveDataChannel = receiveDataChannel;
-
-        receiveDataChannel.onopen = (...args) => {
-          console.log(`sendAnswer receiveChannel onopen`, args);
-        };
-        receiveDataChannel.onmessage = (...args) => {
-          console.log(`sendAnswer receiveChannel onmessage`, args);
-        };
-        receiveDataChannel.onerror = (...args) => {
-          console.log(`sendAnswer receiveChannel onerror`, args);
-        };
-        receiveDataChannel.onclose = (...args) => {
-          console.log(`sendAnswer receiveChannel onclose`, args);
-        };
-      };
-      peerConnection.setRemoteDescription(
+      await peerConnection.setRemoteDescription(
         new RTCSessionDescription(data.offer)
       );
 
@@ -160,7 +180,7 @@ async function main() {
 
     async function handleAnswer(data) {
       if (peerConnection) {
-        peerConnection.setRemoteDescription(
+        await peerConnection.setRemoteDescription(
           new RTCSessionDescription(data.answer)
         );
 
@@ -178,93 +198,45 @@ async function main() {
       }
     }
 
+    async function handleCandidate(data) {
+      if (data.candidate) {
+        try {
+          console.log("handleCandidate", data.candidate);
+          await peerConnection.addIceCandidate(
+            new RTCIceCandidate(data.candidate)
+          );
+        } catch (error) {
+          console.error("handleCandidate", error);
+        }
+      }
+    }
+
     async function handleReceive({ payload }) {
       const { text } = ProtoChatMessage.decode(payload);
       const data = JSON.parse(utils.bytesToUtf8(text));
 
       if (data.type === "offer") {
-        sendAnswer(data);
+        await sendAnswer(data);
       }
 
       if (data.type === "answer") {
-        handleAnswer(data);
+        await handleAnswer(data);
       }
 
       if (data.type === "ready") {
         console.log("partner is ready", data);
       }
+
+      if (data.type === "candidate") {
+        await handleCandidate(data);
+      }
     }
 
     await node.filter.subscribe([decoder], handleReceive);
-
-    // ui.message.onSend(async (text, nick) => {
-    //   const timestamp = Math.floor(Date.now() / 1000);
-    //   const message = ProtoChatMessage.create({
-    //     nick,
-    //     timestamp,
-    //     text: utils.utf8ToBytes(text),
-    //   });
-    //   const payload = ProtoChatMessage.encode(message).finish();
-
-    //   await node.lightPush.push(encoder, { payload, timestamp });
-    // });
   } catch (err) {
     ui.waku.error(err.message);
     ui.hide();
   }
-}
-
-function createPeerConnectionWebRTC(context) {
-  const configuration = {
-    iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-  };
-  const peerConnection = new RTCPeerConnection(configuration);
-
-  console.log("PeerConnection", peerConnection);
-
-  peerConnection.onicecandidate = (...args) => {
-    console.log(`${context} onicecandidate`, args);
-  };
-  peerConnection.onconnectionstatechange = (...args) => {
-    console.log(`${context} onconnectionstatechange`, args);
-  };
-  peerConnection.onnegotiationneeded = (...args) => {
-    console.log(`${context} onnegotiationneeded`, args);
-  };
-
-  return peerConnection;
-}
-function createSendDataChannel(name, peerConnection) {
-  const options = {
-    ordered: false,
-    maxPacketLifTime: 3000,
-  };
-
-  const dataChannel = peerConnection.createDataChannel(name, options);
-  console.log("Data channel", dataChannel);
-
-  dataChannel.onerror = (...args) => {
-    console.log("dataChannel.onerror", args);
-  };
-  dataChannel.onmessage = (...args) => {
-    console.log("dataChannel.onmessage", args);
-  };
-  dataChannel.onopen = (...args) => {
-    console.log("dataChannel.onopen", args);
-  };
-  dataChannel.onclose = (...args) => {
-    console.log("dataChannel.onclose", args);
-  };
-
-  return dataChannel;
-}
-async function createOffer(peerConnection) {
-  const offer = await peerConnection.createOffer({ iceRestart: true });
-  await peerConnection.setLocalDescription(offer);
-
-  console.log("offer", offer);
-
-  return offer;
 }
 
 function buildPairingURLFromObj(pairingObj) {
