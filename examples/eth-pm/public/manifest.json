@@ -1,6 +1,7 @@
 {
-  "short_name": "Ethereum Private Messaging",
-  "name": "End-to-end encrypted communication between two Ethereum addresses.",
+  "short_name": "Waku EthChat",
+  "name": "Waku Ethereum Private Messaging",
+  "description": "End-to-end encrypted communication between two Ethereum addresses.",
   "icons": [
     {
       "src": "favicon.ico",
@@ -13,8 +14,7 @@
       "sizes": "192x192"
     }
   ],
-  "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
+  "theme_color": "#ffffff",
   "background_color": "#ffffff"
 }

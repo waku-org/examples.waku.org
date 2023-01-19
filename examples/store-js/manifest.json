@@ -1,6 +1,6 @@
 {
-  "short_name": "Store js",
-  "name": "This example uses Waku Store to retrieve the latest ping relay message (used for keep alive purposes) and displays its timestamp.",
+  "name": "Waku Store",
+  "description": "This example uses Waku Store to retrieve the latest ping relay message (used for keep alive purposes) and displays its timestamp.",
   "icons": [
     {
       "src": "favicon.ico",
@@ -13,8 +13,7 @@
       "sizes": "192x192"
     }
   ],
-  "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
+  "theme_color": "#ffffff",
   "background_color": "#ffffff"
 }

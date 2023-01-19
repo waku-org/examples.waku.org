@@ -53,7 +53,6 @@ pipeline {
     }
 
     stage('Publish') {
-      //when { expression { GIT_BRANCH.endsWith('master') } }
       steps { script {
         sh "echo ${SITE_DOMAIN} > build/docs/CNAME"
         sshagent(credentials: ['status-im-auto-ssh']) {
@@ -78,6 +77,8 @@ def buildExample(example=STAGE_NAME) {
 }
 
 def copyExample(example=STAGE_NAME) {
-  sh "mkdir -p build/docs/${example}"
-  sh "cp examples/${example}/*.(js|css|html) build/docs/${example}/"
+  def source = "examples/${example}"
+  def dest = "build/docs/${example}"
+  sh "mkdir -p ${dest}"
+  sh "cp -r ${source}/. ${dest}"
 }
