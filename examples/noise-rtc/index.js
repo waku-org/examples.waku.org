@@ -12,8 +12,8 @@ import protobuf from "protobufjs";
 import QRCode from "qrcode";
 
 // Protobuf
-const ProtoChatMessage = new protobuf.Type("ChatMessage").add(
-  new protobuf.Field("text", 3, "bytes")
+const ProtoMessage = new protobuf.Type("Message").add(
+  new protobuf.Field("data", 3, "bytes")
 );
 
 main();
@@ -51,8 +51,8 @@ async function main() {
 
     scheduleHandshakeAuthConfirmation(pairingObj, ui);
 
-    let encoder;
-    let decoder;
+    let sendWakuMessage;
+    let listenToWakuMessages;
 
     try {
       ui.handshake.waiting();
@@ -64,7 +64,10 @@ async function main() {
         ui.shareInfo.show();
       }
 
-      [encoder, decoder] = await pExecute;
+      [sendWakuMessage, listenToWakuMessages] = await buildWakuMessage(
+        node,
+        pExecute
+      );
 
       ui.handshake.connected();
       ui.shareInfo.hide();
@@ -85,154 +88,102 @@ async function main() {
     */
     ui.message.display();
 
-    const configuration = {
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-    };
-    let peerConnection = new RTCPeerConnection(configuration);
-    let sendDataChannel = peerConnection.createDataChannel("chat");
-    let receiveChannel;
-
-    sendDataChannel.onopen = (event) => {
-      console.log("onopen", event);
-    };
-    sendDataChannel.onclose = (event) => {
-      console.log("onclose", event);
-    };
-
-    peerConnection.ondatachannel = (event) => {
-      receiveChannel = event.channel;
-      window.receiveChannel = receiveChannel;
-      receiveChannel.onmessage = (event) => {
-        console.log("onmessage", event);
-      };
-      receiveChannel.onopen = (event) => {
-        console.log("onopen receive", event);
-      };
-      receiveChannel.onclose = (event) => {
-        console.log("onclose receive", event);
-      };
-    };
+    const { peerConnection, sendMessage: sendRTCMessage } = initRTC({
+      ui,
+      onReceive: ui.message.onReceive,
+    });
 
     peerConnection.onicecandidate = async (event) => {
-      console.log("onicecandidate event", event);
       if (event.candidate) {
-        // try {
-        //     await peerConnection.addIceCandidate(new RTCIceCandidate(event.candidate));
-        // } catch(error) {
-        //     console.log("onicecandidate error", error);
-        // }
-        let message = ProtoChatMessage.create({
-          text: utils.utf8ToBytes(
-            JSON.stringify({
-              type: "candidate",
-              candidate: event.candidate,
-            })
-          ),
-        });
-        message = ProtoChatMessage.encode(message).finish();
-
-        await node.lightPush.push(encoder, { payload: message });
+        try {
+          ui.rtc.sendingCandidate();
+          await sendWakuMessage({
+            type: "candidate",
+            candidate: event.candidate,
+          });
+        } catch (error) {
+          ui.rtc.error(error.message);
+        }
       }
     };
 
-    peerConnection.oniceconnectionstatechange = console.log;
+    const sendOffer = async () => {
+      ui.rtc.sendingOffer();
 
-    window.sendOffer = sendOffer;
-    window.sendDataChannel = sendDataChannel;
+      try {
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
 
-    async function sendOffer() {
-      const offer = await peerConnection.createOffer();
-      await peerConnection.setLocalDescription(offer);
+        await sendWakuMessage({
+          type: "offer",
+          offer,
+        });
+      } catch (error) {
+        ui.rtc.error(error.message);
+      }
+    };
 
-      let offerMessage = ProtoChatMessage.create({
-        text: utils.utf8ToBytes(
-          JSON.stringify({
-            type: "offer",
-            offer,
-          })
-        ),
-      });
-      offerMessage = ProtoChatMessage.encode(offerMessage).finish();
-
-      await node.lightPush.push(encoder, { payload: offerMessage });
-    }
-
-    async function sendAnswer(data) {
-      await peerConnection.setRemoteDescription(
-        new RTCSessionDescription(data.offer)
-      );
-
-      const answer = await peerConnection.createAnswer();
-      peerConnection.setLocalDescription(answer);
-
-      let answerMessage = ProtoChatMessage.create({
-        text: utils.utf8ToBytes(
-          JSON.stringify({
-            type: "answer",
-            answer,
-          })
-        ),
-      });
-      answerMessage = ProtoChatMessage.encode(answerMessage).finish();
-
-      await node.lightPush.push(encoder, { payload: answerMessage });
-    }
-
-    async function handleAnswer(data) {
-      if (peerConnection) {
+    const sendAnswer = async (data) => {
+      ui.rtc.sendAnswer();
+      try {
         await peerConnection.setRemoteDescription(
-          new RTCSessionDescription(data.answer)
+          new RTCSessionDescription(data.offer)
         );
 
-        let message = ProtoChatMessage.create({
-          text: utils.utf8ToBytes(
-            JSON.stringify({
-              type: "ready",
-              text: "just ready",
-            })
-          ),
+        const answer = await peerConnection.createAnswer();
+        peerConnection.setLocalDescription(answer);
+
+        await sendWakuMessage({
+          type: "answer",
+          answer,
         });
-        message = ProtoChatMessage.encode(message).finish();
-
-        await node.lightPush.push(encoder, { payload: message });
+      } catch (error) {
+        ui.rtc.error(error.message);
       }
-    }
+    };
 
-    async function handleCandidate(data) {
-      if (data.candidate) {
-        try {
-          console.log("handleCandidate", data.candidate);
-          await peerConnection.addIceCandidate(
-            new RTCIceCandidate(data.candidate)
-          );
-        } catch (error) {
-          console.error("handleCandidate", error);
-        }
+    const receiveAnswer = async (data) => {
+      await peerConnection.setRemoteDescription(
+        new RTCSessionDescription(data.answer)
+      );
+
+      await sendWakuMessage({
+        type: "ready",
+        text: "received answer",
+      });
+    };
+
+    const receiveCandidate = async (data) => {
+      try {
+        await peerConnection.addIceCandidate(
+          new RTCIceCandidate(data.candidate)
+        );
+      } catch (error) {
+        ui.rtc.error(error.message);
       }
-    }
+    };
 
-    async function handleReceive({ payload }) {
-      const { text } = ProtoChatMessage.decode(payload);
-      const data = JSON.parse(utils.bytesToUtf8(text));
-
+    const handleWakuMessages = async (data) => {
       if (data.type === "offer") {
         await sendAnswer(data);
       }
 
       if (data.type === "answer") {
-        await handleAnswer(data);
+        await receiveAnswer(data);
       }
 
       if (data.type === "ready") {
-        console.log("partner is ready", data);
+        console.log("RTC: partner is", data.text);
       }
 
       if (data.type === "candidate") {
-        await handleCandidate(data);
+        await receiveCandidate(data);
       }
-    }
+    };
 
-    await node.filter.subscribe([decoder], handleReceive);
+    await listenToWakuMessages(handleWakuMessages);
+    ui.message.onSend(sendRTCMessage);
+    ui.rtc.onConnect(sendOffer);
   } catch (err) {
     ui.waku.error(err.message);
     ui.hide();
@@ -332,12 +283,70 @@ async function scheduleHandshakeAuthConfirmation(pairingObj, ui) {
   pairingObj.validateAuthCode(confirm("Confirm that authcode is: " + authCode));
 }
 
+async function buildWakuMessage(node, noiseExecute) {
+  const [encoder, decoder] = await noiseExecute;
+
+  const sendMessage = async (message) => {
+    let payload = ProtoMessage.create({
+      data: utils.utf8ToBytes(JSON.stringify(message)),
+    });
+    payload = ProtoMessage.encode(payload).finish();
+
+    return node.lightPush.push(encoder, { payload });
+  };
+
+  const listenToMessages = async (fn) => {
+    return node.filter.subscribe([decoder], (payload) => {
+      const { data } = ProtoMessage.decode(payload);
+      fn(JSON.parse(utils.bytesToUtf8(data)));
+    });
+  };
+
+  return [sendMessage, listenToMessages];
+}
+
+function initRTC({ ui, onReceive }) {
+  const configuration = {};
+  const peerConnection = new RTCPeerConnection(configuration);
+  const sendChannel = peerConnection.createDataChannel("chat");
+
+  let receiveChannel;
+
+  sendChannel.onopen = (event) => {
+    ui.rtc.ready();
+    console.log("onopen send", event);
+  };
+
+  peerConnection.ondatachannel = (event) => {
+    receiveChannel = event.channel;
+
+    receiveChannel.onmessage = (event) => {
+      onReceive(JSON.parse(event.data));
+    };
+
+    receiveChannel.onopen = (event) => {
+      ui.rtc.ready();
+      console.log("onopen receive", event);
+    };
+  };
+
+  const sendMessage = (message, nick) => {
+    sendChannel.send(JSON.stringify({ message, nick, timestamp: Date.now() }));
+  };
+
+  return {
+    peerConnection,
+    sendChannel,
+    receiveChannel,
+    sendMessage,
+  };
+}
+
 function initUI() {
   const messagesList = document.getElementById("messages");
   const nicknameInput = document.getElementById("nick-input");
   const textInput = document.getElementById("text-input");
   const sendButton = document.getElementById("send-btn");
-  const sendingStatusSpan = document.getElementById("sending-status");
   const chatArea = document.getElementById("chat-area");
   const wakuStatusSpan = document.getElementById("waku-status");
   const handshakeStatusSpan = document.getElementById("handshake-status");
@@ -347,6 +356,9 @@ function initUI() {
   const qrUrl = document.getElementById("qr-url");
   const copyURLButton = document.getElementById("copy-url");
   const openTabButton = document.getElementById("open-tab");
+
+  const rtcStatus = document.getElementById("rtc-status");
+  const connectChat = document.getElementById("connect-chat-btn");
 
   copyURLButton.onclick = () => {
     const copyText = document.getElementById("qr-url"); // need to get it each time otherwise copying does not work
@@ -447,13 +459,13 @@ function initUI() {
       _status(text, className) {
         sendButton.className = className;
       },
-      onReceive({ payload }) {
-        const { timestamp, nick, text } = ProtoChatMessage.decode(payload);
+      onReceive(data) {
+        const { timestamp, nick, text } = data;
 
         this._render({
           nick,
           time: timestamp * 1000,
-          text: utils.bytesToUtf8(text),
+          text,
         });
       },
       onSend(cb) {
@@ -477,6 +489,37 @@ function initUI() {
       display() {
         chatArea.style.display = "block";
         this._status("waiting for input", "progress");
+      },
+    },
+    rtc: {
+      _val(msg) {
+        rtcStatus.innerText = msg;
+      },
+      _class(name) {
+        rtcStatus.className = name;
+      },
+      sendingOffer() {
+        this._val("sending offer");
+        this._class("progress");
+      },
+      sendingAnswer() {
+        this._val("sending answer");
+        this._class("progress");
+      },
+      sendingCandidate() {
+        this._val("sending ice candidate");
+        this._class("progress");
+      },
+      ready() {
+        this._val("ready");
+        this._class("success");
+      },
+      error(msg) {
+        this._val(msg);
+        this._class("error");
+      },
+      onConnect(cb) {
+        connectChat.addEventListener("click", cb);
       },
     },
     hide() {
