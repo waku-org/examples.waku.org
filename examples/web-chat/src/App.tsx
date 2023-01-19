@@ -6,17 +6,12 @@ import { WakuContext } from "./WakuContext";
 import { ThemeProvider } from "@livechat/ui-kit";
 import { generate } from "server-name-generator";
 import { Message } from "./Message";
-import {
-  Fleet,
-  getPredefinedBootstrapNodes,
-} from "@waku/core/lib/predefined_bootstrap_nodes";
+import { wakuDnsDiscovery } from "@waku/dns-discovery";
 import { waitForRemotePeer } from "@waku/core/lib/wait_for_remote_peer";
 import { Protocols, WakuLight } from "@waku/interfaces";
-import process from "process";
 import { createLightNode } from "@waku/create";
 import { DecoderV0, MessageV0 } from "@waku/core/lib/waku_message/version_0";
 import { PageDirection } from "@waku/interfaces";
-import { bootstrap } from "@libp2p/bootstrap";
 
 const themes = {
   AuthorName: {
@@ -200,10 +195,17 @@ export default function App() {
 
 async function initWaku(setter: (waku: WakuLight) => void) {
   try {
+    const publicKey = "AOGECG2SPND25EEFMAJ5WF3KSGJNSGV356DSTL2YVLLZWIV6SAYBM";
+    const fqdn = "test.waku.nodes.status.im";
+    const enrTree = `enrtree://${publicKey}@${fqdn}`;
     const waku = await createLightNode({
       libp2p: {
         peerDiscovery: [
-          bootstrap({ list: getPredefinedBootstrapNodes(selectFleetEnv()) }),
+          wakuDnsDiscovery(enrTree, {
+            store: 1,
+            filter: 2,
+            lightpush: 2,
+          }),
         ],
       },
     });
@@ -212,15 +214,6 @@ async function initWaku(setter: (waku: WakuLight) => void) {
     setter(waku);
   } catch (e) {
     console.log("Issue starting waku ", e);
-  }
-}
-
-function selectFleetEnv() {
-  // Works with react-scripts
-  if (process?.env?.NODE_ENV === "development") {
-    return Fleet.Test;
-  } else {
-    return Fleet.Prod;
   }
 }
 
