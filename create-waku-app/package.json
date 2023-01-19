@@ -1,45 +1,45 @@
 {
-    "name": "@waku/create-app",
-    "version": "0.1.0",
-    "description": "Helper package to bootstrap Waku app ",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/waku-org/js-waku-examples.git",
-        "directory": "packages/create-app"
-    },
-    "engines": {
-        "node": ">=16"
-    },
-    "bugs": {
-        "url": "https://github.com/waku-org/js-waku-examples/issues"
-    },
-    "files": [
-        "index.js",
-        "createApp.js",
-        "examples"
-    ],
-    "main": "index.js",
-    "bin": {
-        "create-waku-app": "./index.js"
-    },
-    "scripts": {
-        "build": "node ./build.js",
-        "prepublishOnly": "npm run build"
-    },
-    "keywords": [
-        "waku",
-        "decentralised",
-        "communication",
-        "web3",
-        "ethereum",
-        "dapps"
-    ],
-    "license": "MIT OR Apache-2.0",
-    "dependencies": {
-        "commander": "^9.4.1",
-        "enquirer": "^2.3.6",
-        "fs-extra": "^11.1.0",
-        "semver": "^7.3.8",
-        "validate-npm-package-name": "^5.0.0"
-    }
+  "name": "@waku/create-app",
+  "version": "0.1.1",
+  "description": "Helper package to bootstrap Waku app ",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/waku-org/js-waku-examples.git",
+    "directory": "packages/create-app"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "bugs": {
+    "url": "https://github.com/waku-org/js-waku-examples/issues"
+  },
+  "files": [
+    "index.js",
+    "createApp.js",
+    "examples"
+  ],
+  "main": "index.js",
+  "bin": {
+    "create-app": "./index.js"
+  },
+  "scripts": {
+    "build": "node ./build.js",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "waku",
+    "decentralised",
+    "communication",
+    "web3",
+    "ethereum",
+    "dapps"
+  ],
+  "license": "MIT OR Apache-2.0",
+  "dependencies": {
+    "commander": "^9.4.1",
+    "enquirer": "^2.3.6",
+    "fs-extra": "^11.1.0",
+    "semver": "^7.3.8",
+    "validate-npm-package-name": "^5.0.0"
+  }
 }
