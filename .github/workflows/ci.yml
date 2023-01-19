@@ -68,7 +68,7 @@ jobs:
         work-directory: "create-waku-app"
 
       - name: Authenticate with registry
-        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ./.npmrc
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.WAKU_CREATE_APP_PUBLISH }}" > ./.npmrc
         work-directory: "create-waku-app"
 
       - run: npm publish --tag next --access public
