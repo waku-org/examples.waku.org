@@ -13,7 +13,7 @@ import QRCode from "qrcode";
 
 // Protobuf
 const ProtoMessage = new protobuf.Type("Message").add(
-  new protobuf.Field("data", 3, "bytes")
+  new protobuf.Field("data", 3, "string")
 );
 
 main();
@@ -90,12 +90,14 @@ async function main() {
 
     const { peerConnection, sendMessage: sendRTCMessage } = initRTC({
       ui,
-      onReceive: ui.message.onReceive,
+      onReceive: ui.message.onReceive.bind(ui.message),
     });
 
     peerConnection.onicecandidate = async (event) => {
       if (event.candidate) {
+        console.log("candidate sent");
         try {
+          // if (!peerConnection.remoteDescription) return;
           ui.rtc.sendingCandidate();
           await sendWakuMessage({
             type: "candidate",
@@ -108,6 +110,7 @@ async function main() {
     };
 
     const sendOffer = async () => {
+      console.log("offer sent");
       ui.rtc.sendingOffer();
 
       try {
@@ -124,7 +127,8 @@ async function main() {
     };
 
     const sendAnswer = async (data) => {
-      ui.rtc.sendAnswer();
+      console.log("answer sent");
+      ui.rtc.sendingAnswer();
       try {
         await peerConnection.setRemoteDescription(
           new RTCSessionDescription(data.offer)
@@ -143,18 +147,26 @@ async function main() {
     };
 
     const receiveAnswer = async (data) => {
-      await peerConnection.setRemoteDescription(
-        new RTCSessionDescription(data.answer)
-      );
+      try {
+        console.log("answer received");
+        await peerConnection.setRemoteDescription(
+          new RTCSessionDescription(data.answer)
+        );
+        console.log("answer saved");
 
-      await sendWakuMessage({
-        type: "ready",
-        text: "received answer",
-      });
+        await sendWakuMessage({
+          type: "ready",
+          text: "received answer",
+        });
+      } catch (error) {
+        ui.rtc.error(error.message);
+      }
     };
 
     const receiveCandidate = async (data) => {
       try {
+        // if (!peerConnection.pendingRemoteDescription) return;
+        console.log("candidate saved");
         await peerConnection.addIceCandidate(
           new RTCIceCandidate(data.candidate)
         );
@@ -183,7 +195,12 @@ async function main() {
 
     await listenToWakuMessages(handleWakuMessages);
     ui.message.onSend(sendRTCMessage);
-    ui.rtc.onConnect(sendOffer);
+
+    // if we are initiator of Noise handshake
+    // let's initiate Web RTC as well
+    if (!urlPairingInfo) {
+      await sendOffer();
+    }
   } catch (err) {
     ui.waku.error(err.message);
     ui.hide();
@@ -288,7 +305,8 @@ async function buildWakuMessage(node, noiseExecute) {
 
   const sendMessage = async (message) => {
     let payload = ProtoMessage.create({
-      data: utils.utf8ToBytes(JSON.stringify(message)),
+      //   data: utils.utf8ToBytes(JSON.stringify(message)),
+      data: JSON.stringify(message),
     });
     payload = ProtoMessage.encode(payload).finish();
 
@@ -296,9 +314,10 @@ async function buildWakuMessage(node, noiseExecute) {
   };
 
   const listenToMessages = async (fn) => {
-    return node.filter.subscribe([decoder], (payload) => {
+    return node.filter.subscribe([decoder], ({ payload }) => {
       const { data } = ProtoMessage.decode(payload);
-      fn(JSON.parse(utils.bytesToUtf8(data)));
+      //   fn(JSON.parse(utils.bytesToUtf8(data)));
+      fn(JSON.parse(data));
     });
   };
 
@@ -306,7 +325,9 @@ async function buildWakuMessage(node, noiseExecute) {
 }
 
 function initRTC({ ui, onReceive }) {
-  const configuration = {};
+  const configuration = {
+    iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+  };
   const peerConnection = new RTCPeerConnection(configuration);
   const sendChannel = peerConnection.createDataChannel("chat");
 
