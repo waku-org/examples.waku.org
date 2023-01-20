@@ -56,7 +56,7 @@ jobs:
 
       - name: Build package
         run: npm run build
-        work-directory: "create-waku-app"
+        working-directory: "create-waku-app"
 
       - name: Append git hash to version
         shell: bash
@@ -65,11 +65,11 @@ jobs:
           GIT_HASH=$(git rev-parse --short HEAD)
           cat package.json| jq --arg version "$CURR_VERSION-$GIT_HASH" '.version |= $version' > _package.json
           mv -f _package.json package.json
-        work-directory: "create-waku-app"
+        working-directory: "create-waku-app"
 
       - name: Authenticate with registry
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.WAKU_CREATE_APP_PUBLISH }}" > ./.npmrc
-        work-directory: "create-waku-app"
+        working-directory: "create-waku-app"
 
       - run: npm publish --tag next --access public
-        work-directory: "create-waku-app"
+        working-directory: "create-waku-app"
