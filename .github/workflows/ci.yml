@@ -42,3 +42,34 @@ jobs:
       - name: test
         run: npm run test --if-present
         working-directory: "examples/${{ matrix.example }}"
+  
+  release_create_waku:
+    runs-on: ubuntu-latest
+    needs: [examples_build_and_test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v2.3.3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_JS }}
+      - uses: bahmutov/npm-install@v1
+
+      - name: Build package
+        run: npm run build
+        working-directory: "create-waku-app"
+
+      - name: Append git hash to version
+        shell: bash
+        run: |
+          CURR_VERSION=$(cat package.json | jq .version | tr -d '"')
+          GIT_HASH=$(git rev-parse --short HEAD)
+          cat package.json| jq --arg version "$CURR_VERSION-$GIT_HASH" '.version |= $version' > _package.json
+          mv -f _package.json package.json
+        working-directory: "create-waku-app"
+
+      - name: Authenticate with registry
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.WAKU_CREATE_APP_PUBLISH }}" > ./.npmrc
+        working-directory: "create-waku-app"
+
+      - run: npm publish --tag next --access public
+        working-directory: "create-waku-app"
