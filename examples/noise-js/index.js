@@ -74,17 +74,6 @@ async function main() {
       ui.hide();
     }
 
-    /*
-    // The information needs to be backed up to decrypt messages sent with
-    // codecs generated with the handshake. The `handshakeResult` variable
-    // contains private information that needs to be stored safely
-    const contentTopic = pairingObj.contentTopic;
-    const handshakeResult = pairingObj.getHandshakeResult();
-
-    // To restore the codecs for decrypting older messages, or continuing an existing
-    // session, use this:
-    [encoder, decoder] = WakuPairing.getSecureCodec(contentTopic, handshakeResult);
-    */
     ui.message.display();
 
     await node.filter.subscribe(
@@ -207,7 +196,6 @@ function initUI() {
   const nicknameInput = document.getElementById("nick-input");
   const textInput = document.getElementById("text-input");
   const sendButton = document.getElementById("send-btn");
-  const sendingStatusSpan = document.getElementById("sending-status");
   const chatArea = document.getElementById("chat-area");
   const wakuStatusSpan = document.getElementById("waku-status");
   const handshakeStatusSpan = document.getElementById("handshake-status");
