@@ -17,7 +17,8 @@ jobs:
             relay-angular-chat,
             relay-reactjs-chat,
             store-reactjs-chat,
-            web-chat
+            web-chat,
+            noise-js
           ]
     runs-on: ubuntu-latest
     steps:
