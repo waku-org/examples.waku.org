@@ -25,11 +25,7 @@ async function main() {
 
   // Starting the node
   const node = await createLightNode({
-    libp2p: {
-      peerDiscovery: [
-        new PeerDiscoveryStaticPeers(getPredefinedBootstrapNodes(Fleet.Test)),
-      ],
-    },
+    defaultBootstrap: true,
   });
 
   try {
