@@ -49,7 +49,9 @@ export default function BroadcastPublicKey({
 
     const publicKeyMessageEncoder = createEncoder(
       PublicKeyContentTopic,
-      PublicKeyMessageEncryptionKey
+      PublicKeyMessageEncryptionKey,
+      undefined,
+      true
     );
 
     await waku.relay.send(publicKeyMessageEncoder, { payload });
