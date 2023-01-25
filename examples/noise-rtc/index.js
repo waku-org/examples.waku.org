@@ -351,8 +351,8 @@ function initRTC({ ui, onReceive }) {
     };
   };
 
-  const sendMessage = (message, nick) => {
-    sendChannel.send(JSON.stringify({ message, nick, timestamp: Date.now() }));
+  const sendMessage = (text, nick) => {
+    sendChannel.send(JSON.stringify({ text, nick, timestamp: Date.now() }));
   };
 
   return {
