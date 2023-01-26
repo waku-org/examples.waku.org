@@ -1,5 +1,5 @@
 {
-  "name": "@waku/noise-example",
+  "name": "@waku/noise-rtc",
   "private": true,
   "version": "0.1.0",
   "description": "",
