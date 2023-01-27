@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Waku NoiseRTC</title>
+    <link rel="apple-touch-icon" href="./favicon.png" />
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="icon" href="./favicon.ico" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        word-wrap: break-word;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+      }
+
+      html {
+        font-size: 16px;
+        overflow: hidden;
+      }
+
+      body {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .container {
+        width: 100%;
+        min-width: 300px;
+        max-width: 800px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-content: space-between;
+      }
+
+      h2 {
+        text-align: center;
+        margin-bottom: 5px;
+      }
+
+      h3 {
+        margin-bottom: 10px;
+      }
+
+      h3:last-of-type {
+        margin-bottom: 20px;
+      }
+
+      h2 span,
+      h3 span {
+        font-weight: normal;
+      }
+
+      .progress {
+        color: #9ea13b;
+      }
+
+      .success {
+        color: #3ba183;
+      }
+
+      .error {
+        color: #c84740;
+      }
+
+      button.progress {
+        color: white;
+        background-color: #9ea13b;
+      }
+
+      button.success {
+        color: white;
+        background-color: #3ba183;
+      }
+
+      button.error {
+        color: white;
+        background-color: #c84740;
+      }
+
+      .pairingInfo {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .pairingInfo input {
+        display: block;
+        min-width: 250px;
+        width: 100%;
+        max-width: 600px;
+        font-size: 1.1rem;
+        line-height: 1.5rem;
+        padding: 5px;
+        margin-bottom: 10px;
+      }
+
+      .pairingInfo button {
+        flex-grow: 1;
+        cursor: pointer;
+        padding: 10px;
+      }
+
+      .pairingInfo button + button {
+        margin-left: 5px;
+      }
+
+      .chatArea {
+      }
+
+      .chatArea ul {
+        margin-bottom: 30px;
+        list-style: none;
+      }
+
+      .chatArea ul li + li {
+        margin-top: 5px;
+      }
+
+      .chatArea div {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .chatArea div > * {
+        font-size: 1.1rem;
+        line-height: 1.5rem;
+        padding: 5px;
+        margin-bottom: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="status">
+        <h3>
+          <b>Waku Node Status:</b>
+          <span id="waku-status" class="progress">connecting...</span>
+        </h3>
+        <h3 id="handshake-span">
+          <b>Handshake Status:</b>
+          <span id="handshake-status" class="progress">waiting for waku</span>
+        </h3>
+        <h3>
+          <b>RTC Status:</b>
+          <span id="rtc-status" class="progress"
+            >waiting for noise to be established</span
+          >
+        </h3>
+      </div>
+
+      <div class="pairingInfo" id="qr-url-container" style="display: none">
+        <h2>Pairing information</h2>
+        <input
+          type="text"
+          id="qr-url"
+          readonly
+          placeholder="generating URL..."
+        />
+        <div>
+          <button id="copy-url" style="width: 100px">Copy URL</button>
+          <button id="open-tab" style="width: 100px">Open in new</button>
+        </div>
+        <canvas id="qr-canvas"></canvas>
+      </div>
+
+      <div class="chatArea" id="chat-area" style="display: none">
+        <h2>Chat</h2>
+        <ul id="messages"></ul>
+
+        <div>
+          <input id="nick-input" placeholder="Choose a nickname" type="text" />
+          <textarea
+            id="text-input"
+            placeholder="Type your message here"
+            type="text"
+          ></textarea>
+          <button id="send-btn" type="button" disabled>Send message</button>
+          <button id="connect-chat-btn" type="button">Connect to chat</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="./index.js"></script>
+  </body>
+</html>

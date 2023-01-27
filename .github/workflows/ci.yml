@@ -18,7 +18,8 @@ jobs:
             relay-reactjs-chat,
             store-reactjs-chat,
             web-chat,
-            noise-js
+            noise-js,
+            noise-rtc
           ]
     runs-on: ubuntu-latest
     steps:
