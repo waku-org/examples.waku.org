@@ -23,13 +23,7 @@ async function main() {
   ui.waku.connecting();
 
   // Starting the node
-  const node = await createLightNode({
-    libp2p: {
-      peerDiscovery: [
-        new PeerDiscoveryStaticPeers(getPredefinedBootstrapNodes(Fleet.Test)),
-      ],
-    },
-  });
+  const node = await createLightNode({ defaultBootstrap: true });
 
   try {
     await node.start();
@@ -76,16 +70,6 @@ async function main() {
       ui.hide();
     }
 
-    /*
-    // The information needs to be backed up to decrypt messages sent with
-    // codecs generated with the handshake. The `handshakeResult` variable
-    // contains private information that needs to be stored safely
-    const contentTopic = pairingObj.contentTopic;
-    const handshakeResult = pairingObj.getHandshakeResult();
-    // To restore the codecs for decrypting older messages, or continuing an existing
-    // session, use this:
-    [encoder, decoder] = WakuPairing.getSecureCodec(contentTopic, handshakeResult);
-    */
     ui.message.display();
 
     const { peerConnection, sendMessage: sendRTCMessage } = initRTC({
@@ -97,7 +81,6 @@ async function main() {
       if (event.candidate) {
         console.log("candidate sent");
         try {
-          // if (!peerConnection.remoteDescription) return;
           ui.rtc.sendingCandidate();
           await sendWakuMessage({
             type: "candidate",
@@ -165,7 +148,6 @@ async function main() {
 
     const receiveCandidate = async (data) => {
       try {
-        // if (!peerConnection.pendingRemoteDescription) return;
         console.log("candidate saved");
         await peerConnection.addIceCandidate(
           new RTCIceCandidate(data.candidate)
@@ -305,7 +287,6 @@ async function buildWakuMessage(node, noiseExecute) {
 
   const sendMessage = async (message) => {
     let payload = ProtoMessage.create({
-      //   data: utils.utf8ToBytes(JSON.stringify(message)),
       data: JSON.stringify(message),
     });
     payload = ProtoMessage.encode(payload).finish();
@@ -316,7 +297,6 @@ async function buildWakuMessage(node, noiseExecute) {
   const listenToMessages = async (fn) => {
     return node.filter.subscribe([decoder], ({ payload }) => {
       const { data } = ProtoMessage.decode(payload);
-      //   fn(JSON.parse(utils.bytesToUtf8(data)));
       fn(JSON.parse(data));
     });
   };
@@ -485,7 +465,7 @@ function initUI() {
 
         this._render({
           nick,
-          time: timestamp * 1000,
+          time: timestamp,
           text,
         });
       },
