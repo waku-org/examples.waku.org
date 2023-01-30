@@ -7,6 +7,7 @@ import { ThemeProvider } from "@livechat/ui-kit";
 import { generate } from "server-name-generator";
 import { Message } from "./Message";
 import { wakuDnsDiscovery } from "@waku/dns-discovery";
+import { wakuPeerExchangeDiscovery } from "@waku/peer-exchange";
 import { waitForRemotePeer } from "@waku/core/lib/wait_for_remote_peer";
 import { Protocols, WakuLight } from "@waku/interfaces";
 import { createLightNode } from "@waku/create";
@@ -206,6 +207,7 @@ async function initWaku(setter: (waku: WakuLight) => void) {
             filter: 2,
             lightpush: 2,
           }),
+          wakuPeerExchangeDiscovery(),
         ],
       },
     });
