@@ -22,13 +22,26 @@ export default function Room(props: Props) {
   const [filterPeers, setFilterPeers] = useState(0);
   const [lightPushPeers, setLightPushPeers] = useState(0);
 
+  const [bootstrapPeers, setBootstrapPeers] = useState(new Set<string>());
+  const [peerExchangePeers, setPeerExchangePeers] = useState(new Set<string>());
+
   const ChatEncoder = new EncoderV0(ChatContentTopic);
 
   useEffect(() => {
     if (!waku) return;
 
     // Update store peer when new peer connected & identified
-    waku.libp2p.peerStore.addEventListener("change:protocols", async () => {
+    waku.libp2p.peerStore.addEventListener("change:protocols", async (evt) => {
+      const { peerId } = evt.detail;
+      const tags = (await waku.libp2p.peerStore.getTags(peerId)).map(
+        (t) => t.name
+      );
+      if (tags.includes("peer-exchange")) {
+        setPeerExchangePeers((peers) => new Set(peers).add(peerId.toString()));
+      } else {
+        setBootstrapPeers((peers) => new Set(peers).add(peerId.toString()));
+      }
+
       const storePeers = await waku.store.peers();
       setStorePeers(storePeers.length);
 
@@ -40,6 +53,14 @@ export default function Room(props: Props) {
     });
   }, [waku]);
 
+  useEffect(() => {
+    console.log("Bootstrap Peers:");
+    console.table(bootstrapPeers);
+
+    console.log("Peer Exchange Peers:");
+    console.table(peerExchangePeers);
+  }, [bootstrapPeers, peerExchangePeers]);
+
   return (
     <div
       className="chat-container"
@@ -48,6 +69,10 @@ export default function Room(props: Props) {
       <TitleBar
         leftIcons={[
           `Peers: ${lightPushPeers} light push, ${filterPeers} filter, ${storePeers} store.`,
+        ]}
+        rightIcons={[
+          `Bootstrap (DNS Discovery): ${bootstrapPeers.size}, Peer exchange: ${peerExchangePeers.size}. `,
+          "View console for more details.",
         ]}
         title="Waku v2 chat app"
       />
