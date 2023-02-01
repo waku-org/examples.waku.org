@@ -7,7 +7,7 @@
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "@waku/core": "^0.0.8",
+    "@waku/core": "^0.0.10",
     "@waku/create": "^0.0.6",
     "protobufjs": "^7.1.2",
     "react": "^18.2.0",
@@ -15,8 +15,8 @@
     "react-scripts": "5.0.1"
   },
   "scripts": {
-    "start": "PORT=3001 craco start",
-    "build": "craco build",
+    "start": "GENERATE_SOURCEMAP=false PORT=3001 craco start",
+    "build": "GENERATE_SOURCEMAP=false craco build",
     "test": "exit 0",
     "eject": "craco eject"
   },
