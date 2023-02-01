@@ -1,9 +1,9 @@
 import { Component, OnInit } from "@angular/core";
 import { WakuService } from "../waku.service";
-import type { WakuPrivacy } from "@waku/interfaces";
+import type { RelayNode } from "@waku/interfaces";
 import protobuf from "protobufjs";
-import { DecoderV0, EncoderV0 } from "@waku/core/lib/waku_message/version_0";
-import type { MessageV0 } from "@waku/core/lib/waku_message/version_0";
+import { Decoder, Encoder } from "@waku/core/lib/message/version_0";
+import type { DecodedMessage } from "@waku/core/lib/message/version_0";
 
 const ProtoChatMessage = new protobuf.Type("ChatMessage")
   .add(new protobuf.Field("timestamp", 1, "uint32"))
@@ -21,17 +21,17 @@ interface MessageInterface {
 })
 export class MessagesComponent implements OnInit {
   contentTopic: string = `/js-waku-examples/1/chat/proto`;
-  decoder: DecoderV0;
-  encoder: EncoderV0;
+  decoder: Decoder;
+  encoder: Encoder;
   messages: MessageInterface[] = [];
   messageCount: number = 0;
-  waku!: WakuPrivacy;
+  waku!: RelayNode;
   wakuStatus!: string;
   deleteObserver?: () => void;
 
   constructor(private wakuService: WakuService) {
-    this.decoder = new DecoderV0(this.contentTopic);
-    this.encoder = new EncoderV0(this.contentTopic);
+    this.decoder = new Decoder(this.contentTopic);
+    this.encoder = new Encoder(this.contentTopic);
   }
 
   ngOnInit(): void {
@@ -69,7 +69,7 @@ export class MessagesComponent implements OnInit {
     });
   }
 
-  processIncomingMessages = (wakuMessage: MessageV0) => {
+  processIncomingMessages = (wakuMessage: DecodedMessage) => {
     if (!wakuMessage.payload) return;
 
     const { text, timestamp } = ProtoChatMessage.decode(
