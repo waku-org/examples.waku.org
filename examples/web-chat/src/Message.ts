@@ -1,4 +1,4 @@
-import { MessageV0 } from "@waku/core/lib/waku_message/version_0";
+import { DecodedMessage } from "@waku/core/lib/message/version_0";
 import { ChatMessage } from "./chat_message";
 
 export class Message {
@@ -11,7 +11,7 @@ export class Message {
     this.sentTimestamp = sentTimestamp;
   }
 
-  static fromWakuMessage(wakuMsg: MessageV0): Message | undefined {
+  static fromWakuMessage(wakuMsg: DecodedMessage): Message | undefined {
     if (wakuMsg.payload) {
       try {
         const chatMsg = ChatMessage.decode(wakuMsg.payload);

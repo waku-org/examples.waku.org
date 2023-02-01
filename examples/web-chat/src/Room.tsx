@@ -7,7 +7,7 @@ import { TitleBar } from "@livechat/ui-kit";
 import { Message } from "./Message";
 import { ChatMessage } from "./chat_message";
 import { useEffect, useState } from "react";
-import { EncoderV0 } from "@waku/core/lib/waku_message/version_0";
+import { Encoder } from "@waku/core/lib/message/version_0";
 
 interface Props {
   messages: Message[];
@@ -25,7 +25,7 @@ export default function Room(props: Props) {
   const [bootstrapPeers, setBootstrapPeers] = useState(new Set<string>());
   const [peerExchangePeers, setPeerExchangePeers] = useState(new Set<string>());
 
-  const ChatEncoder = new EncoderV0(ChatContentTopic);
+  const ChatEncoder = new Encoder(ChatContentTopic);
 
   useEffect(() => {
     if (!waku) return;
