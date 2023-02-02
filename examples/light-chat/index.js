@@ -4,7 +4,7 @@ import {
   waitForRemotePeer,
   createDecoder,
   createEncoder,
-} from "https://unpkg.com/@waku/core@0.0.7/bundle/index.js";
+} from "https://unpkg.com/@waku/core@0.0.10/bundle/index.js";
 
 const MULTI_ADDR =
   "/dns4/node-01.ac-cn-hongkong-c.wakuv2.test.statusim.net/tcp/443/wss/p2p/16Uiu2HAkvWiyFsgRhuJEb9JfjYxEkoHLgnUQmr1N5mKWnYjxYRVm";
