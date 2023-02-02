@@ -8,10 +8,10 @@ import { generate } from "server-name-generator";
 import { Message } from "./Message";
 import { wakuDnsDiscovery } from "@waku/dns-discovery";
 import { wakuPeerExchangeDiscovery } from "@waku/peer-exchange";
-import { waitForRemotePeer } from "@waku/core/lib/wait_for_remote_peer";
+import { waitForRemotePeer } from "@waku/core";
 import { Protocols, WakuLight } from "@waku/interfaces";
 import { createLightNode } from "@waku/create";
-import { DecoderV0, MessageV0 } from "@waku/core/lib/waku_message/version_0";
+import { DecodedMessage, Decoder } from "@waku/core/lib/message/version_0";
 import { PageDirection } from "@waku/interfaces";
 
 const themes = {
@@ -44,7 +44,7 @@ const themes = {
 };
 
 export const ChatContentTopic = "/toy-chat/2/huilong/proto";
-const ChatDecoder = new DecoderV0(ChatContentTopic);
+const ChatDecoder = new Decoder(ChatContentTopic);
 
 async function retrieveStoreMessages(
   waku: WakuLight,
@@ -111,7 +111,7 @@ export default function App() {
     // Let's retrieve previous messages before listening to new messages
     if (!historicalMessagesRetrieved) return;
 
-    const handleIncomingMessage = (wakuMsg: MessageV0) => {
+    const handleIncomingMessage = (wakuMsg: DecodedMessage) => {
       console.log("Message received: ", wakuMsg);
       const msg = Message.fromWakuMessage(wakuMsg);
       if (msg) {
@@ -223,6 +223,8 @@ function reduceMessages(state: Message[], newMessages: Message[]) {
   return state.concat(newMessages);
 }
 
-const isMessageDefined = (msg: MessageV0 | undefined): msg is MessageV0 => {
+const isMessageDefined = (
+  msg: DecodedMessage | undefined
+): msg is DecodedMessage => {
   return !!msg;
 };
