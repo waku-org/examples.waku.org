@@ -1,5 +1,5 @@
 import * as utils from "https://unpkg.com/@waku/byte-utils@0.0.2/bundle/index.js";
-import * as wakuCreate from "https://unpkg.com/@waku/create@0.0.5/bundle/index.js";
+import * as wakuCreate from "https://unpkg.com/@waku/create@0.0.6/bundle/index.js";
 import {
   waitForRemotePeer,
   createDecoder,
