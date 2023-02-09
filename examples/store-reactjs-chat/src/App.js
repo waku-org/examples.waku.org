@@ -1,12 +1,11 @@
 import * as React from "react";
 import protobuf from "protobufjs";
 import { createLightNode } from "@waku/create";
-import { waitForRemotePeer } from "@waku/core";
-import { Decoder } from "@waku/core/lib/message/version_0";
+import { waitForRemotePeer, createDecoder } from "@waku/core";
 import { bytesToUtf8 } from "@waku/byte-utils";
 
 const ContentTopic = "/toy-chat/2/huilong/proto";
-const decoder = new Decoder(ContentTopic);
+const decoder = createDecoder(ContentTopic);
 
 const ProtoChatMessage = new protobuf.Type("ChatMessage")
   .add(new protobuf.Field("timestamp", 1, "uint64"))
