@@ -1,8 +1,7 @@
 import * as React from "react";
 import protobuf from "protobufjs";
 import { createRelayNode } from "@waku/create";
-import { waitForRemotePeer } from "@waku/core";
-import { createDecoder, createEncoder } from "@waku/core";
+import { createDecoder, createEncoder, waitForRemotePeer } from "@waku/core";
 
 const ContentTopic = `/js-waku-examples/1/chat/proto`;
 const Encoder = createEncoder(ContentTopic);

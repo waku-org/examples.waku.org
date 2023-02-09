@@ -1,12 +1,11 @@
 import * as React from "react";
 import protobuf from "protobufjs";
 import { createLightNode } from "@waku/create";
-import { waitForRemotePeer } from "@waku/core/lib/wait_for_remote_peer";
-import { DecoderV0 } from "@waku/core/lib/waku_message/version_0";
+import { waitForRemotePeer, createDecoder } from "@waku/core";
 import { bytesToUtf8 } from "@waku/byte-utils";
 
 const ContentTopic = "/toy-chat/2/huilong/proto";
-const Decoder = new DecoderV0(ContentTopic);
+const decoder = createDecoder(ContentTopic);
 
 const ProtoChatMessage = new protobuf.Type("ChatMessage")
   .add(new protobuf.Field("timestamp", 1, "uint64"))
@@ -56,7 +55,7 @@ function App() {
 
       try {
         for await (const messagesPromises of waku.store.queryGenerator(
-          [Decoder],
+          [decoder],
           {
             timeFilter: { startTime, endTime: new Date() },
             pageDirection: "forward",
