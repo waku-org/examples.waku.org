@@ -1,4 +1,6 @@
-import { useEffect, useReducer, useState } from "react";
+/* eslint no-use-before-define: 0 */
+// @ts-ignore
+import React, { useEffect, useReducer, useState } from "react";
 import "./App.css";
 import handleCommand from "./command";
 import Room from "./Room";
@@ -86,25 +88,70 @@ async function retrieveStoreMessages(
   }
 }
 
-export default function App() {
-  const [messages, dispatchMessages] = useReducer(reduceMessages, []);
-  const [waku, setWaku] = useState<WakuLight | undefined>(undefined);
+const useCreateWaku = (options: any): undefined | WakuLight => {
+  const [node, setNode] = React.useState<undefined | WakuLight>(undefined);
+
+  React.useEffect(() => {
+    Promise.resolve().then(async () => {
+      const waku = await createLightNode(options);
+      await waku.start();
+      await waitForRemotePeer(waku, [
+        Protocols.Store,
+        Protocols.Filter,
+        Protocols.LightPush,
+      ]);
+      setNode(waku);
+    });
+  }, []);
+
+  return node;
+};
+
+const usePersistentNick = (): [
+  string,
+  React.Dispatch<React.SetStateAction<string>>
+] => {
   const [nick, setNick] = useState<string>(() => {
     const persistedNick = window.localStorage.getItem("nick");
     return persistedNick !== null ? persistedNick : generate();
   });
-  const [historicalMessagesRetrieved, setHistoricalMessagesRetrieved] =
-    useState(false);
-
   useEffect(() => {
     localStorage.setItem("nick", nick);
   }, [nick]);
 
-  useEffect(() => {
-    initWaku(setWaku)
-      .then(() => console.log("Waku init done"))
-      .catch((e) => console.log("Waku init failed ", e));
-  }, []);
+  return [nick, setNick];
+};
+
+export default function App() {
+  const [messages, dispatchMessages] = useReducer(reduceMessages, []);
+
+  const publicKey = "AOGECG2SPND25EEFMAJ5WF3KSGJNSGV356DSTL2YVLLZWIV6SAYBM";
+  const fqdn = "test.waku.nodes.status.im";
+  const enrTree = `enrtree://${publicKey}@${fqdn}`;
+  const options = {
+    libp2p: {
+      peerDiscovery: [
+        wakuDnsDiscovery(enrTree, {
+          store: 1,
+          filter: 2,
+          lightpush: 2,
+        }),
+        wakuPeerExchangeDiscovery(),
+      ],
+    },
+  };
+  const waku = useCreateWaku(options);
+
+  const [nick, setNick] = usePersistentNick();
+
+  const [historicalMessagesRetrieved, setHistoricalMessagesRetrieved] =
+    useState(false);
+
+  // useEffect(() => {
+  //   initWaku(setWaku)
+  //     .then(() => console.log("Waku init done"))
+  //     .catch((e) => console.log("Waku init failed ", e));
+  // }, []);
 
   useEffect(() => {
     if (!waku) return;
@@ -194,30 +241,35 @@ export default function App() {
   );
 }
 
-async function initWaku(setter: (waku: WakuLight) => void) {
-  try {
-    const publicKey = "AOGECG2SPND25EEFMAJ5WF3KSGJNSGV356DSTL2YVLLZWIV6SAYBM";
-    const fqdn = "test.waku.nodes.status.im";
-    const enrTree = `enrtree://${publicKey}@${fqdn}`;
-    const waku = await createLightNode({
-      libp2p: {
-        peerDiscovery: [
-          wakuDnsDiscovery(enrTree, {
-            store: 1,
-            filter: 2,
-            lightpush: 2,
-          }),
-          wakuPeerExchangeDiscovery(),
-        ],
-      },
-    });
-    await waku.start();
+// async function initWaku(setter: (waku: WakuLight) => void) {
+//   try {
+//     const publicKey = "AOGECG2SPND25EEFMAJ5WF3KSGJNSGV356DSTL2YVLLZWIV6SAYBM";
+//     const fqdn = "test.waku.nodes.status.im";
+//     const enrTree = `enrtree://${publicKey}@${fqdn}`;
+//     const waku = await createLightNode({
+//       libp2p: {
+//         peerDiscovery: [
+//           wakuDnsDiscovery(enrTree, {
+//             store: 1,
+//             filter: 2,
+//             lightpush: 2,
+//           }),
+//           wakuPeerExchangeDiscovery(),
+//         ],
+//       },
+//     });
+//     await waku.start();
+//     await waitForRemotePeer(waku, [
+//       Protocols.Store,
+//       Protocols.Filter,
+//       Protocols.LightPush,
+//     ]);
 
-    setter(waku);
-  } catch (e) {
-    console.log("Issue starting waku ", e);
-  }
-}
+//     setter(waku);
+//   } catch (e) {
+//     console.log("Issue starting waku ", e);
+//   }
+// }
 
 function reduceMessages(state: Message[], newMessages: Message[]) {
   return state.concat(newMessages);
