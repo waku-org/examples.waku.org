@@ -122,6 +122,54 @@ const usePersistentNick = (): [
   return [nick, setNick];
 };
 
+const useFilterMessages = (waku: undefined | WakuLight): Message[] => {
+  const [messages, setMessages] = useState<Message[]>([]);
+
+  const appendMessages = (newMessages: Message[]) => {
+    if (!newMessages || !newMessages.length) {
+      return;
+    }
+
+    setMessages((prev) => [...prev, ...newMessages]);
+  };
+
+  useEffect(() => {
+    if (!waku) return;
+
+    const handleIncomingMessage = (wakuMsg: DecodedMessage) => {
+      console.log("Message received: ", wakuMsg);
+      const msg = Message.fromWakuMessage(wakuMsg);
+      if (msg) {
+        appendMessages([msg]);
+      }
+    };
+
+    let unsubscribe: undefined | (() => Promise<void>);
+    waku.filter.subscribe([ChatDecoder], handleIncomingMessage).then(
+      (_unsubscribe) => {
+        console.log("subscribed to ", ChatContentTopic);
+        unsubscribe = _unsubscribe;
+      },
+      (e) => {
+        console.error("Failed to subscribe", e);
+      }
+    );
+
+    return function cleanUp() {
+      if (!waku) return;
+      if (typeof unsubscribe === "undefined") return;
+      unsubscribe().then(
+        () => {
+          console.log("unsubscribed to ", ChatContentTopic);
+        },
+        (e) => console.error("Failed to unsubscribe", e)
+      );
+    };
+  }, [waku]);
+
+  return messages;
+};
+
 export default function App() {
   const [messages, dispatchMessages] = useReducer(reduceMessages, []);
 
@@ -147,41 +195,8 @@ export default function App() {
   const [historicalMessagesRetrieved, setHistoricalMessagesRetrieved] =
     useState(false);
 
-  useEffect(() => {
-    if (!waku) return;
-    // Let's retrieve previous messages before listening to new messages
-    if (!historicalMessagesRetrieved) return;
-
-    const handleIncomingMessage = (wakuMsg: DecodedMessage) => {
-      console.log("Message received: ", wakuMsg);
-      const msg = Message.fromWakuMessage(wakuMsg);
-      if (msg) {
-        dispatchMessages([msg]);
-      }
-    };
-
-    let unsubscribe: undefined | (() => Promise<void>);
-    waku.filter.subscribe([ChatDecoder], handleIncomingMessage).then(
-      (_unsubscribe) => {
-        console.log("subscribed to ", ChatContentTopic);
-        unsubscribe = _unsubscribe;
-      },
-      (e) => {
-        console.error("Failed to subscribe", e);
-      }
-    );
-
-    return function cleanUp() {
-      if (!waku) return;
-      if (typeof unsubscribe === "undefined") return;
-      unsubscribe().then(
-        () => {
-          console.log("unsubscribed to ", ChatContentTopic);
-        },
-        (e) => console.error("Failed to unsubscribe", e)
-      );
-    };
-  }, [waku, historicalMessagesRetrieved]);
+  const msgs = useFilterMessages(waku);
+  console.log(msgs);
 
   useEffect(() => {
     if (!waku) return;
