@@ -147,12 +147,6 @@ export default function App() {
   const [historicalMessagesRetrieved, setHistoricalMessagesRetrieved] =
     useState(false);
 
-  // useEffect(() => {
-  //   initWaku(setWaku)
-  //     .then(() => console.log("Waku init done"))
-  //     .catch((e) => console.log("Waku init failed ", e));
-  // }, []);
-
   useEffect(() => {
     if (!waku) return;
     // Let's retrieve previous messages before listening to new messages
@@ -240,36 +234,6 @@ export default function App() {
     </div>
   );
 }
-
-// async function initWaku(setter: (waku: WakuLight) => void) {
-//   try {
-//     const publicKey = "AOGECG2SPND25EEFMAJ5WF3KSGJNSGV356DSTL2YVLLZWIV6SAYBM";
-//     const fqdn = "test.waku.nodes.status.im";
-//     const enrTree = `enrtree://${publicKey}@${fqdn}`;
-//     const waku = await createLightNode({
-//       libp2p: {
-//         peerDiscovery: [
-//           wakuDnsDiscovery(enrTree, {
-//             store: 1,
-//             filter: 2,
-//             lightpush: 2,
-//           }),
-//           wakuPeerExchangeDiscovery(),
-//         ],
-//       },
-//     });
-//     await waku.start();
-//     await waitForRemotePeer(waku, [
-//       Protocols.Store,
-//       Protocols.Filter,
-//       Protocols.LightPush,
-//     ]);
-
-//     setter(waku);
-//   } catch (e) {
-//     console.log("Issue starting waku ", e);
-//   }
-// }
 
 function reduceMessages(state: Message[], newMessages: Message[]) {
   return state.concat(newMessages);
