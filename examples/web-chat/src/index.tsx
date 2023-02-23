@@ -9,13 +9,13 @@ import { wakuPeerExchangeDiscovery } from "@waku/peer-exchange";
 import "./index.css";
 import App from "./App";
 
-const publicKey = "AOGECG2SPND25EEFMAJ5WF3KSGJNSGV356DSTL2YVLLZWIV6SAYBM";
-const fqdn = "test.waku.nodes.status.im";
-const enrTree = `enrtree://${publicKey}@${fqdn}`;
-const options = {
+const PUBLIC_KEY = "AOGECG2SPND25EEFMAJ5WF3KSGJNSGV356DSTL2YVLLZWIV6SAYBM";
+const FQDN = "test.waku.nodes.status.im";
+const ENR_TREE = `enrtree://${PUBLIC_KEY}@${FQDN}`;
+const NODE_OPTIONS = {
   libp2p: {
     peerDiscovery: [
-      wakuDnsDiscovery(enrTree, {
+      wakuDnsDiscovery(ENR_TREE, {
         store: 1,
         filter: 2,
         lightpush: 2,
@@ -25,7 +25,7 @@ const options = {
   },
 };
 
-const protocols = [Protocols.Filter, Protocols.Store, Protocols.LightPush];
+const PROTOCOLS = [Protocols.Filter, Protocols.Store, Protocols.LightPush];
 
 const THEMES = {
   AuthorName: {
@@ -59,7 +59,7 @@ const THEMES = {
 ReactDOM.render(
   <React.StrictMode>
     <ThemeProvider theme={THEMES}>
-      <LightNodeProvider options={options} protocols={protocols}>
+      <LightNodeProvider options={NODE_OPTIONS} protocols={PROTOCOLS}>
         <App />
       </LightNodeProvider>
     </ThemeProvider>
