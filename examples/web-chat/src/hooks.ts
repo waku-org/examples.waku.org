@@ -37,3 +37,54 @@ export const useMessages = (params: UseMessagesParams): Message[] => {
       .filter((v): v is Message => !!v);
   }, [storedMessages, newMessages]);
 };
+
+export const useNodePeers = (node: undefined | LightNode) => {
+  const [storePeers, setStorePeers] = useState(0);
+  const [filterPeers, setFilterPeers] = useState(0);
+  const [lightPushPeers, setLightPushPeers] = useState(0);
+
+  const [bootstrapPeers, setBootstrapPeers] = useState(new Set<string>());
+  const [peerExchangePeers, setPeerExchangePeers] = useState(new Set<string>());
+
+  useEffect(() => {
+    if (!node) return;
+
+    // Update store peer when new peer connected & identified
+    node.libp2p.peerStore.addEventListener("change:protocols", async (evt) => {
+      const { peerId } = evt.detail;
+      const tags = (await node.libp2p.peerStore.getTags(peerId)).map(
+        (t) => t.name
+      );
+      if (tags.includes("peer-exchange")) {
+        setPeerExchangePeers((peers) => new Set(peers).add(peerId.toString()));
+      } else {
+        setBootstrapPeers((peers) => new Set(peers).add(peerId.toString()));
+      }
+
+      const storePeers = await node.store.peers();
+      setStorePeers(storePeers.length);
+
+      const filterPeers = await node.filter.peers();
+      setFilterPeers(filterPeers.length);
+
+      const lightPushPeers = await node.lightPush.peers();
+      setLightPushPeers(lightPushPeers.length);
+    });
+  }, [node]);
+
+  useEffect(() => {
+    console.log("Bootstrap Peers:");
+    console.table(bootstrapPeers);
+
+    console.log("Peer Exchange Peers:");
+    console.table(peerExchangePeers);
+  }, [bootstrapPeers, peerExchangePeers]);
+
+  return {
+    storePeers,
+    filterPeers,
+    lightPushPeers,
+    bootstrapPeers,
+    peerExchangePeers,
+  };
+};
