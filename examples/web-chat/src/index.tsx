@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import { ThemeProvider } from "@livechat/ui-kit";
 import { LightNodeProvider } from "@waku/react";
 import { wakuDnsDiscovery } from "@waku/dns-discovery";
 import { Protocols } from "@waku/interfaces";
@@ -26,11 +27,42 @@ const options = {
 
 const protocols = [Protocols.Filter, Protocols.Store, Protocols.LightPush];
 
+const THEMES = {
+  AuthorName: {
+    css: {
+      fontSize: "1.1em",
+    },
+  },
+  Message: {
+    css: {
+      margin: "0em",
+      padding: "0em",
+      fontSize: "0.83em",
+    },
+  },
+  MessageText: {
+    css: {
+      margin: "0em",
+      padding: "0.1em",
+      paddingLeft: "1em",
+      fontSize: "1.1em",
+    },
+  },
+  MessageGroup: {
+    css: {
+      margin: "0em",
+      padding: "0.2em",
+    },
+  },
+};
+
 ReactDOM.render(
   <React.StrictMode>
-    <LightNodeProvider options={options} protocols={protocols}>
-      <App />
-    </LightNodeProvider>
+    <ThemeProvider theme={THEMES}>
+      <LightNodeProvider options={options} protocols={protocols}>
+        <App />
+      </LightNodeProvider>
+    </ThemeProvider>
   </React.StrictMode>,
   document.getElementById("root")
 );
