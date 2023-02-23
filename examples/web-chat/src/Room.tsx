@@ -1,4 +1,4 @@
-import type { Message as WakuMessage } from "@waku/interfaces";
+import type { IDecodedMessage as WakuMessage } from "@waku/interfaces";
 import { ChatContentTopic } from "./App";
 import ChatList from "./ChatList";
 import MessageInput from "./MessageInput";

@@ -1,5 +1,5 @@
 import { multiaddr } from "@multiformats/multiaddr";
-import type { WakuLight } from "@waku/interfaces";
+import type { LightNode as WakuLight } from "@waku/interfaces";
 
 function help(): string[] {
   return [
