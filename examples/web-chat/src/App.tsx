@@ -11,7 +11,6 @@ import { useWaku, useContentPair } from "@waku/react";
 
 import { useMessages, usePersistentNick } from "./hooks";
 
-export const ChatContentTopic = "/toy-chat/2/huilong/proto";
 const startTime = new Date();
 // Only retrieve a week of history
 startTime.setTime(Date.now() - 1000 * 60 * 60 * 24 * 7);
@@ -19,7 +18,7 @@ const endTime = new Date();
 
 export default function App() {
   const { node } = useWaku<LightNode>();
-  const { decoder } = useContentPair(ChatContentTopic);
+  const { decoder } = useContentPair();
   const messages = useMessages({
     node,
     decoder,

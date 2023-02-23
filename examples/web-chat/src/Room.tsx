@@ -2,10 +2,9 @@ import type {
   IDecodedMessage as WakuMessage,
   LightNode,
 } from "@waku/interfaces";
-import { ChatContentTopic } from "./App";
 import ChatList from "./ChatList";
 import MessageInput from "./MessageInput";
-import { useWaku } from "@waku/react";
+import { useWaku, useContentPair } from "@waku/react";
 import { TitleBar } from "@livechat/ui-kit";
 import { Message } from "./Message";
 import { ChatMessage } from "./chat_message";
@@ -20,6 +19,7 @@ interface Props {
 
 export default function Room(props: Props) {
   const { node } = useWaku<LightNode>();
+  const { encoder } = useContentPair();
 
   const [storePeers, setStorePeers] = useState(0);
   const [filterPeers, setFilterPeers] = useState(0);
@@ -27,8 +27,6 @@ export default function Room(props: Props) {
 
   const [bootstrapPeers, setBootstrapPeers] = useState(new Set<string>());
   const [peerExchangePeers, setPeerExchangePeers] = useState(new Set<string>());
-
-  const ChatEncoder = new Encoder(ChatContentTopic);
 
   useEffect(() => {
     if (!node) return;
@@ -89,7 +87,7 @@ export default function Room(props: Props) {
                   props.nick,
                   props.commandHandler,
                   async (msg) => {
-                    await node.lightPush.push(ChatEncoder, msg);
+                    await node.lightPush.push(encoder as Encoder, msg);
                   }
                 );
               }

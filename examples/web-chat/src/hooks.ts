@@ -23,7 +23,7 @@ export const usePersistentNick = (): [
 
 type UseMessagesParams = {
   node: undefined | LightNode;
-  decoder: Decoder;
+  decoder: undefined | Decoder;
   options: StoreQueryOptions;
 };
 
