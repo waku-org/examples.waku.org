@@ -1,15 +1,11 @@
-import type {
-  IDecodedMessage as WakuMessage,
-  LightNode,
-} from "@waku/interfaces";
+import type { LightNode } from "@waku/interfaces";
 import ChatList from "./ChatList";
 import MessageInput from "./MessageInput";
-import { useWaku, useContentPair } from "@waku/react";
+import { useWaku, useContentPair, useLightPush } from "@waku/react";
 import { TitleBar } from "@livechat/ui-kit";
 import { Message } from "./Message";
 import { ChatMessage } from "./chat_message";
 import { useEffect, useState } from "react";
-import { Encoder } from "@waku/core/lib/message/version_0";
 
 interface Props {
   messages: Message[];
@@ -20,6 +16,27 @@ interface Props {
 export default function Room(props: Props) {
   const { node } = useWaku<LightNode>();
   const { encoder } = useContentPair();
+  const { push: onPush } = useLightPush({ node, encoder });
+
+  const onSend = async (text: string) => {
+    if (!onPush) {
+      return;
+    }
+
+    if (text.startsWith("/")) {
+      props.commandHandler(text);
+    } else {
+      const timestamp = new Date();
+      const chatMessage = ChatMessage.fromUtf8String(
+        timestamp,
+        props.nick,
+        text
+      );
+      const payload = chatMessage.encode();
+
+      await onPush({ payload, timestamp });
+    }
+  };
 
   const [storePeers, setStorePeers] = useState(0);
   const [filterPeers, setFilterPeers] = useState(0);
@@ -78,39 +95,7 @@ export default function Room(props: Props) {
         title="Waku v2 chat app"
       />
       <ChatList messages={props.messages} />
-      <MessageInput
-        sendMessage={
-          node
-            ? async (messageToSend) => {
-                return handleMessage(
-                  messageToSend,
-                  props.nick,
-                  props.commandHandler,
-                  async (msg) => {
-                    await node.lightPush.push(encoder as Encoder, msg);
-                  }
-                );
-              }
-            : undefined
-        }
-      />
+      <MessageInput sendMessage={onSend} />
     </div>
   );
-}
-
-async function handleMessage(
-  message: string,
-  nick: string,
-  commandHandler: (cmd: string) => void,
-  sender: (wakuMsg: Partial<WakuMessage>) => Promise<void>
-) {
-  if (message.startsWith("/")) {
-    commandHandler(message);
-  } else {
-    const timestamp = new Date();
-    const chatMessage = ChatMessage.fromUtf8String(timestamp, nick, message);
-    const payload = chatMessage.encode();
-
-    await sender({ payload, timestamp });
-  }
 }
