@@ -6,15 +6,17 @@ import handleCommand from "./command";
 import Room from "./Room";
 import { generate } from "server-name-generator";
 import { Message } from "./Message";
-import { LightNode } from "@waku/interfaces";
 import { Decoder } from "@waku/core/lib/message/version_0";
-import { PageDirection } from "@waku/interfaces";
+import { PageDirection, LightNode, StoreQueryOptions } from "@waku/interfaces";
 
-import { useWaku, useFilterMessages, useStoreMessages } from "@waku/react";
+import {
+  useWaku,
+  useFilterMessages,
+  useStoreMessages,
+  useContentPair,
+} from "@waku/react";
 
 export const ChatContentTopic = "/toy-chat/2/huilong/proto";
-const ChatDecoder = new Decoder(ChatContentTopic);
-
 const startTime = new Date();
 // Only retrieve a week of history
 startTime.setTime(Date.now() - 1000 * 60 * 60 * 24 * 7);
@@ -35,18 +37,29 @@ const usePersistentNick = (): [
   return [nick, setNick];
 };
 
+type UseMessagesParams = {
+  node: undefined | LightNode;
+  decoder: Decoder;
+  options: StoreQueryOptions;
+};
+
+const useMessages = (params: UseMessagesParams): Message[] => {
+  const { messages: newMessages } = useFilterMessages(params);
+  const { messages: storedMessages } = useStoreMessages(params);
+
+  return React.useMemo((): Message[] => {
+    return [...storedMessages, ...newMessages]
+      .map(Message.fromWakuMessage)
+      .filter((v): v is Message => !!v);
+  }, [storedMessages, newMessages]);
+};
+
 export default function App() {
   const { node } = useWaku<LightNode>();
-
-  const [nick, setNick] = usePersistentNick();
-
-  const { messages } = useFilterMessages({
+  const { decoder } = useContentPair(ChatContentTopic);
+  const messages = useMessages({
     node,
-    decoder: ChatDecoder,
-  });
-  const { messages: storeMessages } = useStoreMessages({
-    node,
-    decoder: ChatDecoder,
+    decoder,
     options: {
       pageSize: 5,
       pageDirection: PageDirection.FORWARD,
@@ -57,7 +70,7 @@ export default function App() {
     },
   });
 
-  console.log(messages, storeMessages);
+  const [nick, setNick] = usePersistentNick();
 
   return (
     <div
@@ -66,7 +79,7 @@ export default function App() {
     >
       <Room
         nick={nick}
-        messages={[]}
+        messages={messages}
         commandHandler={(input: string) => {
           handleCommand(input, node, setNick).then(({ command, response }) => {
             const commandMessages = response.map((msg) => {
