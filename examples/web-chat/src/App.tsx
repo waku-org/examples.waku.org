@@ -1,6 +1,3 @@
-/* eslint no-use-before-define: 0 */
-// @ts-ignore
-import React, { useEffect, useState } from "react";
 import "./App.css";
 import handleCommand from "./command";
 import Room from "./Room";
@@ -19,7 +16,7 @@ const endTime = new Date();
 export default function App() {
   const { node } = useWaku<LightNode>();
   const { decoder } = useContentPair();
-  const messages = useMessages({
+  const [messages, pushLocalMessages] = useMessages({
     node,
     decoder,
     options: {
@@ -34,23 +31,21 @@ export default function App() {
 
   const [nick, setNick] = usePersistentNick();
 
+  const onCommand = (text: string): void => {
+    handleCommand(text, node, setNick).then(({ command, response }) => {
+      const commandMessages = response.map((msg) => {
+        return Message.fromUtf8String(command, msg);
+      });
+      pushLocalMessages(commandMessages);
+    });
+  };
+
   return (
     <div
       className="chat-app"
       style={{ height: "100vh", width: "100vw", overflow: "hidden" }}
     >
-      <Room
-        nick={nick}
-        messages={messages}
-        commandHandler={(input: string) => {
-          handleCommand(input, node, setNick).then(({ command, response }) => {
-            const commandMessages = response.map((msg) => {
-              return Message.fromUtf8String(command, msg);
-            });
-            console.log("trying to send", commandMessages);
-          });
-        }}
-      />
+      <Room nick={nick} messages={messages} commandHandler={onCommand} />
     </div>
   );
 }

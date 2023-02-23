@@ -59,7 +59,7 @@ export default function Room(props: Props) {
         title="Waku v2 chat app"
       />
       <ChatList messages={props.messages} />
-      <MessageInput sendMessage={onSend} />
+      <MessageInput hasPeers={!!lightPushPeers} sendMessage={onSend} />
     </div>
   );
 }

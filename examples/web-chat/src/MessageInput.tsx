@@ -11,58 +11,54 @@ import {
 } from "@livechat/ui-kit";
 
 interface Props {
+  hasPeers: boolean;
   sendMessage: ((msg: string) => Promise<void>) | undefined;
 }
 
 export default function MessageInput(props: Props) {
-  const [inputText, setInputText] = useState<string>("");
-  const [activeButton, setActiveButton] = useState<boolean>(false);
+  const { hasPeers } = props;
   const { node } = useWaku<LightNode>();
 
-  const sendMessage = async () => {
+  const [inputText, setInputText] = useState<string>("");
+  const [isActive, setActiveButton] = useState<boolean>(false);
+
+  const onMessage = async () => {
     if (props.sendMessage) {
       await props.sendMessage(inputText);
       setInputText("");
     }
   };
 
-  const messageHandler = (event: ChangeEvent<HTMLInputElement>) => {
+  const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     setInputText(event.target.value);
   };
 
-  const keyPressHandler = async (event: KeyboardEvent<HTMLInputElement>) => {
+  const onKeyDown = async (event: KeyboardEvent<HTMLInputElement>) => {
     if (
       event.key === "Enter" &&
       !event.altKey &&
       !event.ctrlKey &&
       !event.shiftKey
     ) {
-      await sendMessage();
+      await onMessage();
     }
   };
 
   // Enable the button if there are peers available or the user is sending a command
   useEffect(() => {
-    if (inputText.startsWith("/")) {
+    if (inputText.startsWith("/") || hasPeers) {
       setActiveButton(true);
     } else if (node) {
-      (async () => {
-        const peers = await node.lightPush.peers();
-        if (!!peers) {
-          setActiveButton(true);
-        } else {
-          setActiveButton(false);
-        }
-      })();
+      setActiveButton(false);
     }
-  }, [activeButton, inputText, node]);
+  }, [inputText, hasPeers]);
 
   return (
     <TextComposer
-      onKeyDown={keyPressHandler}
-      onChange={messageHandler}
-      active={activeButton}
-      onButtonClick={sendMessage}
+      onKeyDown={onKeyDown}
+      onChange={onChange}
+      active={isActive}
+      onButtonClick={onMessage}
     >
       <Row align="center">
         <Fill>

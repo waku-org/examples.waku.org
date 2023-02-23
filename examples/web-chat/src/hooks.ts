@@ -27,15 +27,31 @@ type UseMessagesParams = {
   options: StoreQueryOptions;
 };
 
-export const useMessages = (params: UseMessagesParams): Message[] => {
+type UseMessagesResult = [Message[], (v: Message[]) => void];
+
+export const useMessages = (params: UseMessagesParams): UseMessagesResult => {
   const { messages: newMessages } = useFilterMessages(params);
   const { messages: storedMessages } = useStoreMessages(params);
+  const [localMessages, setLocalMessages] = useState<Message[]>([]);
 
-  return React.useMemo((): Message[] => {
+  const pushMessages = (msgs: Message[]) => {
+    if (!msgs || !msgs.length) {
+      return;
+    }
+    setLocalMessages((prev) => [...prev, ...msgs]);
+  };
+
+  const allMessages = React.useMemo((): Message[] => {
     return [...storedMessages, ...newMessages]
       .map(Message.fromWakuMessage)
-      .filter((v): v is Message => !!v);
-  }, [storedMessages, newMessages]);
+      .concat(localMessages)
+      .filter((v): v is Message => !!v)
+      .sort(
+        (left, right) => left.timestamp.getTime() - right.timestamp.getTime()
+      );
+  }, [storedMessages, newMessages, localMessages]);
+
+  return [allMessages, pushMessages];
 };
 
 export const useNodePeers = (node: undefined | LightNode) => {
