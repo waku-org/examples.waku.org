@@ -39,10 +39,6 @@ export const useMessages = (params: UseMessagesParams): Message[] => {
 };
 
 export const useNodePeers = (node: undefined | LightNode) => {
-  const [storePeers, setStorePeers] = useState(0);
-  const [filterPeers, setFilterPeers] = useState(0);
-  const [lightPushPeers, setLightPushPeers] = useState(0);
-
   const [bootstrapPeers, setBootstrapPeers] = useState(new Set<string>());
   const [peerExchangePeers, setPeerExchangePeers] = useState(new Set<string>());
 
@@ -60,15 +56,6 @@ export const useNodePeers = (node: undefined | LightNode) => {
       } else {
         setBootstrapPeers((peers) => new Set(peers).add(peerId.toString()));
       }
-
-      const storePeers = await node.store.peers();
-      setStorePeers(storePeers.length);
-
-      const filterPeers = await node.filter.peers();
-      setFilterPeers(filterPeers.length);
-
-      const lightPushPeers = await node.lightPush.peers();
-      setLightPushPeers(lightPushPeers.length);
     });
   }, [node]);
 
@@ -81,9 +68,6 @@ export const useNodePeers = (node: undefined | LightNode) => {
   }, [bootstrapPeers, peerExchangePeers]);
 
   return {
-    storePeers,
-    filterPeers,
-    lightPushPeers,
     bootstrapPeers,
     peerExchangePeers,
   };

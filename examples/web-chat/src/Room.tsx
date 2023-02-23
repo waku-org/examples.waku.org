@@ -1,7 +1,7 @@
 import type { LightNode } from "@waku/interfaces";
 import ChatList from "./ChatList";
 import MessageInput from "./MessageInput";
-import { useWaku, useContentPair, useLightPush } from "@waku/react";
+import { useWaku, useContentPair, useLightPush, usePeers } from "@waku/react";
 import { TitleBar } from "@livechat/ui-kit";
 import { Message } from "./Message";
 import { ChatMessage } from "./chat_message";
@@ -17,13 +17,9 @@ export default function Room(props: Props) {
   const { node } = useWaku<LightNode>();
   const { encoder } = useContentPair();
   const { push: onPush } = useLightPush({ node, encoder });
-  const {
-    lightPushPeers,
-    filterPeers,
-    storePeers,
-    bootstrapPeers,
-    peerExchangePeers,
-  } = useNodePeers(node);
+
+  const { bootstrapPeers, peerExchangePeers } = useNodePeers(node);
+  const { storePeers, filterPeers, lightPushPeers } = usePeers({ node });
 
   const onSend = async (text: string) => {
     if (!onPush) {
@@ -52,7 +48,9 @@ export default function Room(props: Props) {
     >
       <TitleBar
         leftIcons={[
-          `Peers: ${lightPushPeers} light push, ${filterPeers} filter, ${storePeers} store.`,
+          `Peers: ${orZero(lightPushPeers?.length)} light push, ${orZero(
+            filterPeers?.length
+          )} filter, ${orZero(storePeers?.length)} store.`,
         ]}
         rightIcons={[
           `Bootstrap (DNS Discovery): ${bootstrapPeers.size}, Peer exchange: ${peerExchangePeers.size}. `,
@@ -64,4 +62,8 @@ export default function Room(props: Props) {
       <MessageInput sendMessage={onSend} />
     </div>
   );
+}
+
+function orZero(value: undefined | number): number {
+  return value || 0;
 }
