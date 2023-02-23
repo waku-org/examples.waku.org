@@ -1,8 +1,11 @@
-import type { IDecodedMessage as WakuMessage } from "@waku/interfaces";
+import type {
+  IDecodedMessage as WakuMessage,
+  LightNode,
+} from "@waku/interfaces";
 import { ChatContentTopic } from "./App";
 import ChatList from "./ChatList";
 import MessageInput from "./MessageInput";
-import { useWaku } from "./WakuContext";
+import { useWaku } from "@waku/react";
 import { TitleBar } from "@livechat/ui-kit";
 import { Message } from "./Message";
 import { ChatMessage } from "./chat_message";
@@ -16,7 +19,7 @@ interface Props {
 }
 
 export default function Room(props: Props) {
-  const { waku } = useWaku();
+  const { node } = useWaku<LightNode>();
 
   const [storePeers, setStorePeers] = useState(0);
   const [filterPeers, setFilterPeers] = useState(0);
@@ -28,12 +31,12 @@ export default function Room(props: Props) {
   const ChatEncoder = new Encoder(ChatContentTopic);
 
   useEffect(() => {
-    if (!waku) return;
+    if (!node) return;
 
     // Update store peer when new peer connected & identified
-    waku.libp2p.peerStore.addEventListener("change:protocols", async (evt) => {
+    node.libp2p.peerStore.addEventListener("change:protocols", async (evt) => {
       const { peerId } = evt.detail;
-      const tags = (await waku.libp2p.peerStore.getTags(peerId)).map(
+      const tags = (await node.libp2p.peerStore.getTags(peerId)).map(
         (t) => t.name
       );
       if (tags.includes("peer-exchange")) {
@@ -42,16 +45,16 @@ export default function Room(props: Props) {
         setBootstrapPeers((peers) => new Set(peers).add(peerId.toString()));
       }
 
-      const storePeers = await waku.store.peers();
+      const storePeers = await node.store.peers();
       setStorePeers(storePeers.length);
 
-      const filterPeers = await waku.filter.peers();
+      const filterPeers = await node.filter.peers();
       setFilterPeers(filterPeers.length);
 
-      const lightPushPeers = await waku.lightPush.peers();
+      const lightPushPeers = await node.lightPush.peers();
       setLightPushPeers(lightPushPeers.length);
     });
-  }, [waku]);
+  }, [node]);
 
   useEffect(() => {
     console.log("Bootstrap Peers:");
@@ -79,14 +82,14 @@ export default function Room(props: Props) {
       <ChatList messages={props.messages} />
       <MessageInput
         sendMessage={
-          waku
+          node
             ? async (messageToSend) => {
                 return handleMessage(
                   messageToSend,
                   props.nick,
                   props.commandHandler,
                   async (msg) => {
-                    await waku.lightPush.push(ChatEncoder, msg);
+                    await node.lightPush.push(ChatEncoder, msg);
                   }
                 );
               }

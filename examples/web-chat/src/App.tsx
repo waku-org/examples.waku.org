@@ -1,10 +1,9 @@
 /* eslint no-use-before-define: 0 */
 // @ts-ignore
-import React, { useEffect, useReducer, useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./App.css";
 import handleCommand from "./command";
 import Room from "./Room";
-import { WakuContext } from "./WakuContext";
 import { generate } from "server-name-generator";
 import { Message } from "./Message";
 import { LightNode } from "@waku/interfaces";
@@ -65,22 +64,18 @@ export default function App() {
       className="chat-app"
       style={{ height: "100vh", width: "100vw", overflow: "hidden" }}
     >
-      <WakuContext.Provider value={{ waku: node }}>
-        <Room
-          nick={nick}
-          messages={[]}
-          commandHandler={(input: string) => {
-            handleCommand(input, node, setNick).then(
-              ({ command, response }) => {
-                const commandMessages = response.map((msg) => {
-                  return Message.fromUtf8String(command, msg);
-                });
-                console.log("trying to send", commandMessages);
-              }
-            );
-          }}
-        />
-      </WakuContext.Provider>
+      <Room
+        nick={nick}
+        messages={[]}
+        commandHandler={(input: string) => {
+          handleCommand(input, node, setNick).then(({ command, response }) => {
+            const commandMessages = response.map((msg) => {
+              return Message.fromUtf8String(command, msg);
+            });
+            console.log("trying to send", commandMessages);
+          });
+        }}
+      />
     </div>
   );
 }

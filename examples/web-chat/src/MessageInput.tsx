@@ -1,5 +1,6 @@
 import { ChangeEvent, KeyboardEvent, useEffect, useState } from "react";
-import { useWaku } from "./WakuContext";
+import { useWaku } from "@waku/react";
+import { LightNode } from "@waku/interfaces";
 import {
   TextInput,
   TextComposer,
@@ -16,7 +17,7 @@ interface Props {
 export default function MessageInput(props: Props) {
   const [inputText, setInputText] = useState<string>("");
   const [activeButton, setActiveButton] = useState<boolean>(false);
-  const { waku } = useWaku();
+  const { node } = useWaku<LightNode>();
 
   const sendMessage = async () => {
     if (props.sendMessage) {
@@ -44,9 +45,9 @@ export default function MessageInput(props: Props) {
   useEffect(() => {
     if (inputText.startsWith("/")) {
       setActiveButton(true);
-    } else if (waku) {
+    } else if (node) {
       (async () => {
-        const peers = await waku.lightPush.peers();
+        const peers = await node.lightPush.peers();
         if (!!peers) {
           setActiveButton(true);
         } else {
@@ -54,7 +55,7 @@ export default function MessageInput(props: Props) {
         }
       })();
     }
-  }, [activeButton, inputText, waku]);
+  }, [activeButton, inputText, node]);
 
   return (
     <TextComposer
