@@ -41,21 +41,21 @@ export default function Room(props: Props) {
     }
   };
 
+  const lightPushPeersLength = orZero(lightPushPeers?.length);
+  const filterPeersLength = orZero(filterPeers?.length);
+  const storePeersLength = orZero(storePeers?.length);
+
+  const peersMessage = `Peers: ${lightPushPeersLength} light push, ${filterPeersLength} filter, ${storePeersLength} store.`;
+  const bootstrapPeersMessage = `Bootstrap (DNS Discovery): ${bootstrapPeers.size}, Peer exchange: ${peerExchangePeers.size}. `;
+
   return (
     <div
       className="chat-container"
       style={{ height: "98vh", display: "flex", flexDirection: "column" }}
     >
       <TitleBar
-        leftIcons={[
-          `Peers: ${orZero(lightPushPeers?.length)} light push, ${orZero(
-            filterPeers?.length
-          )} filter, ${orZero(storePeers?.length)} store.`,
-        ]}
-        rightIcons={[
-          `Bootstrap (DNS Discovery): ${bootstrapPeers.size}, Peer exchange: ${peerExchangePeers.size}. `,
-          "View console for more details.",
-        ]}
+        leftIcons={[peersMessage]}
+        rightIcons={[bootstrapPeersMessage, "View console for more details."]}
         title="Waku v2 chat app"
       />
       <ChatList messages={props.messages} />
