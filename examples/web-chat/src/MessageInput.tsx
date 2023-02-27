@@ -11,12 +11,12 @@ import {
 } from "@livechat/ui-kit";
 
 interface Props {
-  hasPeers: boolean;
+  hasLightPushPeers: boolean;
   sendMessage: ((msg: string) => Promise<void>) | undefined;
 }
 
 export default function MessageInput(props: Props) {
-  const { hasPeers } = props;
+  const { hasLightPushPeers } = props;
   const { node } = useWaku<LightNode>();
 
   const [inputText, setInputText] = useState<string>("");
@@ -46,12 +46,12 @@ export default function MessageInput(props: Props) {
 
   // Enable the button if there are peers available or the user is sending a command
   useEffect(() => {
-    if (inputText.startsWith("/") || hasPeers) {
+    if (inputText.startsWith("/") || hasLightPushPeers) {
       setActiveButton(true);
     } else if (node) {
       setActiveButton(false);
     }
-  }, [inputText, hasPeers]);
+  }, [inputText, hasLightPushPeers]);
 
   return (
     <TextComposer
