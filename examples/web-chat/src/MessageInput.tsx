@@ -51,7 +51,7 @@ export default function MessageInput(props: Props) {
     } else if (node) {
       setActiveButton(false);
     }
-  }, [inputText, hasLightPushPeers]);
+  }, [node, inputText, hasLightPushPeers]);
 
   return (
     <TextComposer
