@@ -1,13 +1,11 @@
-import type { Message as WakuMessage } from "@waku/interfaces";
-import { ChatContentTopic } from "./App";
+import type { LightNode } from "@waku/interfaces";
 import ChatList from "./ChatList";
 import MessageInput from "./MessageInput";
-import { useWaku } from "./WakuContext";
+import { useWaku, useContentPair, useLightPush, usePeers } from "@waku/react";
 import { TitleBar } from "@livechat/ui-kit";
 import { Message } from "./Message";
 import { ChatMessage } from "./chat_message";
-import { useEffect, useState } from "react";
-import { Encoder } from "@waku/core/lib/message/version_0";
+import { useNodePeers } from "./hooks";
 
 interface Props {
   messages: Message[];
@@ -16,50 +14,39 @@ interface Props {
 }
 
 export default function Room(props: Props) {
-  const { waku } = useWaku();
+  const { node } = useWaku<LightNode>();
+  const { encoder } = useContentPair();
+  const { push: onPush } = useLightPush({ node, encoder });
 
-  const [storePeers, setStorePeers] = useState(0);
-  const [filterPeers, setFilterPeers] = useState(0);
-  const [lightPushPeers, setLightPushPeers] = useState(0);
+  const { bootstrapPeers, peerExchangePeers } = useNodePeers(node);
+  const { storePeers, filterPeers, lightPushPeers } = usePeers({ node });
 
-  const [bootstrapPeers, setBootstrapPeers] = useState(new Set<string>());
-  const [peerExchangePeers, setPeerExchangePeers] = useState(new Set<string>());
+  const onSend = async (text: string) => {
+    if (!onPush) {
+      return;
+    }
 
-  const ChatEncoder = new Encoder(ChatContentTopic);
-
-  useEffect(() => {
-    if (!waku) return;
-
-    // Update store peer when new peer connected & identified
-    waku.libp2p.peerStore.addEventListener("change:protocols", async (evt) => {
-      const { peerId } = evt.detail;
-      const tags = (await waku.libp2p.peerStore.getTags(peerId)).map(
-        (t) => t.name
+    if (text.startsWith("/")) {
+      props.commandHandler(text);
+    } else {
+      const timestamp = new Date();
+      const chatMessage = ChatMessage.fromUtf8String(
+        timestamp,
+        props.nick,
+        text
       );
-      if (tags.includes("peer-exchange")) {
-        setPeerExchangePeers((peers) => new Set(peers).add(peerId.toString()));
-      } else {
-        setBootstrapPeers((peers) => new Set(peers).add(peerId.toString()));
-      }
+      const payload = chatMessage.encode();
 
-      const storePeers = await waku.store.peers();
-      setStorePeers(storePeers.length);
+      await onPush({ payload, timestamp });
+    }
+  };
 
-      const filterPeers = await waku.filter.peers();
-      setFilterPeers(filterPeers.length);
+  const lightPushPeersLength = orZero(lightPushPeers?.length);
+  const filterPeersLength = orZero(filterPeers?.length);
+  const storePeersLength = orZero(storePeers?.length);
 
-      const lightPushPeers = await waku.lightPush.peers();
-      setLightPushPeers(lightPushPeers.length);
-    });
-  }, [waku]);
-
-  useEffect(() => {
-    console.log("Bootstrap Peers:");
-    console.table(bootstrapPeers);
-
-    console.log("Peer Exchange Peers:");
-    console.table(peerExchangePeers);
-  }, [bootstrapPeers, peerExchangePeers]);
+  const peersMessage = `Peers: ${lightPushPeersLength} light push, ${filterPeersLength} filter, ${storePeersLength} store.`;
+  const bootstrapPeersMessage = `Bootstrap (DNS Discovery): ${bootstrapPeers.size}, Peer exchange: ${peerExchangePeers.size}. `;
 
   return (
     <div
@@ -67,49 +54,16 @@ export default function Room(props: Props) {
       style={{ height: "98vh", display: "flex", flexDirection: "column" }}
     >
       <TitleBar
-        leftIcons={[
-          `Peers: ${lightPushPeers} light push, ${filterPeers} filter, ${storePeers} store.`,
-        ]}
-        rightIcons={[
-          `Bootstrap (DNS Discovery): ${bootstrapPeers.size}, Peer exchange: ${peerExchangePeers.size}. `,
-          "View console for more details.",
-        ]}
+        leftIcons={[peersMessage]}
+        rightIcons={[bootstrapPeersMessage, "View console for more details."]}
         title="Waku v2 chat app"
       />
       <ChatList messages={props.messages} />
-      <MessageInput
-        sendMessage={
-          waku
-            ? async (messageToSend) => {
-                return handleMessage(
-                  messageToSend,
-                  props.nick,
-                  props.commandHandler,
-                  async (msg) => {
-                    await waku.lightPush.push(ChatEncoder, msg);
-                  }
-                );
-              }
-            : undefined
-        }
-      />
+      <MessageInput hasLightPushPeers={!!lightPushPeers} sendMessage={onSend} />
     </div>
   );
 }
 
-async function handleMessage(
-  message: string,
-  nick: string,
-  commandHandler: (cmd: string) => void,
-  sender: (wakuMsg: Partial<WakuMessage>) => Promise<void>
-) {
-  if (message.startsWith("/")) {
-    commandHandler(message);
-  } else {
-    const timestamp = new Date();
-    const chatMessage = ChatMessage.fromUtf8String(timestamp, nick, message);
-    const payload = chatMessage.encode();
-
-    await sender({ payload, timestamp });
-  }
+function orZero(value: undefined | number): number {
+  return value || 0;
 }

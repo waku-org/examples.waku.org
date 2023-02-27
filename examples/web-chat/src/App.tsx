@@ -1,230 +1,51 @@
-import { useEffect, useReducer, useState } from "react";
 import "./App.css";
 import handleCommand from "./command";
 import Room from "./Room";
-import { WakuContext } from "./WakuContext";
-import { ThemeProvider } from "@livechat/ui-kit";
-import { generate } from "server-name-generator";
 import { Message } from "./Message";
-import { wakuDnsDiscovery } from "@waku/dns-discovery";
-import { wakuPeerExchangeDiscovery } from "@waku/peer-exchange";
-import { waitForRemotePeer } from "@waku/core";
-import { Protocols, WakuLight } from "@waku/interfaces";
-import { createLightNode } from "@waku/create";
-import { DecodedMessage, Decoder } from "@waku/core/lib/message/version_0";
-import { PageDirection } from "@waku/interfaces";
+import { PageDirection, LightNode } from "@waku/interfaces";
 
-const themes = {
-  AuthorName: {
-    css: {
-      fontSize: "1.1em",
-    },
-  },
-  Message: {
-    css: {
-      margin: "0em",
-      padding: "0em",
-      fontSize: "0.83em",
-    },
-  },
-  MessageText: {
-    css: {
-      margin: "0em",
-      padding: "0.1em",
-      paddingLeft: "1em",
-      fontSize: "1.1em",
-    },
-  },
-  MessageGroup: {
-    css: {
-      margin: "0em",
-      padding: "0.2em",
-    },
-  },
-};
+import { useWaku, useContentPair } from "@waku/react";
 
-export const ChatContentTopic = "/toy-chat/2/huilong/proto";
-const ChatDecoder = new Decoder(ChatContentTopic);
+import { useMessages, usePersistentNick } from "./hooks";
 
-async function retrieveStoreMessages(
-  waku: WakuLight,
-  setArchivedMessages: (value: Message[]) => void
-): Promise<void> {
-  const startTime = new Date();
-  // Only retrieve a week of history
-  startTime.setTime(Date.now() - 1000 * 60 * 60 * 24 * 7);
-
-  const endTime = new Date();
-
-  try {
-    for await (const messagesPromises of waku.store.queryGenerator(
-      [ChatDecoder],
-      {
-        pageSize: 5,
-        pageDirection: PageDirection.FORWARD,
-        timeFilter: {
-          startTime,
-          endTime,
-        },
-      }
-    )) {
-      const wakuMessages = await Promise.all(messagesPromises);
-
-      const messages: Message[] = [];
-      wakuMessages
-        .filter(isMessageDefined)
-        .map((wakuMsg) => Message.fromWakuMessage(wakuMsg))
-        .forEach((message) => {
-          if (message) {
-            messages.push(message);
-          }
-        });
-      setArchivedMessages(messages);
-    }
-  } catch (e) {
-    console.log("Failed to retrieve messages", e);
-  }
-}
+const startTime = new Date();
+// Only retrieve a week of history
+startTime.setTime(Date.now() - 1000 * 60 * 60 * 24 * 7);
+const endTime = new Date();
 
 export default function App() {
-  const [messages, dispatchMessages] = useReducer(reduceMessages, []);
-  const [waku, setWaku] = useState<WakuLight | undefined>(undefined);
-  const [nick, setNick] = useState<string>(() => {
-    const persistedNick = window.localStorage.getItem("nick");
-    return persistedNick !== null ? persistedNick : generate();
-  });
-  const [historicalMessagesRetrieved, setHistoricalMessagesRetrieved] =
-    useState(false);
-
-  useEffect(() => {
-    localStorage.setItem("nick", nick);
-  }, [nick]);
-
-  useEffect(() => {
-    initWaku(setWaku)
-      .then(() => console.log("Waku init done"))
-      .catch((e) => console.log("Waku init failed ", e));
-  }, []);
-
-  useEffect(() => {
-    if (!waku) return;
-    // Let's retrieve previous messages before listening to new messages
-    if (!historicalMessagesRetrieved) return;
-
-    const handleIncomingMessage = (wakuMsg: DecodedMessage) => {
-      console.log("Message received: ", wakuMsg);
-      const msg = Message.fromWakuMessage(wakuMsg);
-      if (msg) {
-        dispatchMessages([msg]);
-      }
-    };
-
-    let unsubscribe: undefined | (() => Promise<void>);
-    waku.filter.subscribe([ChatDecoder], handleIncomingMessage).then(
-      (_unsubscribe) => {
-        console.log("subscribed to ", ChatContentTopic);
-        unsubscribe = _unsubscribe;
+  const { node } = useWaku<LightNode>();
+  const { decoder } = useContentPair();
+  const [messages, pushLocalMessages] = useMessages({
+    node,
+    decoder,
+    options: {
+      pageSize: 5,
+      pageDirection: PageDirection.FORWARD,
+      timeFilter: {
+        startTime,
+        endTime,
       },
-      (e) => {
-        console.error("Failed to subscribe", e);
-      }
-    );
+    },
+  });
 
-    return function cleanUp() {
-      if (!waku) return;
-      if (typeof unsubscribe === "undefined") return;
-      unsubscribe().then(
-        () => {
-          console.log("unsubscribed to ", ChatContentTopic);
-        },
-        (e) => console.error("Failed to unsubscribe", e)
-      );
-    };
-  }, [waku, historicalMessagesRetrieved]);
+  const [nick, setNick] = usePersistentNick();
 
-  useEffect(() => {
-    if (!waku) return;
-    if (historicalMessagesRetrieved) return;
-
-    const retrieveMessages = async () => {
-      await waitForRemotePeer(waku, [
-        Protocols.Store,
-        Protocols.Filter,
-        Protocols.LightPush,
-      ]);
-      console.log(`Retrieving archived messages`);
-
-      try {
-        retrieveStoreMessages(waku, dispatchMessages).then((length) => {
-          console.log(`Messages retrieved:`, length);
-          setHistoricalMessagesRetrieved(true);
-        });
-      } catch (e) {
-        console.log(`Error encountered when retrieving archived messages`, e);
-      }
-    };
-
-    retrieveMessages();
-  }, [waku, historicalMessagesRetrieved]);
+  const onCommand = (text: string): void => {
+    handleCommand(text, node, setNick).then(({ command, response }) => {
+      const commandMessages = response.map((msg) => {
+        return Message.fromUtf8String(command, msg);
+      });
+      pushLocalMessages(commandMessages);
+    });
+  };
 
   return (
     <div
       className="chat-app"
       style={{ height: "100vh", width: "100vw", overflow: "hidden" }}
     >
-      <WakuContext.Provider value={{ waku: waku }}>
-        <ThemeProvider theme={themes}>
-          <Room
-            nick={nick}
-            messages={messages}
-            commandHandler={(input: string) => {
-              handleCommand(input, waku, setNick).then(
-                ({ command, response }) => {
-                  const commandMessages = response.map((msg) => {
-                    return Message.fromUtf8String(command, msg);
-                  });
-                  dispatchMessages(commandMessages);
-                }
-              );
-            }}
-          />
-        </ThemeProvider>
-      </WakuContext.Provider>
+      <Room nick={nick} messages={messages} commandHandler={onCommand} />
     </div>
   );
 }
-
-async function initWaku(setter: (waku: WakuLight) => void) {
-  try {
-    const publicKey = "AOGECG2SPND25EEFMAJ5WF3KSGJNSGV356DSTL2YVLLZWIV6SAYBM";
-    const fqdn = "test.waku.nodes.status.im";
-    const enrTree = `enrtree://${publicKey}@${fqdn}`;
-    const waku = await createLightNode({
-      libp2p: {
-        peerDiscovery: [
-          wakuDnsDiscovery(enrTree, {
-            store: 1,
-            filter: 2,
-            lightpush: 2,
-          }),
-          wakuPeerExchangeDiscovery(),
-        ],
-      },
-    });
-    await waku.start();
-
-    setter(waku);
-  } catch (e) {
-    console.log("Issue starting waku ", e);
-  }
-}
-
-function reduceMessages(state: Message[], newMessages: Message[]) {
-  return state.concat(newMessages);
-}
-
-const isMessageDefined = (
-  msg: DecodedMessage | undefined
-): msg is DecodedMessage => {
-  return !!msg;
-};

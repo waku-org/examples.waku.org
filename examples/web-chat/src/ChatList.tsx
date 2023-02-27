@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import {
   Message as LiveMessage,
   MessageText,
@@ -9,8 +9,6 @@ import { Message } from "./Message";
 interface Props {
   messages: Message[];
 }
-
-memo(ChatList);
 
 export default function ChatList(props: Props) {
   const renderedMessages = props.messages.map((message) => (

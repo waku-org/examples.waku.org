@@ -1,5 +1,6 @@
 import { ChangeEvent, KeyboardEvent, useEffect, useState } from "react";
-import { useWaku } from "./WakuContext";
+import { useWaku } from "@waku/react";
+import { LightNode } from "@waku/interfaces";
 import {
   TextInput,
   TextComposer,
@@ -10,58 +11,54 @@ import {
 } from "@livechat/ui-kit";
 
 interface Props {
+  hasLightPushPeers: boolean;
   sendMessage: ((msg: string) => Promise<void>) | undefined;
 }
 
 export default function MessageInput(props: Props) {
-  const [inputText, setInputText] = useState<string>("");
-  const [activeButton, setActiveButton] = useState<boolean>(false);
-  const { waku } = useWaku();
+  const { hasLightPushPeers } = props;
+  const { node } = useWaku<LightNode>();
 
-  const sendMessage = async () => {
+  const [inputText, setInputText] = useState<string>("");
+  const [isActive, setActiveButton] = useState<boolean>(false);
+
+  const onMessage = async () => {
     if (props.sendMessage) {
       await props.sendMessage(inputText);
       setInputText("");
     }
   };
 
-  const messageHandler = (event: ChangeEvent<HTMLInputElement>) => {
+  const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     setInputText(event.target.value);
   };
 
-  const keyPressHandler = async (event: KeyboardEvent<HTMLInputElement>) => {
+  const onKeyDown = async (event: KeyboardEvent<HTMLInputElement>) => {
     if (
       event.key === "Enter" &&
       !event.altKey &&
       !event.ctrlKey &&
       !event.shiftKey
     ) {
-      await sendMessage();
+      await onMessage();
     }
   };
 
   // Enable the button if there are peers available or the user is sending a command
   useEffect(() => {
-    if (inputText.startsWith("/")) {
+    if (inputText.startsWith("/") || hasLightPushPeers) {
       setActiveButton(true);
-    } else if (waku) {
-      (async () => {
-        const peers = await waku.lightPush.peers();
-        if (!!peers) {
-          setActiveButton(true);
-        } else {
-          setActiveButton(false);
-        }
-      })();
+    } else if (node) {
+      setActiveButton(false);
     }
-  }, [activeButton, inputText, waku]);
+  }, [node, inputText, hasLightPushPeers]);
 
   return (
     <TextComposer
-      onKeyDown={keyPressHandler}
-      onChange={messageHandler}
-      active={activeButton}
-      onButtonClick={sendMessage}
+      onKeyDown={onKeyDown}
+      onChange={onChange}
+      active={isActive}
+      onButtonClick={onMessage}
     >
       <Row align="center">
         <Fill>
