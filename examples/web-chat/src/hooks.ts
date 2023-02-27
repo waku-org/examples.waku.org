@@ -54,6 +54,8 @@ export const useMessages = (params: UseMessagesParams): UseMessagesResult => {
   return [allMessages, pushMessages];
 };
 
+// can be safely ignored
+// this is for experiments on waku side around new discovery options
 export const useNodePeers = (node: undefined | LightNode) => {
   const [bootstrapPeers, setBootstrapPeers] = useState(new Set<string>());
   const [peerExchangePeers, setPeerExchangePeers] = useState(new Set<string>());
