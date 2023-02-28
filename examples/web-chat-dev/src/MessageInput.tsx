@@ -40,7 +40,7 @@ export default function MessageInput(props: Props) {
       !event.ctrlKey &&
       !event.shiftKey
     ) {
-      await onMessage();
+      await sendMessage();
     }
   };
 
