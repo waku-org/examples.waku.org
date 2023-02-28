@@ -1,0 +1,74 @@
+{
+  "name": "web-chat-dev",
+  "version": "0.1.0",
+  "private": true,
+  "homepage": "/web-chat-dev",
+  "dependencies": {
+    "@libp2p/bootstrap": "^5.0.0",
+    "@livechat/ui-kit": "^0.5.0-24",
+    "@multiformats/multiaddr": "11.0.7",
+    "@waku/react": "0.0.1-a",
+    "@waku/byte-utils": "^0.0.2",
+    "@waku/core": "^0.0.10",
+    "@waku/create": "^0.0.4",
+    "@waku/dns-discovery": "0.0.5",
+    "@waku/interfaces": "^0.0.7",
+    "@waku/peer-exchange": "^0.0.3",
+    "process": "^0.11.10",
+    "protons-runtime": "^3.1.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "server-name-generator": "^1.0.5",
+    "uint8arraylist": "^2.3.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.5.2",
+    "@types/node": "^17.0.45",
+    "@types/react": "^18.0.25",
+    "@types/react-dom": "^18.0.9",
+    "cspell": "^6.14.3",
+    "gh-pages": "^4.0.0",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.7.1",
+    "protons": "^5.1.0",
+    "react-scripts": "5.0.1",
+    "typescript": "^4.9.3",
+    "url": "^0.11.0"
+  },
+  "scripts": {
+    "start": "GENERATE_SOURCEMAP=false PORT=3003 react-scripts start",
+    "build": "react-scripts build",
+    "test:unit": "exit 0",
+    "fix": "run-s fix:*",
+    "test": "run-s build test:*",
+    "test:lint": "eslint src --ext .ts --ext .tsx",
+    "test:prettier": "prettier \"src/**/*.{ts,tsx}\" \"./*.json\" --list-different",
+    "test:spelling": "cspell \"{README.md,.github/*.md,src/**/*.{ts,tsx},public/**/*.html}\" -c ./.cspell.json",
+    "fix:prettier": "prettier \"src/**/*.{ts,tsx}\" \"./*.json\" --write",
+    "fix:lint": "eslint src --ext .ts --ext .tsx --fix",
+    "proto": "protons src/proto/*.proto",
+    "js-waku:build": "cd ../; npm run build",
+    "predeploy": "run-s js-waku:build build",
+    "deploy": "gh-pages -d build"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not ie <= 99",
+      "not android <= 4.4.4",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
