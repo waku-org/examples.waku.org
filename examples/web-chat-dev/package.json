@@ -2,7 +2,7 @@
   "name": "web-chat-dev",
   "version": "0.1.0",
   "private": true,
-  "homepage": "/web-chat",
+  "homepage": "/web-chat-dev",
   "dependencies": {
     "@libp2p/bootstrap": "^5.0.0",
     "@livechat/ui-kit": "^0.5.0-24",
