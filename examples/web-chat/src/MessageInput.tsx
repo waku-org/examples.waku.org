@@ -23,13 +23,14 @@ export default function MessageInput(props: Props) {
   const [isActive, setActiveButton] = useState<boolean>(false);
 
   const onMessage = async () => {
-    if (props.sendMessage) {
+    if (props.sendMessage && inputText) {
       await props.sendMessage(inputText);
       setInputText("");
     }
   };
 
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
+    event.preventDefault();
     setInputText(event.target.value);
   };
 

@@ -22,7 +22,7 @@ export default function Room(props: Props) {
   const { storePeers, filterPeers, lightPushPeers } = usePeers({ node });
 
   const onSend = async (text: string) => {
-    if (!onPush) {
+    if (!onPush || !text) {
       return;
     }
 
