@@ -18,7 +18,6 @@ jobs:
             relay-reactjs-chat,
             store-reactjs-chat,
             web-chat,
-            web-chat-dev,
             noise-js,
             noise-rtc,
           ]
