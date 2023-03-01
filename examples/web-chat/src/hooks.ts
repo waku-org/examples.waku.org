@@ -46,6 +46,7 @@ export const useMessages = (params: UseMessagesParams): UseMessagesResult => {
       .map(Message.fromWakuMessage)
       .concat(localMessages)
       .filter((v): v is Message => !!v)
+      .filter((v) => v.payloadAsUtf8 !== "")
       .sort(
         (left, right) => left.timestamp.getTime() - right.timestamp.getTime()
       );
