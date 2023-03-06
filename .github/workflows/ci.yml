@@ -74,5 +74,5 @@ jobs:
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.WAKU_CREATE_APP_PUBLISH }}" > ./.npmrc
         working-directory: "create-waku-app"
 
-      - run: npm publish --tag next --access public
+      - run: npm publish --tag latest --access public
         working-directory: "create-waku-app"
