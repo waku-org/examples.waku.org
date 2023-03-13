@@ -39,7 +39,6 @@ pipeline {
         stage('relay-reactjs-chat') { steps { script { buildExample() } } }
         stage('store-reactjs-chat') { steps { script { buildExample() } } }
         stage('web-chat') { steps { script { buildExample() } } }
-        stage('web-chat-dev') { steps { script { buildExample() } } }
         stage('noise-js') { steps { script { buildExample() } } }
         stage('noise-rtc') { steps { script { buildExample() } } }
       }
