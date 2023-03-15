@@ -8,6 +8,7 @@ import { ChatMessage } from "./chat_message";
 import { useNodePeers } from "./hooks";
 import { useEffect, useState } from "react";
 import type { PeerId } from "@libp2p/interface-peer-id";
+import { multiaddr } from "@multiformats/multiaddr";
 
 interface Props {
   messages: Message[];
@@ -40,8 +41,8 @@ export default function Room(props: Props) {
   useEffect(() => {
     if (!node || (!bootstrapPeers && !peerExchangePeers) || started) return;
 
-    const peerId = Array.from(bootstrapPeers)[0];
-    if (!peerId) return;
+    // const peerId = Array.from(bootstrapPeers)[0];
+    // if (!peerId) return;
 
     // pings work well and can be interpreted as a good source of checking connectivity with a peer
     // however, the peer:disconnect event is not triggered when we manually go offline
@@ -49,11 +50,25 @@ export default function Room(props: Props) {
     node.libp2p.connectionManager.addEventListener("peer:disconnect", (cb) => {
       console.log("peer:disconnect", cb);
     });
-    setInterval(() => {
-      ping(node, peerId);
-    }, 1000);
 
-    setStarted(true);
+    // replace with your own node ID to reproduce
+    const peerId = multiaddr(
+      "/ip4/127.0.0.1/tcp/8002/ws/p2p/16Uiu2HAmHLN5F9M8s8u2ttGU6CYo3qPXA3j5dc9Q2WMsiJRSh46Z"
+    );
+    console.log("dialing");
+    node
+      .dial(peerId)
+      .then(() => {
+        console.log("dialed");
+        setInterval(() => {
+          // @ts-ignore
+          return ping(node, peerId);
+        }, 3000);
+        setStarted(true);
+      })
+      .catch((err) => {
+        console.log(`Dial error: ${err}`);
+      });
   }, [node, bootstrapPeers, peerExchangePeers, started]);
 
   const onSend = async (text: string) => {
