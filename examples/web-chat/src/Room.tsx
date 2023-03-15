@@ -6,6 +6,8 @@ import { TitleBar } from "@livechat/ui-kit";
 import { Message } from "./Message";
 import { ChatMessage } from "./chat_message";
 import { useNodePeers } from "./hooks";
+import { useEffect, useState } from "react";
+import type { PeerId } from "@libp2p/interface-peer-id";
 
 interface Props {
   messages: Message[];
@@ -18,8 +20,41 @@ export default function Room(props: Props) {
   const { encoder } = useContentPair();
   const { push: onPush } = useLightPush({ node, encoder });
 
+  const [started, setStarted] = useState(false);
+
   const { bootstrapPeers, peerExchangePeers } = useNodePeers(node);
   const { storePeers, filterPeers, lightPushPeers } = usePeers({ node });
+
+  const ping = (node: LightNode, peerId: PeerId) => {
+    node.libp2p
+      // @ts-ignore
+      .ping(peerId)
+      .then((res) => {
+        console.log(`Ping: ${res}`);
+      })
+      .catch((err) => {
+        console.log(`Ping error: ${err}`);
+      });
+  };
+
+  useEffect(() => {
+    if (!node || (!bootstrapPeers && !peerExchangePeers) || started) return;
+
+    const peerId = Array.from(bootstrapPeers)[0];
+    if (!peerId) return;
+
+    // pings work well and can be interpreted as a good source of checking connectivity with a peer
+    // however, the peer:disconnect event is not triggered when we manually go offline
+
+    node.libp2p.connectionManager.addEventListener("peer:disconnect", (cb) => {
+      console.log("peer:disconnect", cb);
+    });
+    setInterval(() => {
+      ping(node, peerId);
+    }, 1000);
+
+    setStarted(true);
+  }, [node, bootstrapPeers, peerExchangePeers, started]);
 
   const onSend = async (text: string) => {
     if (!onPush || !text) {

@@ -3,6 +3,7 @@ import { generate } from "server-name-generator";
 import { Message } from "./Message";
 import { Decoder } from "@waku/core/lib/message/version_0";
 import { LightNode, StoreQueryOptions } from "@waku/interfaces";
+import type { PeerId } from "@libp2p/interface-peer-id";
 
 import { useFilterMessages, useStoreMessages } from "@waku/react";
 
@@ -58,8 +59,8 @@ export const useMessages = (params: UseMessagesParams): UseMessagesResult => {
 // can be safely ignored
 // this is for experiments on waku side around new discovery options
 export const useNodePeers = (node: undefined | LightNode) => {
-  const [bootstrapPeers, setBootstrapPeers] = useState(new Set<string>());
-  const [peerExchangePeers, setPeerExchangePeers] = useState(new Set<string>());
+  const [bootstrapPeers, setBootstrapPeers] = useState(new Set<PeerId>());
+  const [peerExchangePeers, setPeerExchangePeers] = useState(new Set<PeerId>());
 
   useEffect(() => {
     if (!node) return;
@@ -71,9 +72,9 @@ export const useNodePeers = (node: undefined | LightNode) => {
         (t) => t.name
       );
       if (tags.includes("peer-exchange")) {
-        setPeerExchangePeers((peers) => new Set(peers).add(peerId.toString()));
+        setPeerExchangePeers((peers) => new Set(peers).add(peerId));
       } else {
-        setBootstrapPeers((peers) => new Set(peers).add(peerId.toString()));
+        setBootstrapPeers((peers) => new Set(peers).add(peerId));
       }
     });
   }, [node]);
