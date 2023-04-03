@@ -117,7 +117,7 @@ function App() {
 
     let unsubscribe: undefined | (() => Promise<void>);
 
-    waku.relay.addObserver(publicKeyMessageDecoder, observerPublicKeyMessage);
+    waku.relay.subscribe(publicKeyMessageDecoder, observerPublicKeyMessage);
 
     return function cleanUp() {
       if (typeof unsubscribe === "undefined") return;
@@ -152,7 +152,7 @@ function App() {
 
     let unsubscribe: undefined | (() => Promise<void>);
 
-    waku.relay.addObserver(privateMessageDecoder, observerPrivateMessage);
+    waku.relay.subscribe(privateMessageDecoder, observerPrivateMessage);
 
     return function cleanUp() {
       if (typeof unsubscribe === "undefined") return;
@@ -164,7 +164,7 @@ function App() {
     if (!waku) return;
 
     const interval = setInterval(async () => {
-      const peers = waku.relay.getPeers();
+      const peers = waku.relay.gossipSub.getPeers();
 
       setPeerStats({
         relayPeers: peers.length,
