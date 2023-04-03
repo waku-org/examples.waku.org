@@ -6,12 +6,12 @@ import {
   Select,
   TextField,
 } from "@material-ui/core";
-import React, { ChangeEvent, useState, KeyboardEvent } from "react";
+import React, { ChangeEvent, KeyboardEvent, useState } from "react";
 import type { RelayNode } from "@waku/interfaces";
 import { createEncoder } from "@waku/message-encryption/ecies";
 import { PrivateMessage } from "./wire";
 import { PrivateMessageContentTopic } from "../waku";
-import { hexToBytes } from "@waku/byte-utils";
+import { hexToBytes } from "@waku/utils/bytes";
 
 const useStyles = makeStyles((theme) => ({
   formControl: {
@@ -118,12 +118,11 @@ async function sendMessage(
   });
   const payload = privateMessage.encode();
 
-  const encoder = createEncoder(
-    PrivateMessageContentTopic,
-    recipientPublicKey,
-    undefined,
-    true
-  );
+  const encoder = createEncoder({
+    contentTopic: PrivateMessageContentTopic,
+    publicKey: recipientPublicKey,
+    ephemeral: true,
+  });
 
   console.log("pushing");
   const res = await waku.relay.send(encoder, { payload });
