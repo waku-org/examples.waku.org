@@ -1,15 +1,12 @@
-import * as utils from "https://unpkg.com/@waku/byte-utils@0.0.2/bundle/index.js";
-import * as wakuCreate from "https://unpkg.com/@waku/create@0.0.6/bundle/index.js";
+import * as utils from "https://unpkg.com/@waku/utils@0.0.4/bundle/bytes.js";
+import * as wakuCreate from "https://unpkg.com/@waku/create@0.0.12/bundle/index.js";
 import {
   waitForRemotePeer,
   createDecoder,
   createEncoder,
-} from "https://unpkg.com/@waku/core@0.0.10/bundle/index.js";
+} from "https://unpkg.com/@waku/core@0.0.16/bundle/index.js";
 
-const MULTI_ADDR =
-  "/dns4/node-01.ac-cn-hongkong-c.wakuv2.test.statusim.net/tcp/443/wss/p2p/16Uiu2HAkvWiyFsgRhuJEb9JfjYxEkoHLgnUQmr1N5mKWnYjxYRVm";
 const CONTENT_TOPIC = "/toy-chat/2/huilong/proto";
-const PROTOCOLS = ["filter", "lightpush"];
 
 const ui = initUI();
 runApp(ui).catch((err) => {
@@ -21,8 +18,6 @@ async function runApp(ui) {
   ui.setStatus("connecting...", "progress");
 
   const { info, sendMessage, unsubscribeFromMessages } = await initWakuContext({
-    protocols: PROTOCOLS,
-    multiAddr: MULTI_ADDR,
     contentTopic: CONTENT_TOPIC,
     onMessageReceived: ui.renderMessage,
   });
@@ -31,7 +26,6 @@ async function runApp(ui) {
 
   ui.setLocalPeer(info.localPeerId);
   ui.setRemotePeer(info.remotePeerIds);
-  ui.setRemoteMultiAddr(info.multiAddr);
   ui.setContentTopic(info.contentTopic);
 
   ui.onSendMessage(sendMessage);
@@ -44,14 +38,9 @@ async function runApp(ui) {
   });
 }
 
-async function initWakuContext({
-  multiAddr,
-  protocols,
-  contentTopic,
-  onMessageReceived,
-}) {
+async function initWakuContext({ contentTopic, onMessageReceived }) {
   const Decoder = createDecoder(contentTopic);
-  const Encoder = createEncoder(contentTopic);
+  const Encoder = createEncoder({ contentTopic });
 
   const ChatMessage = new protobuf.Type("ChatMessage")
     .add(new protobuf.Field("timestamp", 1, "uint64"))
@@ -61,7 +50,7 @@ async function initWakuContext({
   const node = await wakuCreate.createLightNode({ defaultBootstrap: true });
 
   await node.start();
-  await waitForRemotePeer(node, protocols);
+  await waitForRemotePeer(node);
 
   // Set a filter by using Decoder for a given ContentTopic
   const unsubscribeFromMessages = await node.filter.subscribe(
@@ -83,7 +72,6 @@ async function initWakuContext({
   return {
     unsubscribeFromMessages,
     info: {
-      multiAddr,
       contentTopic,
       localPeerId,
       remotePeerIds,
@@ -99,7 +87,7 @@ async function initWakuContext({
         text: utils.utf8ToBytes(text),
       });
 
-      await node.lightPush.push(Encoder, {
+      await node.lightPush.send(Encoder, {
         payload: ChatMessage.encode(protoMessage).finish(),
       });
     },
@@ -114,7 +102,6 @@ function initUI() {
   const statusBlock = document.getElementById("status");
   const localPeerBlock = document.getElementById("localPeerId");
   const remotePeerId = document.getElementById("remotePeerId");
-  const remoteMultiAddr = document.getElementById("remoteMultiAddr");
   const contentTopicBlock = document.getElementById("contentTopic");
 
   const messagesBlock = document.getElementById("messages");
@@ -145,9 +132,6 @@ function initUI() {
     },
     setRemotePeer: (ids) => {
       remotePeerId.innerText = ids.join("\n");
-    },
-    setRemoteMultiAddr: (multiAddr) => {
-      remoteMultiAddr.innerText = multiAddr.toString();
     },
     setContentTopic: (topic) => {
       contentTopicBlock.innerText = topic.toString();
