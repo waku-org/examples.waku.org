@@ -1,5 +1,5 @@
 import { KeyPair } from "../crypto";
-import { bytesToHex, hexToBytes } from "@waku/byte-utils";
+import { bytesToHex, hexToBytes } from "@waku/utils/bytes";
 
 /**
  * Save key pair to storage, encrypted with password

@@ -7,7 +7,7 @@ import { Message } from "./messaging/Messages";
 import { equals } from "uint8arrays/equals";
 import { waitForRemotePeer } from "@waku/core";
 import { createRelayNode } from "@waku/create";
-import { bytesToHex, hexToBytes } from "@waku/byte-utils";
+import { bytesToHex, hexToBytes } from "@waku/utils/bytes";
 import type { DecodedMessage } from "@waku/message-encryption";
 
 export const PublicKeyContentTopic = "/eth-pm/1/public-key/proto";

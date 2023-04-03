@@ -6,7 +6,7 @@ import { PublicKeyContentTopic } from "./waku";
 import { keccak256, _TypedDataEncoder, recoverAddress } from "ethers/lib/utils";
 import { equals } from "uint8arrays/equals";
 import type { TypedDataSigner } from "@ethersproject/abstract-signer";
-import { bytesToHex, hexToBytes, utf8ToBytes } from "@waku/byte-utils";
+import { bytesToHex, hexToBytes, utf8ToBytes } from "@waku/utils/bytes";
 
 export const PublicKeyMessageEncryptionKey = hexToBytes(
   keccak256(utf8ToBytes(PublicKeyContentTopic))

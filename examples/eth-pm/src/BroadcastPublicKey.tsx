@@ -47,12 +47,11 @@ export default function BroadcastPublicKey({
     })();
     const payload = _publicKeyMessage.encode();
 
-    const publicKeyMessageEncoder = createEncoder(
-      PublicKeyContentTopic,
-      PublicKeyMessageEncryptionKey,
-      undefined,
-      true
-    );
+    const publicKeyMessageEncoder = createEncoder({
+      contentTopic: PublicKeyContentTopic,
+      symKey: PublicKeyMessageEncryptionKey,
+      ephemeral: true,
+    });
 
     await waku.relay.send(publicKeyMessageEncoder, { payload });
   };
