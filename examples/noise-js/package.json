@@ -9,8 +9,11 @@
     "start": "webpack-dev-server"
   },
   "dependencies": {
-    "@waku/noise": "https://github.com/waku-org/js-noise.git",
-    "js-waku": "^0.29.0-29436ea",
+    "@waku/core": "0.0.16",
+    "@waku/create": "0.0.12",
+    "@waku/interfaces": "0.0.11",
+    "@waku/noise": "0.0.3",
+    "@waku/utils": "0.0.4",
     "protobufjs": "^7.1.2",
     "qrcode": "^1.5.1"
   },

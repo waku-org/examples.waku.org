@@ -1,12 +1,7 @@
-import { createLightNode } from "js-waku/lib/create_waku";
-import { utils } from "js-waku";
-import { waitForRemotePeer } from "js-waku/lib/wait_for_remote_peer";
-import {
-  Fleet,
-  getPredefinedBootstrapNodes,
-} from "js-waku/lib/predefined_bootstrap_nodes";
-import { PeerDiscoveryStaticPeers } from "js-waku/lib/peer_discovery_static_list";
-import { Protocols } from "js-waku";
+import { createLightNode } from "@waku/create";
+import * as utils from "@waku/utils/bytes";
+import { waitForRemotePeer } from "@waku/core";
+import { Protocols } from "@waku/interfaces";
 import * as noise from "@waku/noise";
 import protobuf from "protobufjs";
 import QRCode from "qrcode";
@@ -34,12 +29,12 @@ async function main() {
 
     ui.waku.connected();
 
-    const [sender, responder] = getSenderAndResponder(node);
+    const responder = getResponder(node);
     const myStaticKey = noise.generateX25519KeyPair();
     const urlPairingInfo = getPairingInfoFromURL();
 
     const pairingObj = new noise.WakuPairing(
-      sender,
+      node.lightPush,
       responder,
       myStaticKey,
       urlPairingInfo || new noise.ResponderParameters()
@@ -86,7 +81,7 @@ async function main() {
       });
       const payload = ProtoChatMessage.encode(message).finish();
 
-      await node.lightPush.push(encoder, { payload, timestamp });
+      await node.lightPush.send(encoder, { payload, timestamp });
     });
   } catch (err) {
     ui.waku.error(err.message);
@@ -122,13 +117,7 @@ function getPairingInfoFromURL() {
   );
 }
 
-function getSenderAndResponder(node) {
-  const sender = {
-    async publish(encoder, msg) {
-      await node.lightPush.push(encoder, msg);
-    },
-  };
-
+function getResponder(node) {
   const msgQueue = new Array();
   const subscriptions = new Map();
   const intervals = new Map();
@@ -178,7 +167,7 @@ function getSenderAndResponder(node) {
     },
   };
 
-  return [sender, responder];
+  return responder;
 }
 
 async function scheduleHandshakeAuthConfirmation(pairingObj, ui) {
