@@ -147,7 +147,8 @@
         MembershipKey,
         RLNDecoder,
         RLNEncoder,
-      } from "https://unpkg.com/@waku/rln@0.0.13/bundle/index.js";
+        RLNContract,
+      } from "https://unpkg.com/@waku/rln@0.0.13-fae4bea/bundle/index.js";
 
       import { ethers } from "https://unpkg.com/ethers@5.7.2/dist/ethers.esm.min.js";
 
@@ -225,6 +226,28 @@
         .add(new protobuf.Field("nick", 2, "string"))
         .add(new protobuf.Field("text", 3, "bytes"));
 
+      const rlnDeployBlk = 8813000;
+      const rlnAddress = "0x4252105670fe33d2947e8ead304969849e64f2a6";
+      const rlnAbi = [
+        "function MEMBERSHIP_DEPOSIT() public view returns(uint256)",
+        "function register(uint256 pubkey) external payable",
+        "function withdraw(uint256 secret, uint256 _pubkeyIndex, address payable receiver) external",
+        "event MemberRegistered(uint256 pubkey, uint256 index)",
+        "event MemberWithdrawn(uint256 pubkey, uint256 index)",
+      ];
+
+      const provider = new ethers.providers.Web3Provider(
+        window.ethereum,
+        "any"
+      );
+
+      let accounts;
+      let signature;
+      let rlnContract = new RLNContract({
+        address: rlnAddress,
+        provider: provider.getSigner(),
+      });
+
       // Function to update the fields to guide the user by disabling buttons.
       const updateFields = () => {
         if (membershipKey) {
@@ -283,15 +306,14 @@
       importFromWalletButton.onclick = async () => {
         const signer = provider.getSigner();
 
-        const signature = await signer.signMessage(SIGNATURE_MESSAGE);
-
+        signature = await signer.signMessage(SIGNATURE_MESSAGE);
         membershipKey = await rlnInstance.generateSeededMembershipKey(
           signature
         );
 
         const idCommitment = ethers.utils.hexlify(membershipKey.IDCommitment);
 
-        allMemberships.forEach((m) => {
+        rlnContract.members.forEach((m) => {
           if (m.pubkey._hex === idCommitment) {
             membershipId = m.index.toString();
           }
@@ -308,40 +330,13 @@
         }
       };
 
-      const rlnDeployBlk = 8813000;
-      const rlnAddress = "0x4252105670fe33d2947e8ead304969849e64f2a6";
-      const rlnAbi = [
-        "function MEMBERSHIP_DEPOSIT() public view returns(uint256)",
-        "function register(uint256 pubkey) external payable",
-        "function withdraw(uint256 secret, uint256 _pubkeyIndex, address payable receiver) external",
-        "event MemberRegistered(uint256 pubkey, uint256 index)",
-        "event MemberWithdrawn(uint256 pubkey, uint256 index)",
-      ];
-
-      const provider = new ethers.providers.Web3Provider(
-        window.ethereum,
-        "any"
-      );
-
-      let accounts;
-      let rlnContract;
-
-      const handleMembership = (pubkey, index) => {
+      const updateLastMember = (pubkey, index) => {
         try {
-          allMemberships.push({ pubkey, index });
-
           const idCommitment = ethers.utils.zeroPad(
             ethers.utils.arrayify(pubkey),
             32
           );
-          rlnInstance.insertMember(idCommitment);
           const indexInt = index.toNumber();
-          if (
-            !latestMembershipSpan.innerText ||
-            indexInt > latestMembershipSpan.innerText
-          ) {
-            latestMembershipSpan.innerText = indexInt;
-          }
           console.debug(
             "IDCommitment registered in tree",
             idCommitment,
@@ -372,24 +367,19 @@
       };
 
       retrieveRLNDetailsButton.onclick = async () => {
-        rlnContract = new ethers.Contract(rlnAddress, rlnAbi, provider);
+        const filter = rlnContract.contract.filters.MemberRegistered();
 
-        const filter = rlnContract.filters.MemberRegistered();
-
-        // populating merkle tree:
-        const alreadyRegisteredMembers = await rlnContract.queryFilter(
-          filter,
-          rlnDeployBlk
-        );
-        alreadyRegisteredMembers.forEach((event) => {
-          handleMembership(event.args.pubkey, event.args.index, event);
-        });
+        await rlnContract.fetchMembers(rlnInstance, rlnDeployBlk);
+        rlnContract.subscribeToMembers(rlnInstance);
 
         retrievedRLNEvents = true;
 
-        // reacting to new registrations
-        rlnContract.on(filter, (pubkey, index, event) => {
-          handleMembership(event.args.pubkey, event.args.index, event);
+        const { pubkey, index } = rlnContract.members.at(-1);
+        updateLastMember(pubkey, index);
+
+        // make sure we have subscriptions to keep updating last item
+        rlnContract.contract.on(filter, (pubkey, index, event) => {
+          updateLastMember(event.args.pubkey, event.args.index);
         });
         updateFields();
       };
@@ -403,30 +393,41 @@
         try {
           registerButton.disabled = true;
 
-          const idCommitment = membershipKey.IDCommitment;
-          const reversedArray = idCommitment.slice().reverse();
-          const pubkey = ethers.utils.hexlify(reversedArray).toString();
+          let event;
 
-          const price = await rlnContract.MEMBERSHIP_DEPOSIT();
+          if (signature) {
+            event = await rlnContract.registerMember(rlnInstance, signature);
+          } else {
+            // if user imports credentials manually
+            // TODO: add logic to cover it in RLNContract
+            const idCommitment = membershipKey.IDCommitment;
+            const reversedArray = idCommitment.slice().reverse();
+            const pubkey = ethers.utils.hexlify(reversedArray).toString();
 
-          const signer = provider.getSigner();
-          const rlnContractWithSigner = rlnContract.connect(signer);
+            const price = await rlnContract.MEMBERSHIP_DEPOSIT();
 
-          const txResponse = await rlnContractWithSigner.register(pubkey, {
-            value: price,
-          });
-          console.log("Transaction broadcasted:", txResponse);
+            const signer = provider.getSigner();
+            const rlnContractWithSigner = rlnContract.connect(signer);
 
-          const txReceipt = await txResponse.wait();
+            const txResponse = await rlnContractWithSigner.register(pubkey, {
+              value: price,
+            });
+            console.log("Transaction broadcasted:", txResponse);
 
-          console.log("Transaction receipt", txReceipt);
+            const txReceipt = await txResponse.wait();
+
+            console.log("Transaction receipt", txReceipt);
+
+            event = txReceipt.events[0];
+          }
 
           // Update membershipId
-          membershipId = txReceipt.events[0].args.index.toNumber();
+          membershipId = event.args.index.toNumber();
           console.log(
             "Obtained index for current membership credentials",
             membershipId
           );
+
           updateFields();
           registerButton.disabled = false;
         } catch (err) {
