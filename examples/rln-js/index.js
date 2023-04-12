@@ -40,7 +40,7 @@ run()
 async function run() {
   const ui = initUI();
   const rln = await initRLN(ui);
-  const waku = await initWaku(ui, rln);
+  await initWaku(ui, rln);
 }
 
 async function initRLN(ui) {
