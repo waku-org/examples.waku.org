@@ -23,7 +23,7 @@ const ProtoChatMessage = new protobuf.Type("ChatMessage")
   .add(new protobuf.Field("nick", 2, "string"))
   .add(new protobuf.Field("text", 3, "bytes"));
 
-const rlnDeployBlk = 8818900;
+const rlnDeployBlk = 8824425;
 const rlnAddress = "0x4252105670fe33d2947e8ead304969849e64f2a6";
 
 const SIGNATURE_MESSAGE =
