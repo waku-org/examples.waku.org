@@ -1,10 +1,10 @@
-import { utils } from "https://unpkg.com/js-waku@0.30.0/bundle/index.js";
-import { createLightNode } from "https://unpkg.com/js-waku@0.30.0/bundle/lib/create_waku.js";
-import { waitForRemotePeer } from "https://unpkg.com/js-waku@0.30.0/bundle/lib/wait_for_remote_peer.js";
+import * as utils from "https://unpkg.com/@waku/utils@0.0.4/bundle/bytes.js";
+import { createLightNode } from "https://unpkg.com/@waku/create@0.0.12/bundle/index.js";
 import {
-  EncoderV0,
-  DecoderV0,
-} from "https://unpkg.com/js-waku@0.30.0/bundle/lib/waku_message/version_0.js";
+  createEncoder,
+  createDecoder,
+  waitForRemotePeer,
+} from "https://unpkg.com/@waku/core@0.0.16/bundle/index.js";
 import { protobuf } from "https://taisukef.github.io/protobuf-es.js/dist/protobuf-es.js";
 import {
   create,
@@ -100,7 +100,7 @@ async function initRLN(ui) {
     membershipKey = key;
 
     encoder = new RLNEncoder(
-      new EncoderV0(ContentTopic),
+      createEncoder(ContentTopic),
       rlnInstance,
       membershipId,
       membershipKey
@@ -126,7 +126,7 @@ async function initRLN(ui) {
 
     if (membershipId) {
       encoder = new RLNEncoder(
-        new EncoderV0(ContentTopic),
+        createEncoder(ContentTopic),
         rlnInstance,
         membershipId,
         membershipKey
@@ -256,7 +256,7 @@ async function initWaku(ui, rln) {
 
     const decoder = new RLNDecoder(
       rln.rlnInstance,
-      new DecoderV0(ContentTopic)
+      createDecoder(ContentTopic)
     );
 
     await node.filter.subscribe([decoder], onFilterMessage);
