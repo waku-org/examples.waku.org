@@ -246,9 +246,11 @@ async function initWaku(ui, rln) {
     verifyMessageAndRender(wakuMessage);
   };
 
-  ui.onDial(async (multiaddr) => {
+  ui.onDial(async (ma) => {
     ui.setWakuStatus("Dialing peer.");
 
+    // TODO(@weboko): move this fix into Waku.dial
+    const multiaddr = MultiformatsMultiaddr.multiaddr(ma);
     await node.dial(multiaddr, ["filter", "lightpush"]);
     await waitForRemotePeer(node, ["filter", "lightpush"]);
 
@@ -276,7 +278,7 @@ async function initWaku(ui, rln) {
     console.log("Sending message with proof...");
 
     ui.setSendingStatus("sending...");
-    await node.lightPush.push(rln.encoder, { payload, timestamp });
+    await node.lightPush.send(rln.encoder, { payload, timestamp });
     ui.setSendingStatus("sent!");
 
     console.log("Message sent!");
