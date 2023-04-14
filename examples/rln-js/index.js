@@ -12,7 +12,7 @@ import {
   RLNDecoder,
   RLNEncoder,
   RLNContract,
-} from "https://unpkg.com/@waku/rln@0.0.13-fae4bea/bundle/index.js";
+} from "https://unpkg.com/@waku/rln@0.0.14/bundle/index.js";
 import { ethers } from "https://unpkg.com/ethers@5.7.2/dist/ethers.esm.min.js";
 
 const ContentTopic = "/toy-chat/2/luzhou/proto";
@@ -23,7 +23,7 @@ const ProtoChatMessage = new protobuf.Type("ChatMessage")
   .add(new protobuf.Field("nick", 2, "string"))
   .add(new protobuf.Field("text", 3, "bytes"));
 
-const rlnDeployBlk = 8824425;
+const rlnDeployBlk = 8828313;
 const rlnAddress = "0x4252105670fe33d2947e8ead304969849e64f2a6";
 
 const SIGNATURE_MESSAGE =
@@ -44,6 +44,11 @@ async function run() {
 }
 
 async function initRLN(ui) {
+  const result = {
+    encoder: undefined,
+    rlnInstance: undefined,
+  };
+
   const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
 
   ui.setRlnStatus("WASM Blob download in progress...");
@@ -90,7 +95,6 @@ async function initRLN(ui) {
     });
   });
 
-  let encoder;
   let signature;
   let membershipId;
   let membershipKey;
@@ -99,8 +103,11 @@ async function initRLN(ui) {
     membershipId = id;
     membershipKey = key;
 
-    encoder = new RLNEncoder(
-      createEncoder(ContentTopic),
+    result.encoder = new RLNEncoder(
+      createEncoder({
+        ephemeral: false,
+        contentTopic: ContentTopic,
+      }),
       rlnInstance,
       membershipId,
       membershipKey
@@ -125,8 +132,11 @@ async function initRLN(ui) {
     });
 
     if (membershipId) {
-      encoder = new RLNEncoder(
-        createEncoder(ContentTopic),
+      result.encoder = new RLNEncoder(
+        createEncoder({
+          ephemeral: false,
+          contentTopic: ContentTopic,
+        }),
         rlnInstance,
         membershipId,
         membershipKey
@@ -182,10 +192,7 @@ async function initRLN(ui) {
     ui.enableDialButton();
   });
 
-  return {
-    encoder,
-    rlnInstance,
-  };
+  return result;
 }
 
 async function initWaku(ui, rln) {
@@ -196,7 +203,7 @@ async function initWaku(ui, rln) {
   await node.start();
   ui.setWakuStatus("Waku node started.");
 
-  const verifyMessageAndRender = (message) => {
+  const verifyMessage = (message) => {
     if (message.proofState === "verifying...") {
       try {
         console.log("Verifying proof without roots");
@@ -216,7 +223,6 @@ async function initWaku(ui, rln) {
         console.error("Error verifying proof:", e);
       }
 
-      ui.renderMessage(message);
       console.log("Verifying proof with roots", message.verify());
     }
   };
@@ -243,7 +249,8 @@ async function initWaku(ui, rln) {
             <i>[${time.toISOString()}]</i>
         `;
 
-    verifyMessageAndRender(wakuMessage);
+    verifyMessage(wakuMessage);
+    ui.renderMessage(wakuMessage);
   };
 
   ui.onDial(async (ma) => {
@@ -261,7 +268,7 @@ async function initWaku(ui, rln) {
       createDecoder(ContentTopic)
     );
 
-    await node.filter.subscribe([decoder], onFilterMessage);
+    await node.filter.subscribe(decoder, onFilterMessage);
 
     ui.setWakuStatus("Waku node subscribed.");
     ui.enableChatButtonsIfNickSet();
