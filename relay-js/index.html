@@ -36,13 +36,13 @@
       import {
         bytesToUtf8,
         utf8ToBytes,
-      } from "https://unpkg.com/@waku/byte-utils@0.0.2/bundle/index.js";
-      import { createRelayNode } from "https://unpkg.com/@waku/create@0.0.5/bundle/index.js";
+      } from "https://unpkg.com/@waku/utils@0.0.4/bundle/bytes.js";
+      import { createRelayNode } from "https://unpkg.com/@waku/create@0.0.12/bundle/index.js";
       import {
         waitForRemotePeer,
         createDecoder,
         createEncoder,
-      } from "https://unpkg.com/@waku/core@0.0.10/bundle/index.js";
+      } from "https://unpkg.com/@waku/core@0.0.16/bundle/index.js";
 
       const statusDiv = document.getElementById("status");
       const messagesDiv = document.getElementById("messages");
@@ -58,24 +58,28 @@
 
       // Prepare encoder and decoder, `V0` for clear text messages.
 
-      const encoder = createEncoder(contentTopic);
+      const encoder = createEncoder({ contentTopic });
       const decoder = createDecoder(contentTopic);
 
       try {
         statusDiv.innerHTML = "<p>Starting</p>";
 
         // Create and starts a Waku node.
-        // `default: true` bootstraps by connecting to pre-defined/hardcoded Waku nodes.
+        // `defaultBootstrap: true` bootstraps by connecting to pre-defined/hardcoded Waku nodes.
+        // `emitSelf`: emits event of sent message to itself and invokes subscribers by it
         // We are currently working on migrating this method to DNS Discovery.
         //
         // https://js.waku.org/functions/lib_create_waku.createPrivacyNode.html
-        const waku = await createRelayNode({ defaultBootstrap: true });
+        const waku = await createRelayNode({
+          emitSelf: true,
+          defaultBootstrap: true,
+        });
         await waku.start();
 
         // Add a hook to process all incoming messages on a specified content topic.
         //
         // https://js.waku.org/classes/index.waku_relay.WakuRelay.html#addObserver
-        waku.relay.addObserver(
+        waku.relay.subscribe(
           decoder,
           (message) => {
             // Checks there is a payload on the message.
