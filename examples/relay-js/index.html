@@ -65,7 +65,8 @@
         statusDiv.innerHTML = "<p>Starting</p>";
 
         // Create and starts a Waku node.
-        // `default: true` bootstraps by connecting to pre-defined/hardcoded Waku nodes.
+        // `defaultBootstrap: true` bootstraps by connecting to pre-defined/hardcoded Waku nodes.
+        // `emitSelf`: emits event of sent message to itself and invokes subscribers by it
         // We are currently working on migrating this method to DNS Discovery.
         //
         // https://js.waku.org/functions/lib_create_waku.createPrivacyNode.html
@@ -105,7 +106,7 @@
         // waku nodes (peers) and for appropriate handshakes to be done.
         //
         // https://js.waku.org/functions/lib_wait_for_remote_peer.waitForRemotePeer.html
-        await waitForRemotePeer(waku), ["relay"];
+        await waitForRemotePeer(waku);
 
         // We are now connected to a remote peer, let's define the `sendMessage`
         // function that sends the text input over Waku Relay, the gossipsub
