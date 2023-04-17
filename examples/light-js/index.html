@@ -40,14 +40,15 @@
     <br />
     <div id="messages"></div>
 
+    <script src="https://unpkg.com/@multiformats/multiaddr@12.1.1/dist/index.min.js"></script>
     <script type="module">
-      import * as utils from "https://unpkg.com/@waku/byte-utils@0.0.2/bundle/index.js";
-      import { createLightNode } from "https://unpkg.com/@waku/create@0.0.6/bundle/index.js";
+      import * as utils from "https://unpkg.com/@waku/utils@0.0.4/bundle/bytes.js";
+      import { createLightNode } from "https://unpkg.com/@waku/create@0.0.12/bundle/index.js";
       import {
         waitForRemotePeer,
         createEncoder,
         createDecoder,
-      } from "https://unpkg.com/@waku/core@0.0.10/bundle/index.js";
+      } from "https://unpkg.com/@waku/core@0.0.16/bundle/index.js";
 
       const peerIdDiv = document.getElementById("peer-id");
       const remotePeerIdDiv = document.getElementById("remote-peer-id");
@@ -62,7 +63,7 @@
 
       const ContentTopic = "/js-waku-examples/1/chat/utf8";
       const decoder = createDecoder(ContentTopic);
-      const encoder = createEncoder(ContentTopic);
+      const encoder = createEncoder({ contentTopic: ContentTopic });
       let messages = [];
       let unsubscribe;
 
@@ -88,7 +89,8 @@
           return;
         }
         statusDiv.innerHTML = "<p>Dialing peer.</p>";
-        await node.dial(ma, ["filter", "lightpush"]);
+        const multiaddr = MultiformatsMultiaddr.multiaddr(ma);
+        await node.dial(multiaddr, ["filter", "lightpush"]);
         await waitForRemotePeer(node, ["filter", "lightpush"]);
         const peers = await node.libp2p.peerStore.all();
         statusDiv.innerHTML = "<p>Peer dialed.</p>";
@@ -121,7 +123,7 @@
       sendButton.onclick = async () => {
         const text = textInput.value;
 
-        await node.lightPush.push(encoder, {
+        await node.lightPush.send(encoder, {
           payload: utils.utf8ToBytes(text),
         });
         console.log("Message sent!");
