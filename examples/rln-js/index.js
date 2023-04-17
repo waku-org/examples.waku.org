@@ -150,34 +150,10 @@ async function initRLN(ui) {
   });
 
   ui.onRegister(async () => {
-    let event;
-
     ui.setRlnStatus("Trying to register...");
-    if (signature) {
-      event = await rlnContract.registerMember(rlnInstance, signature);
-    } else {
-      // if user imports credentials manually
-      // TODO(@weboko): add logic to cover it in RLNContract
-      const idCommitment = membershipKey.IDCommitment;
-      const reversedArray = idCommitment.slice().reverse();
-      const pubkey = ethers.utils.hexlify(reversedArray).toString();
-
-      const price = await rlnContract.MEMBERSHIP_DEPOSIT();
-
-      const signer = provider.getSigner();
-      const rlnContractWithSigner = rlnContract.connect(signer);
-
-      const txResponse = await rlnContractWithSigner.register(pubkey, {
-        value: price,
-      });
-      console.log("Transaction broadcasted:", txResponse);
-
-      const txReceipt = await txResponse.wait();
-
-      console.log("Transaction receipt", txReceipt);
-
-      event = txReceipt.events[0];
-    }
+    const event = signature
+      ? await rlnContract.registerMember(rlnInstance, signature)
+      : await rlnContract.registerMemberFromMembershipKey(membershipKey);
 
     // Update membershipId
     membershipId = event.args.index.toNumber();
