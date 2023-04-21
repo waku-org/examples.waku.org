@@ -1,11 +1,11 @@
 import type { LightNode } from "@waku/interfaces";
 import ChatList from "./ChatList";
 import MessageInput from "./MessageInput";
-import { useWaku, useContentPair, useLightPush, usePeers } from "@waku/react";
+import { useWaku, useContentPair, useLightPush } from "@waku/react";
 import { TitleBar } from "@livechat/ui-kit";
 import { Message } from "./Message";
 import { ChatMessage } from "./chat_message";
-import { useNodePeers } from "./hooks";
+import { useNodePeers, usePeers } from "./hooks";
 
 interface Props {
   messages: Message[];

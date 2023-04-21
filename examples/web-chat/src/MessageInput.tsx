@@ -24,7 +24,11 @@ export default function MessageInput(props: Props) {
 
   const onMessage = async () => {
     if (props.sendMessage && inputText) {
-      await props.sendMessage(inputText);
+      try {
+        await props.sendMessage(inputText);
+      } catch (e) {
+        console.error(`Failed to send message: ${e}`);
+      }
       setInputText("");
     }
   };
@@ -36,6 +40,7 @@ export default function MessageInput(props: Props) {
 
   const onKeyDown = async (event: KeyboardEvent<HTMLInputElement>) => {
     if (
+      isActive &&
       event.key === "Enter" &&
       !event.altKey &&
       !event.ctrlKey &&
@@ -63,7 +68,7 @@ export default function MessageInput(props: Props) {
     >
       <Row align="center">
         <Fill>
-          <TextInput value={inputText} />
+          <TextInput />
         </Fill>
         <Fit>
           <SendButton />
