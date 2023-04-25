@@ -23,7 +23,7 @@ const ProtoChatMessage = new protobuf.Type("ChatMessage")
   .add(new protobuf.Field("nick", 2, "string"))
   .add(new protobuf.Field("text", 3, "bytes"));
 
-const rlnDeployBlk = 8828313;
+const rlnDeployBlk = 7109391;
 const rlnAddress = "0x4252105670fe33d2947e8ead304969849e64f2a6";
 
 const SIGNATURE_MESSAGE =
@@ -80,7 +80,10 @@ async function initRLN(ui) {
   ui.onRetrieveDetails(async () => {
     const filter = rlnContract.contract.filters.MemberRegistered();
 
+    ui.disableRetrieveButton();
     await rlnContract.fetchMembers(rlnInstance, rlnDeployBlk);
+    ui.enableRetrieveButton();
+
     rlnContract.subscribeToMembers(rlnInstance);
 
     const last = rlnContract.members.at(-1);
@@ -373,10 +376,16 @@ function initUI() {
         window.alert("Switch to Goerli");
 
         registerButton.disabled = true;
-        retrieveRLNDetailsButton.disabled = true;
+        this.disableRetrieveButton();
       } else {
-        retrieveRLNDetailsButton.disabled = false;
+        this.enableRetrieveButton();
       }
+    },
+    enableRetrieveButton() {
+      retrieveRLNDetailsButton.disabled = false;
+    },
+    disableRetrieveButton() {
+      retrieveRLNDetailsButton.disabled = true;
     },
     enableRegisterButtonForGoerli(chainId) {
       registerButton.disabled = isGoerliChain(chainId) ? false : true;
