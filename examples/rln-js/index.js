@@ -12,7 +12,7 @@ import {
   RLNDecoder,
   RLNEncoder,
   RLNContract,
-} from "https://unpkg.com/@waku/rln@0.0.14/bundle/index.js";
+} from "https://unpkg.com/@waku/rln@0.0.14-7e0966a/bundle/index.js";
 import { ethers } from "https://unpkg.com/ethers@5.7.2/dist/ethers.esm.min.js";
 
 const ContentTopic = "/toy-chat/2/luzhou/proto";
@@ -81,7 +81,7 @@ async function initRLN(ui) {
     const filter = rlnContract.contract.filters.MemberRegistered();
 
     ui.disableRetrieveButton();
-    await rlnContract.fetchMembers(rlnInstance, rlnDeployBlk);
+    await rlnContract.fetchMembers(rlnInstance, { fromBlock: rlnDeployBlk });
     ui.enableRetrieveButton();
 
     rlnContract.subscribeToMembers(rlnInstance);
