@@ -29,6 +29,7 @@ pipeline {
         sh 'npm install --silent'
         /* TODO: Build the main page. */
         sh 'mkdir -p build/docs'
+        sh 'cp index.html build/docs/'
       }
     }
 
