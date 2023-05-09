@@ -1,10 +1,10 @@
-import * as utils from "https://unpkg.com/@waku/utils@0.0.4/bundle/bytes.js";
-import * as wakuCreate from "https://unpkg.com/@waku/create@0.0.12/bundle/index.js";
+import * as utils from "https://unpkg.com/@waku/utils@0.0.5/bundle/bytes.js";
+import * as wakuCreate from "https://unpkg.com/@waku/create@0.0.13/bundle/index.js";
 import {
   waitForRemotePeer,
   createDecoder,
   createEncoder,
-} from "https://unpkg.com/@waku/core@0.0.16/bundle/index.js";
+} from "https://unpkg.com/@waku/core@0.0.17/bundle/index.js";
 
 const CONTENT_TOPIC = "/toy-chat/2/huilong/proto";
 
