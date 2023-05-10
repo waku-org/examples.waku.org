@@ -8,7 +8,7 @@ See https://examples.waku.org/ for more examples.
 
 ### Web Chat App
 
-- [code](web-chat)
+- [code](examples/web-chat)
 - [website](https://examples.waku.org/web-chat)
 - Demonstrates: Group chat, React/TypeScript, Relay, Store.
 
@@ -16,7 +16,7 @@ See https://examples.waku.org/ for more examples.
 
 End-to-end encrypted communication between two Ethereum addresses.
 
-- [code](eth-pm)
+- [code](examples/eth-pm)
 - [website](https://examples.waku.org/eth-pm)
 - Demonstrates: Private Messaging, React/TypeScript, Light Client, Signature with Web3, Asymmetric Encryption.
 
@@ -24,7 +24,7 @@ End-to-end encrypted communication between two Ethereum addresses.
 
 Send messages between several users (or just one) using light client targetted protocols.
 
-- [code](light-js)
+- [code](examples/light-js)
 - [website](https://examples.waku.org/light-js)
 - Demonstrates: Waku Light node: Filter + Light Push, Pure Javascript/HTML using ESM/unpkg bundle.
 
@@ -32,7 +32,7 @@ Send messages between several users (or just one) using light client targetted p
 
 A barebone messaging app to illustrate the [Angular Relay guide](https://docs.wakuconnect.dev/docs/guides/10_angular_relay/).
 
-- [code](relay-angular-chat)
+- [code](examples/relay-angular-chat)
 - [website](https://examples.waku.org/relay-angular-chat)
 - Demonstrates: Group messaging, Angular, Waku Relay, Protobuf using `protobufjs`, No async/await syntax.
 
@@ -40,7 +40,7 @@ A barebone messaging app to illustrate the [Angular Relay guide](https://docs.wa
 
 This example uses Waku Relay to send and receive simple text messages.
 
-- [code](relay-js)
+- [code](examples/relay-js)
 - [website](https://examples.waku.org/relay-js)
 - Demonstrates: Waku Relay, Pure Javascript/HTML using ESM/unpkg bundle.
 
@@ -48,7 +48,7 @@ This example uses Waku Relay to send and receive simple text messages.
 
 A barebone chat app to illustrate the [ReactJS Relay guide](https://docs.wakuconnect.dev/docs/guides/07_reactjs_relay/).
 
-- [code](relay-reactjs-chat)
+- [code](examples/relay-reactjs-chat)
 - [website](https://examples.waku.org/relay-reactjs-chat)
 - Demonstrates: Group chat, React/JavaScript, Waku Relay, Protobuf using `protobufjs`.
 
@@ -60,7 +60,7 @@ A barebone chat app to illustrate the [ReactJS Relay guide](https://docs.wakucon
 
 Use RLN in the browser, compatible with nwaku chat2 and go-waku chat2 RLN implementations.
 
-- [code](rln-js)
+- [code](examples/rln-js)
 - [website](https://examples.waku.org/rln-js)
 - Demonstrates: 
   - RLN:
@@ -75,7 +75,7 @@ Use RLN in the browser, compatible with nwaku chat2 and go-waku chat2 RLN implem
 
 This example uses Waku Store to retrieve the latest ping relay message (used for keep alive purposes) and displays its timestamp.
 
-- [code](store-js)
+- [code](examples/store-js)
 - [website](https://examples.waku.org/store-js)
 - Demonstrates: Waku Store: Using a condition to stop retrieving results from Waku Store, Pure Javascript/HTML using ESM/unpkg bundle.
 
@@ -84,7 +84,7 @@ This example uses Waku Store to retrieve the latest ping relay message (used for
 A simple app that retrieves chat messages using [Waku Store](https://rfc.vac.dev/spec/13/)
 to illustrate the [Retrieve Messages Using Waku Store With ReactJS guide](https://docs.wakuconnect.dev/docs/guides/08_reactjs_store/).
 
-- [code](store-reactjs-chat)
+- [code](examples/store-reactjs-chat)
 - [website](https://examples.waku.org/store-reactjs-chat)
 - Demonstrates: React/JavaScript, Waku Store, Protobuf using `protobufjs`, no async/await syntax.
 
