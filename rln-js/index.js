@@ -8,11 +8,11 @@ import {
 import { protobuf } from "https://taisukef.github.io/protobuf-es.js/dist/protobuf-es.js";
 import {
   create,
-  MembershipKey,
+  IdentityCredential,
   RLNDecoder,
   RLNEncoder,
   RLNContract,
-} from "https://unpkg.com/@waku/rln@0.0.14-7e0966a/bundle/index.js";
+} from "https://unpkg.com/@waku/rln@0.1.0/bundle/index.js";
 import { ethers } from "https://unpkg.com/ethers@5.7.2/dist/ethers.esm.min.js";
 
 const ContentTopic = "/toy-chat/2/luzhou/proto";
@@ -23,8 +23,8 @@ const ProtoChatMessage = new protobuf.Type("ChatMessage")
   .add(new protobuf.Field("nick", 2, "string"))
   .add(new protobuf.Field("text", 3, "bytes"));
 
-const rlnDeployBlk = 7109391;
-const rlnAddress = "0x4252105670fe33d2947e8ead304969849e64f2a6";
+const rlnDeployBlk = 3193048;
+const rlnAddress = "0x9C09146844C1326c2dBC41c451766C7138F88155";
 
 const SIGNATURE_MESSAGE =
   "The signature of this message will be used to generate your RLN credentials. Anyone accessing it may send messages on your behalf, please only share with the RLN dApp";
@@ -64,14 +64,14 @@ async function initRLN(ui) {
   window.ethereum.on("accountsChanged", ui.setAccount);
   window.ethereum.on("chainChanged", (chainId) => {
     const id = parseInt(chainId, 16);
-    ui.disableIfNotGoerli(id);
+    ui.disableIfNotSepolia(id);
   });
   ui.onConnectWallet(async () => {
     try {
       const accounts = await provider.send("eth_requestAccounts", []);
       ui.setAccount(accounts);
       const network = await provider.getNetwork();
-      ui.disableIfNotGoerli(network.chainId);
+      ui.disableIfNotSepolia(network.chainId);
     } catch (e) {
       console.log("No web3 provider available", e);
     }
@@ -100,12 +100,9 @@ async function initRLN(ui) {
 
   let signature;
   let membershipId;
-  let membershipKey;
+  let credentials;
 
-  ui.onManualImport((id, key) => {
-    membershipId = id;
-    membershipKey = key;
-
+  ui.onManualImport((membershipId, credentials) => {
     result.encoder = new RLNEncoder(
       createEncoder({
         ephemeral: false,
@@ -113,10 +110,10 @@ async function initRLN(ui) {
       }),
       rlnInstance,
       membershipId,
-      membershipKey
+      credentials
     );
 
-    ui.setMembershipInfo(membershipId, membershipKey);
+    ui.setMembershipInfo(membershipId, credentials);
     ui.enableDialButton();
   });
 
@@ -124,9 +121,9 @@ async function initRLN(ui) {
     const signer = provider.getSigner();
 
     signature = await signer.signMessage(SIGNATURE_MESSAGE);
-    membershipKey = await rlnInstance.generateSeededMembershipKey(signature);
+    credentials = await rlnInstance.generateSeededIdentityCredential(signature);
 
-    const idCommitment = ethers.utils.hexlify(membershipKey.IDCommitment);
+    const idCommitment = ethers.utils.hexlify(credentials.IDCommitment);
 
     rlnContract.members.forEach((m) => {
       if (m.pubkey._hex === idCommitment) {
@@ -142,21 +139,21 @@ async function initRLN(ui) {
         }),
         rlnInstance,
         membershipId,
-        membershipKey
+        credentials
       );
     }
 
-    ui.setMembershipInfo(membershipId, membershipKey);
+    ui.setMembershipInfo(membershipId, credentials);
 
     const network = await provider.getNetwork();
-    ui.enableRegisterButtonForGoerli(network.chainId);
+    ui.enableRegisterButtonForSepolia(network.chainId);
   });
 
   ui.onRegister(async () => {
     ui.setRlnStatus("Trying to register...");
     const event = signature
-      ? await rlnContract.registerMember(rlnInstance, signature)
-      : await rlnContract.registerMemberFromMembershipKey(membershipKey);
+      ? await rlnContract.registerWithSignature(rlnInstance, signature)
+      : await rlnContract.registerWithKey(credentials);
 
     // Update membershipId
     membershipId = event.args.index.toNumber();
@@ -167,7 +164,7 @@ async function initRLN(ui) {
     );
 
     ui.setRlnStatus("Successfully registered.");
-    ui.setMembershipInfo(membershipId, membershipKey);
+    ui.setMembershipInfo(membershipId, credentials);
     ui.enableDialButton();
   });
 
@@ -285,16 +282,20 @@ function initUI() {
 
   // Credentials Elements
   const membershipIdInput = document.getElementById("membership-id");
-  const identityKeyInput = document.getElementById("id-key");
+  const idSecretHashInput = document.getElementById("id-secret-hash");
   const commitmentKeyInput = document.getElementById("commitment-key");
+  const idTrapdoorInput = document.getElementById("id-trapdoor")
+  const idNullifierInput = document.getElementById("id-nullifier")
   const importManually = document.getElementById("import-manually-button");
   const importFromWalletButton = document.getElementById(
     "import-from-wallet-button"
   );
 
   const idDiv = document.getElementById("id");
-  const keyDiv = document.getElementById("key");
+  const secretHashDiv = document.getElementById("secret-hash");
   const commitmentDiv = document.getElementById("commitment");
+  const trapdoorDiv = document.getElementById("trapdoor");
+  const nullifierDiv = document.getElementById("nullifier");
   const registerButton = document.getElementById("register-button");
 
   // Waku Elements
@@ -320,13 +321,17 @@ function initUI() {
 
   // monitor & enable buttons if needed
   membershipIdInput.onchange = enableManualImportIfNeeded;
-  identityKeyInput.onchange = enableManualImportIfNeeded;
+  idSecretHashInput.onchange = enableManualImportIfNeeded;
   commitmentKeyInput.onchange = enableManualImportIfNeeded;
+  idNullifierInput.onchange = enableManualImportIfNeeded;
+  idTrapdoorInput.onchange = enableManualImportIfNeeded;
 
   function enableManualImportIfNeeded() {
     const isValuesPresent =
-      identityKeyInput.value &&
+      idSecretHashInput.value &&
       commitmentKeyInput.value &&
+      idNullifierInput.value &&
+      idTrapdoorInput.value &&
       membershipIdInput.value;
 
     if (isValuesPresent) {
@@ -349,10 +354,12 @@ function initUI() {
     setRlnStatus(text) {
       statusSpan.innerText = text;
     },
-    setMembershipInfo(id, key) {
+    setMembershipInfo(id, credential) {
       idDiv.innerText = id || "not registered yet";
-      keyDiv.innerText = utils.bytesToHex(key.IDKey);
-      commitmentDiv.innerText = utils.bytesToHex(key.IDCommitment);
+      secretHashDiv.innerText = utils.bytesToHex(credential.IDSecretHash);
+      commitmentDiv.innerText = utils.bytesToHex(credential.IDCommitment);
+      nullifierDiv.innerText = utils.bytesToHex(credential.IDNullifier);
+      trapdoorDiv.innerText = utils.bytesToHex(credential.IDTrapdoor);
     },
     setLastMember(index, pubkey) {
       try {
@@ -371,9 +378,9 @@ function initUI() {
         console.error(err); // TODO: the merkle tree can be in a wrong state. The app should be disabled
       }
     },
-    disableIfNotGoerli(chainId) {
-      if (!isGoerliChain(chainId)) {
-        window.alert("Switch to Goerli");
+    disableIfNotSepolia(chainId) {
+      if (!isSepolia(chainId)) {
+        window.alert("Switch to Sepolia");
 
         registerButton.disabled = true;
         this.disableRetrieveButton();
@@ -387,8 +394,8 @@ function initUI() {
     disableRetrieveButton() {
       retrieveRLNDetailsButton.disabled = true;
     },
-    enableRegisterButtonForGoerli(chainId) {
-      registerButton.disabled = isGoerliChain(chainId) ? false : true;
+    enableRegisterButtonForSepolia(chainId) {
+      registerButton.disabled = isSepolia(chainId) ? false : true;
     },
     setAccount(accounts) {
       addressDiv.innerText = accounts.length ? accounts[0] : "";
@@ -406,13 +413,16 @@ function initUI() {
     },
     onManualImport(fn) {
       importManually.addEventListener("click", () => {
-        const idKey = utils.hexToBytes(identityKeyInput.value);
+        const idTrapdoor = utils.hexToBytes(idTrapdoorInput.value);
+        const idNullifier = utils.hexToBytes(idNullifierInput.value);
         const idCommitment = utils.hexToBytes(commitmentKeyInput.value);
+        const idSecretHash = utils.hexToBytes(idSecretHashInput.value);
+
 
         const membershipId = membershipIdInput.value;
-        const membershipKey = new MembershipKey(idKey, idCommitment);
+        const credentials = new IdentityCredential(idTrapdoor, idNullifier, idSecretHash, idCommitment);
 
-        fn(membershipId, membershipKey);
+        fn(membershipId, credentials);
       });
     },
     onWalletImport(fn) {
@@ -480,6 +490,6 @@ function initUI() {
   };
 }
 
-function isGoerliChain(id) {
-  return id === 5;
+function isSepolia(id) {
+  return id === 11155111;
 }
