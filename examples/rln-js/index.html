@@ -66,10 +66,14 @@
             >Membership ID (your index in the RLN smart contract):</label
           >
           <input id="membership-id" name="membership-id" type="text" />
-          <label for="id-key">RLN Identity Key (hex string):</label>
-          <input id="id-key" name="id-key" type="text" />
+          <label for="id-secret-hash">RLN Secret Hash (hex string):</label>
+          <input id="id-secret-hash" name="id-secret-hash" type="text" />
           <label for="commitment-key">RLN Commitment Key (hex string):</label>
           <input id="commitment-key" name="commitment-key" type="text" />
+          <label for="id-trapdoor">RLN ID Trapdoor (hex string):</label>
+          <input id="id-trapdoor" name="id-trapdoor" type="text" />
+          <label for="id-nullifier">RLN ID Nullifier (hex string):</label>
+          <input id="id-nullifier" name="id-nullifier" type="text" />
           <button disabled id="import-manually-button" type="button">
             Import RLN Credentials
           </button>
@@ -81,12 +85,20 @@
       <code class="value" id="id">none</code>
     </div>
     <div class="row rcenter">
-      <h4>Key</h4>
-      <code class="value" id="key">none</code>
+      <h4>Secret Hash</h4>
+      <code class="value" id="secret-hash">none</code>
     </div>
     <div class="row rcenter">
       <h4>Commitment</h4>
       <code class="value" id="commitment">none</code>
+    </div>
+    <div class="row rcenter">
+      <h4>Nullifier</h4>
+      <code class="value" id="nullifier">none</code>
+    </div>
+    <div class="row rcenter">
+      <h4>Trapdoor</h4>
+      <code class="value" id="trapdoor">none</code>
     </div>
 
     <h2 class="mu1">Waku</h2>
