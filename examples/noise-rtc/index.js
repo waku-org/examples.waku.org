@@ -1,7 +1,6 @@
 import { createLightNode } from "@waku/create";
 import * as utils from "@waku/utils/bytes";
 import { waitForRemotePeer } from "@waku/core";
-import { Protocols } from "@waku/interfaces";
 import * as noise from "@waku/noise";
 import protobuf from "protobufjs";
 import QRCode from "qrcode";
@@ -22,17 +21,16 @@ async function main() {
 
   try {
     await node.start();
-    await waitForRemotePeer(node, [Protocols.Filter, Protocols.LightPush]);
+    await waitForRemotePeer(node, ["filter", "lightpush"]);
 
     ui.waku.connected();
 
-    const responder = getResponder(node);
     const myStaticKey = noise.generateX25519KeyPair();
     const urlPairingInfo = getPairingInfoFromURL();
 
     const pairingObj = new noise.WakuPairing(
       node.lightPush,
-      responder,
+      node.filter,
       myStaticKey,
       urlPairingInfo || new noise.ResponderParameters()
     );
@@ -210,59 +208,6 @@ function getPairingInfoFromURL() {
     decodeURIComponent(qrCodeString),
     utils.hexToBytes(messageNameTag)
   );
-}
-
-function getResponder(node) {
-  const msgQueue = new Array();
-  const subscriptions = new Map();
-  const intervals = new Map();
-
-  const responder = {
-    async subscribe(decoder) {
-      const subscription = await node.filter.subscribe(
-        [decoder],
-        (wakuMessage) => {
-          msgQueue.push(wakuMessage);
-        }
-      );
-      subscriptions.set(decoder.contentTopic, subscription);
-    },
-    async nextMessage(contentTopic) {
-      if (msgQueue.length != 0) {
-        const oldestMsg = msgQueue.shift();
-        if (oldestMsg.contentTopic === contentTopic) {
-          return oldestMsg;
-        }
-      }
-
-      return new Promise((resolve) => {
-        const interval = setInterval(() => {
-          if (msgQueue.length != 0) {
-            clearInterval(interval);
-            const oldestMsg = msgQueue.shift();
-            if (oldestMsg.contentTopic === contentTopic) {
-              resolve(oldestMsg);
-            }
-          }
-        }, 100);
-        intervals.set(contentTopic, interval);
-      });
-    },
-    async stop(contentTopic) {
-      if (intervals.has(contentTopic)) {
-        clearInterval(intervals.get(contentTopic));
-        intervals.delete(contentTopic);
-      }
-      if (subscriptions.has(contentTopic)) {
-        await subscriptions.get(contentTopic)();
-        subscriptions.delete(contentTopic);
-      } else {
-        console.log("Subscriptipon doesnt exist");
-      }
-    },
-  };
-
-  return responder;
 }
 
 async function scheduleHandshakeAuthConfirmation(pairingObj, ui) {
