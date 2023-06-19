@@ -1,6 +1,5 @@
-import { createLightNode } from "@waku/create";
+import { createLightNode, waitForRemotePeer } from "@waku/sdk";
 import * as utils from "@waku/utils/bytes";
-import { waitForRemotePeer } from "@waku/core";
 import * as noise from "@waku/noise";
 import protobuf from "protobufjs";
 import QRCode from "qrcode";
