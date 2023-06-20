@@ -42,13 +42,14 @@
 
     <script src="https://unpkg.com/@multiformats/multiaddr@12.1.1/dist/index.min.js"></script>
     <script type="module">
-      import * as utils from "https://unpkg.com/@waku/utils@0.0.5/bundle/bytes.js";
-      import { createLightNode } from "https://unpkg.com/@waku/create@0.0.13/bundle/index.js";
       import {
+        createLightNode,
         waitForRemotePeer,
         createEncoder,
         createDecoder,
-      } from "https://unpkg.com/@waku/core@0.0.17/bundle/index.js";
+        utf8ToBytes,
+        bytesToUtf8,
+      } from "https://unpkg.com/@waku/sdk@0.0.16/bundle/index.js";
 
       const peerIdDiv = document.getElementById("peer-id");
       const remotePeerIdDiv = document.getElementById("remote-peer-id");
@@ -101,7 +102,7 @@
       };
 
       const callback = (wakuMessage) => {
-        const text = utils.bytesToUtf8(wakuMessage.payload);
+        const text = bytesToUtf8(wakuMessage.payload);
         const timestamp = wakuMessage.timestamp.toString();
         messages.push(text + " - " + timestamp);
         updateMessages(messages, messagesDiv);
@@ -124,7 +125,7 @@
         const text = textInput.value;
 
         await node.lightPush.send(encoder, {
-          payload: utils.utf8ToBytes(text),
+          payload: utf8ToBytes(text),
         });
         console.log("Message sent!");
         textInput.value = null;
