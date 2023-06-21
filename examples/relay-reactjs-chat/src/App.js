@@ -33,10 +33,7 @@ function App() {
       setWaku(waku);
       await waku.start();
       setWakuStatus("Connecting");
-      await waku.dial(
-        "/ip4/0.0.0.0/tcp/8000/ws/p2p/16Uiu2HAmSC4xN3R831RmRiHfWFnyQi4A8kzQEoYS36YLWtSLsL4x"
-      );
-      // await waitForRemotePeer(waku, ["relay"]);
+      await waitForRemotePeer(waku, ["relay"]);
       setWakuStatus("Ready");
     })();
   }, [waku, wakuStatus]);
