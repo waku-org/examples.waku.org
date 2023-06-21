@@ -5,8 +5,7 @@ import { PrivateMessage, PublicKeyMessage } from "./messaging/wire";
 import { validatePublicKeyMessage } from "./crypto";
 import { Message } from "./messaging/Messages";
 import { equals } from "uint8arrays/equals";
-import { waitForRemotePeer } from "@waku/core";
-import { createRelayNode } from "@waku/create";
+import { waitForRemotePeer, createRelayNode } from "@waku/sdk";
 import { bytesToHex, hexToBytes } from "@waku/utils/bytes";
 import type { DecodedMessage } from "@waku/message-encryption";
 
