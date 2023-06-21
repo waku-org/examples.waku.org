@@ -1,10 +1,10 @@
-import * as utils from "https://unpkg.com/@waku/utils@0.0.4/bundle/bytes.js";
-import { createLightNode } from "https://unpkg.com/@waku/create@0.0.12/bundle/index.js";
+import * as utils from "https://unpkg.com/@waku/utils@0.0.8/bundle/bytes.js";
 import {
   createEncoder,
   createDecoder,
   waitForRemotePeer,
-} from "https://unpkg.com/@waku/core@0.0.16/bundle/index.js";
+  createLightNode,
+} from "https://unpkg.com/@waku/sdk@0.0.16/bundle/index.js";
 import { protobuf } from "https://taisukef.github.io/protobuf-es.js/dist/protobuf-es.js";
 import {
   create,
@@ -284,8 +284,8 @@ function initUI() {
   const membershipIdInput = document.getElementById("membership-id");
   const idSecretHashInput = document.getElementById("id-secret-hash");
   const commitmentKeyInput = document.getElementById("commitment-key");
-  const idTrapdoorInput = document.getElementById("id-trapdoor")
-  const idNullifierInput = document.getElementById("id-nullifier")
+  const idTrapdoorInput = document.getElementById("id-trapdoor");
+  const idNullifierInput = document.getElementById("id-nullifier");
   const importManually = document.getElementById("import-manually-button");
   const importFromWalletButton = document.getElementById(
     "import-from-wallet-button"
@@ -418,9 +418,13 @@ function initUI() {
         const idCommitment = utils.hexToBytes(commitmentKeyInput.value);
         const idSecretHash = utils.hexToBytes(idSecretHashInput.value);
 
-
         const membershipId = membershipIdInput.value;
-        const credentials = new IdentityCredential(idTrapdoor, idNullifier, idSecretHash, idCommitment);
+        const credentials = new IdentityCredential(
+          idTrapdoor,
+          idNullifier,
+          idSecretHash,
+          idCommitment
+        );
 
         fn(membershipId, credentials);
       });
