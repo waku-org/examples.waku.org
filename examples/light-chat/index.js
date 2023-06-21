@@ -1,10 +1,11 @@
-import * as utils from "https://unpkg.com/@waku/utils@0.0.5/bundle/bytes.js";
-import * as wakuCreate from "https://unpkg.com/@waku/create@0.0.13/bundle/index.js";
 import {
+  createLightNode,
+  bytesToUtf8,
+  utf8ToBytes,
   waitForRemotePeer,
   createDecoder,
   createEncoder,
-} from "https://unpkg.com/@waku/core@0.0.17/bundle/index.js";
+} from "https://unpkg.com/@waku/sdk@0.0.16/bundle/index.js";
 
 const CONTENT_TOPIC = "/toy-chat/2/huilong/proto";
 
@@ -47,7 +48,7 @@ async function initWakuContext({ contentTopic, onMessageReceived }) {
     .add(new protobuf.Field("nick", 2, "string"))
     .add(new protobuf.Field("text", 3, "bytes"));
 
-  const node = await wakuCreate.createLightNode({ defaultBootstrap: true });
+  const node = await createLightNode({ defaultBootstrap: true });
 
   await node.start();
   await waitForRemotePeer(node);
@@ -59,7 +60,7 @@ async function initWakuContext({ contentTopic, onMessageReceived }) {
       const messageObj = ChatMessage.decode(wakuMessage.payload);
       onMessageReceived({
         ...messageObj,
-        text: utils.bytesToUtf8(messageObj.text),
+        text: bytesToUtf8(messageObj.text),
       });
     }
   );
@@ -84,7 +85,7 @@ async function initWakuContext({ contentTopic, onMessageReceived }) {
       const protoMessage = ChatMessage.create({
         nick,
         timestamp: Date.now(),
-        text: utils.utf8ToBytes(text),
+        text: utf8ToBytes(text),
       });
 
       await node.lightPush.send(Encoder, {
