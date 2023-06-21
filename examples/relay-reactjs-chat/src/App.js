@@ -1,10 +1,14 @@
 import * as React from "react";
 import protobuf from "protobufjs";
-import { createRelayNode } from "@waku/create";
-import { createDecoder, createEncoder, waitForRemotePeer } from "@waku/core";
+import {
+  createRelayNode,
+  createDecoder,
+  createEncoder,
+  waitForRemotePeer,
+} from "@waku/sdk";
 
 const ContentTopic = `/js-waku-examples/1/chat/proto`;
-const Encoder = createEncoder(ContentTopic);
+const Encoder = createEncoder({ contentTopic: ContentTopic });
 const Decoder = createDecoder(ContentTopic);
 
 const SimpleChatMessage = new protobuf.Type("SimpleChatMessage")
@@ -29,7 +33,10 @@ function App() {
       setWaku(waku);
       await waku.start();
       setWakuStatus("Connecting");
-      await waitForRemotePeer(waku, ["relay"]);
+      await waku.dial(
+        "/ip4/0.0.0.0/tcp/8000/ws/p2p/16Uiu2HAmSC4xN3R831RmRiHfWFnyQi4A8kzQEoYS36YLWtSLsL4x"
+      );
+      // await waitForRemotePeer(waku, ["relay"]);
       setWakuStatus("Ready");
     })();
   }, [waku, wakuStatus]);
@@ -54,7 +61,7 @@ function App() {
     if (!waku) return;
 
     // Pass the content topic to only process messages related to your dApp
-    const deleteObserver = waku.relay.addObserver(
+    const deleteObserver = waku.relay.subscribe(
       Decoder,
       processIncomingMessage
     );
