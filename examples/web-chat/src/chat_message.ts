@@ -1,4 +1,4 @@
-import { utf8ToBytes, bytesToUtf8 } from "@waku/byte-utils";
+import { utf8ToBytes, bytesToUtf8 } from "@waku/sdk";
 import * as proto from "./proto/chat_message";
 
 /**
