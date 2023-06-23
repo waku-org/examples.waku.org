@@ -1,10 +1,14 @@
 import * as React from "react";
 import protobuf from "protobufjs";
-import { createRelayNode } from "@waku/create";
-import { createDecoder, createEncoder, waitForRemotePeer } from "@waku/core";
+import {
+  createRelayNode,
+  createDecoder,
+  createEncoder,
+  waitForRemotePeer,
+} from "@waku/sdk";
 
 const ContentTopic = `/js-waku-examples/1/chat/proto`;
-const Encoder = createEncoder(ContentTopic);
+const Encoder = createEncoder({ contentTopic: ContentTopic });
 const Decoder = createDecoder(ContentTopic);
 
 const SimpleChatMessage = new protobuf.Type("SimpleChatMessage")
@@ -54,7 +58,7 @@ function App() {
     if (!waku) return;
 
     // Pass the content topic to only process messages related to your dApp
-    const deleteObserver = waku.relay.addObserver(
+    const deleteObserver = waku.relay.subscribe(
       Decoder,
       processIncomingMessage
     );

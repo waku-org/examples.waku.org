@@ -1,8 +1,11 @@
 import * as React from "react";
 import protobuf from "protobufjs";
-import { createLightNode } from "@waku/create";
-import { waitForRemotePeer, createDecoder } from "@waku/core";
-import { bytesToUtf8 } from "@waku/byte-utils";
+import {
+  createLightNode,
+  waitForRemotePeer,
+  createDecoder,
+  bytesToUtf8,
+} from "@waku/sdk";
 
 const ContentTopic = "/toy-chat/2/huilong/proto";
 const decoder = createDecoder(ContentTopic);
