@@ -5,12 +5,8 @@ import type {
   Peer,
   PeerProtocolsChangeData,
 } from "@libp2p/interface-peer-store";
-import type {
-  LightNode,
-  StoreQueryOptions,
-  Waku,
-  IDecoder,
-} from "@waku/interfaces";
+import type { LightNode, StoreQueryOptions, Waku } from "@waku/interfaces";
+import type { waku } from "@waku/sdk";
 
 import { useFilterMessages, useStoreMessages } from "@waku/react";
 
@@ -31,7 +27,7 @@ export const usePersistentNick = (): [
 
 type UseMessagesParams = {
   node: undefined | LightNode;
-  decoder: undefined | IDecoder<any>;
+  decoder: undefined | waku.Decoder;
   options: StoreQueryOptions;
 };
 

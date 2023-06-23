@@ -9,7 +9,7 @@
     "@multiformats/multiaddr": "11.0.7",
     "@waku/react": "0.0.1-b",
     "@waku/byte-utils": "^0.0.2",
-    "@waku/create": "^0.0.4",
+    "@waku/sdk": "^0.0.16",
     "@waku/dns-discovery": "0.0.5",
     "@waku/interfaces": "^0.0.15",
     "@waku/peer-exchange": "^0.0.3",
