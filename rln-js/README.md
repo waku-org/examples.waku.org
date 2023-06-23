@@ -19,7 +19,7 @@ To test the example:
 
 ```shell
 git clone https://github.com/waku-org/js-waku-examples
-cd js-waku-examples/rln-js
+cd js-waku-examples/examples/rln-js
 npm install
 npm run start
 # open  http://127.0.0.1:8080 In your browser
