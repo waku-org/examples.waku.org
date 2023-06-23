@@ -1,11 +1,11 @@
 {
   "files": {
     "main.css": "/relay-reactjs-chat/static/css/main.4efb37a3.css",
-    "main.js": "/relay-reactjs-chat/static/js/main.6c153e62.js",
+    "main.js": "/relay-reactjs-chat/static/js/main.485e5d2c.js",
     "index.html": "/relay-reactjs-chat/index.html"
   },
   "entrypoints": [
     "static/css/main.4efb37a3.css",
-    "static/js/main.6c153e62.js"
+    "static/js/main.485e5d2c.js"
   ]
 }
