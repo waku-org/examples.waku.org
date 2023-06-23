@@ -2,20 +2,20 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { ThemeProvider } from "@livechat/ui-kit";
 import { LightNodeProvider, ContentPairProvider } from "@waku/react";
-import { wakuDnsDiscovery } from "@waku/dns-discovery";
+import { wakuDnsDiscovery, enrTree } from "@waku/dns-discovery";
 import { wakuPeerExchangeDiscovery } from "@waku/peer-exchange";
 
 import "./index.css";
 import App from "./App";
-import { ENR_TREE, CONTENT_TOPIC, PROTOCOLS } from "./config";
+import { CONTENT_TOPIC, PROTOCOLS } from "./config";
 
 const NODE_OPTIONS = {
   libp2p: {
     peerDiscovery: [
-      wakuDnsDiscovery(ENR_TREE, {
+      wakuDnsDiscovery([enrTree.TEST], {
         store: 1,
         filter: 2,
-        lightpush: 2,
+        lightPush: 2,
       }),
       wakuPeerExchangeDiscovery(),
     ],
