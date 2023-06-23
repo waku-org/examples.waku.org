@@ -12,10 +12,10 @@ import { ENR_TREE, CONTENT_TOPIC, PROTOCOLS } from "./config";
 const NODE_OPTIONS = {
   libp2p: {
     peerDiscovery: [
-      wakuDnsDiscovery(ENR_TREE, {
+      wakuDnsDiscovery([ENR_TREE], {
         store: 1,
         filter: 2,
-        lightpush: 2,
+        lightPush: 2,
       }),
       wakuPeerExchangeDiscovery(),
     ],
