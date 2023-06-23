@@ -88,7 +88,7 @@ function connections(waku: LightNode | undefined): string[] {
   }
   let response: string[] = [];
   let strConnections = "  connections: \n";
-  waku.libp2p.connectionManager.getConnections().forEach((connection) => {
+  waku.libp2p.getConnections().forEach((connection) => {
     strConnections += connection.remotePeer.toString() + ", ";
     strConnections += JSON.stringify(connection.stat);
     strConnections += "; " + JSON.stringify(connection.streams);

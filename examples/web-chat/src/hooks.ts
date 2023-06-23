@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { generate } from "server-name-generator";
 import { Message } from "./Message";
-import { Decoder } from "@waku/core/lib/message/version_0";
 import type {
   Peer,
   PeerProtocolsChangeData,
 } from "@libp2p/interface-peer-store";
-import type { LightNode, StoreQueryOptions, Waku } from "@waku/interfaces";
+import type {
+  LightNode,
+  StoreQueryOptions,
+  Waku,
+  IDecoder,
+} from "@waku/interfaces";
 
 import { useFilterMessages, useStoreMessages } from "@waku/react";
 
@@ -27,7 +31,7 @@ export const usePersistentNick = (): [
 
 type UseMessagesParams = {
   node: undefined | LightNode;
-  decoder: undefined | Decoder;
+  decoder: undefined | IDecoder<any>;
   options: StoreQueryOptions;
 };
 
@@ -109,7 +113,6 @@ type UsePeersResults = {
   storePeers?: undefined | Peer[];
   filterPeers?: undefined | Peer[];
   lightPushPeers?: undefined | Peer[];
-  peerExchangePeers?: undefined | Peer[];
 };
 
 /**
@@ -134,14 +137,12 @@ export const usePeers = (params: UsePeersParams): UsePeersResults => {
         handleCatch(node?.store?.peers()),
         handleCatch(node?.filter?.peers()),
         handleCatch(node?.lightPush?.peers()),
-        handleCatch(node?.peerExchange?.peers()),
       ]);
 
       setPeers({
         storePeers: peers[0],
         filterPeers: peers[1],
         lightPushPeers: peers[2],
-        peerExchangePeers: peers[3],
       });
     };
 
