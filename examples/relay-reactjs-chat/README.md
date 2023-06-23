@@ -16,7 +16,7 @@ To run a development version locally, do:
 
 ```shell
 git clone https://github.com/waku-org/js-waku-examples
-cd relay-reactjs-chat
+cd js-waku-examples/examples/relay-reactjs-chat
 npm install
 npm run start
 ```

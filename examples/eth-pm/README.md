@@ -24,7 +24,7 @@ To run a development version locally, do:
 
 ```shell
 git clone https://github.com/waku-org/js-waku-examples
-cd eth-pm
+cd js-waku-examples/examples/eth-pm
 npm install
 npm run start
 ```
