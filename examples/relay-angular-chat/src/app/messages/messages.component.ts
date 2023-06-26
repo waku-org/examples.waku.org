@@ -1,9 +1,8 @@
 import { Component, OnInit } from "@angular/core";
 import { WakuService } from "../waku.service";
-import type { WakuPrivacy } from "@waku/interfaces";
+import type { RelayNode, Unsubscribe } from "@waku/interfaces";
 import protobuf from "protobufjs";
-import { DecoderV0, EncoderV0 } from "@waku/core/lib/waku_message/version_0";
-import type { MessageV0 } from "@waku/core/lib/waku_message/version_0";
+import { waku, createDecoder, createEncoder } from "@waku/sdk";
 
 const ProtoChatMessage = new protobuf.Type("ChatMessage")
   .add(new protobuf.Field("timestamp", 1, "uint32"))
@@ -21,17 +20,17 @@ interface MessageInterface {
 })
 export class MessagesComponent implements OnInit {
   contentTopic: string = `/js-waku-examples/1/chat/proto`;
-  decoder: DecoderV0;
-  encoder: EncoderV0;
+  decoder: waku.Decoder;
+  encoder: waku.Encoder;
   messages: MessageInterface[] = [];
   messageCount: number = 0;
-  waku!: WakuPrivacy;
+  waku!: RelayNode;
   wakuStatus!: string;
-  deleteObserver?: () => void;
+  deleteObserver?: Unsubscribe;
 
   constructor(private wakuService: WakuService) {
-    this.decoder = new DecoderV0(this.contentTopic);
-    this.encoder = new EncoderV0(this.contentTopic);
+    this.decoder = createDecoder(this.contentTopic);
+    this.encoder = createEncoder({ contentTopic: this.contentTopic });
   }
 
   ngOnInit(): void {
@@ -41,10 +40,10 @@ export class MessagesComponent implements OnInit {
 
     this.wakuService.waku.subscribe((waku) => {
       this.waku = waku;
-      this.deleteObserver = this.waku.relay.addObserver(
+      this.deleteObserver = this.waku.relay.subscribe(
         this.decoder,
         this.processIncomingMessages
-      );
+      ) as Unsubscribe;
     });
 
     window.onbeforeunload = () => this.ngOnDestroy();
@@ -69,7 +68,7 @@ export class MessagesComponent implements OnInit {
     });
   }
 
-  processIncomingMessages = (wakuMessage: MessageV0) => {
+  processIncomingMessages = (wakuMessage: waku.DecodedMessage) => {
     if (!wakuMessage.payload) return;
 
     const { text, timestamp } = ProtoChatMessage.decode(
