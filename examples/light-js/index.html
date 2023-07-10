@@ -20,11 +20,7 @@
     <div id="remote-peer-id"></div>
 
     <label for="remote-multiaddr">Remote peer's multiaddr</label>
-    <input
-      id="remote-multiaddr"
-      type="text"
-      value="/dns4/node-01.ac-cn-hongkong-c.wakuv2.test.statusim.net/tcp/8000/wss/p2p/16Uiu2HAkvWiyFsgRhuJEb9JfjYxEkoHLgnUQmr1N5mKWnYjxYRVm"
-    />
+    <input id="remote-multiaddr" type="text" value="" />
     <button disabled id="dial" type="button">Dial</button>
     <br />
     <button disabled id="subscribe" type="button">Subscribe with Filter</button>
@@ -50,6 +46,10 @@
         utf8ToBytes,
         bytesToUtf8,
       } from "https://unpkg.com/@waku/sdk@0.0.16/bundle/index.js";
+      import {
+        enrTree,
+        DnsNodeDiscovery,
+      } from "https://unpkg.com/@waku/dns-discovery@0.0.14/bundle/index.js";
 
       const peerIdDiv = document.getElementById("peer-id");
       const remotePeerIdDiv = document.getElementById("remote-peer-id");
@@ -73,6 +73,14 @@
         messages.forEach((msg) => (div.innerHTML += "<li>" + msg + "</li>"));
         div.innerHTML += "</ul>";
       };
+
+      try {
+        await searchForPeer(statusDiv, remoteMultiAddrDiv);
+      } catch (e) {
+        console.log("Failed to find a peer", e);
+        remoteMultiAddrDiv.value =
+          "/dns4/node-01.ac-cn-hongkong-c.wakuv2.test.statusim.net/tcp/8000/wss/p2p/16Uiu2HAkvWiyFsgRhuJEb9JfjYxEkoHLgnUQmr1N5mKWnYjxYRVm";
+      }
 
       statusDiv.innerHTML = "<p>Creating Waku node.</p>";
       const node = await createLightNode();
@@ -130,6 +138,21 @@
         console.log("Message sent!");
         textInput.value = null;
       };
+
+      async function searchForPeer(statusNode, multiaddrNode) {
+        statusDiv.innerHTML = "<p>Discovering peer</p>";
+
+        const dnsDiscovery = await DnsNodeDiscovery.dnsOverHttp();
+        const peersIterator = await dnsDiscovery.getNextPeer(
+          [enrTree["TEST"]],
+          { lightPush: 1, filter: 1 }
+        );
+        const peer = await peersIterator.next();
+        const ma = peer.value.multiaddrs.map((v) => v.toString())[1];
+        const peerId = peer.value.peerId.toString();
+
+        multiaddrNode.value = `${ma}/p2p/${peerId}`;
+      }
     </script>
   </body>
 </html>
