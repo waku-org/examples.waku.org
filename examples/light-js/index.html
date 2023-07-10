@@ -147,9 +147,9 @@
           [enrTree["TEST"]],
           { lightPush: 1, filter: 1 }
         );
-        const peer = await peersIterator.next();
-        const ma = peer.value.multiaddrs.map((v) => v.toString())[1];
-        const peerId = peer.value.peerId.toString();
+        const peerEnr = await peersIterator.next();
+        const ma = peerEnr.value.multiaddrs.map((v) => v.toString())[1];
+        const peerId = peerEnr.value.peerId.toString();
 
         multiaddrNode.value = `${ma}/p2p/${peerId}`;
       }
