@@ -6,8 +6,7 @@
 - Protobuf using `protobufjs`.
 - No async/await syntax.
 
-A simple app that retrieves chat messages using [Waku Store](https://rfc.vac.dev/spec/13/)
-to illustrate the [Retrieve Messages Using Waku Store With ReactJS guide](https://docs.wakuconnect.dev/docs/guides/08_reactjs_store/).
+A simple app that retrieves chat messages using [Waku Store](https://docs.waku.org/overview/concepts/protocols#store) to illustrate the retrieval of messages with `js-waku` and ReactJS.
 
 The `master` branch's HEAD is deployed at https://examples.waku.org/store-reactjs-chat/.
 

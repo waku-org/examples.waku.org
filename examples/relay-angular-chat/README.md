@@ -8,7 +8,7 @@
 - Protobuf using `protobufjs`
 - No async/await syntax
 
-A barebones messaging app to illustrate the [Angular Relay guide](https://docs.wakuconnect.dev/docs/guides/10_angular_relay/).
+A barebone messaging app to illustrate the seamless integration of `js-waku` into AngularJS.
 
 The `master` branch's HEAD is deployed at https://examples.waku.org/relay-angular-chat/.
 

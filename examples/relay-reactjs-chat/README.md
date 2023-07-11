@@ -8,7 +8,7 @@
 - Waku Relay
 - Protobuf using `protobufjs`.
 
-A barebone chat app to illustrate the [ReactJS Relay guide](https://docs.wakuconnect.dev/docs/guides/07_reactjs_relay/).
+A barebone chat app to illustrate the seamless integration of `js-waku` into ReactJS.
 
 The `master` branch's HEAD is deployed at https://examples.waku.org/relay-reactjs-chat/.
 
