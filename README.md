@@ -30,7 +30,7 @@ Send messages between several users (or just one) using light client targetted p
 
 ### Minimal Angular (v13) Waku Relay
 
-A barebone messaging app to illustrate the [Angular Relay guide](https://docs.wakuconnect.dev/docs/guides/10_angular_relay/).
+A barebone messaging app to illustrate the seamless integration of `js-waku` into AngularJS.
 
 - [code](examples/relay-angular-chat)
 - [website](https://examples.waku.org/relay-angular-chat)
@@ -46,7 +46,7 @@ This example uses Waku Relay to send and receive simple text messages.
 
 ### Waku Relay in ReactJS
 
-A barebone chat app to illustrate the [ReactJS Relay guide](https://docs.wakuconnect.dev/docs/guides/07_reactjs_relay/).
+A barebone chat app to illustrate the seamless integration of `js-waku` into ReactJS.
 
 - [code](examples/relay-reactjs-chat)
 - [website](https://examples.waku.org/relay-reactjs-chat)
@@ -81,8 +81,7 @@ This example uses Waku Store to retrieve the latest ping relay message (used for
 
 ### Minimal ReactJS Waku Store App
 
-A simple app that retrieves chat messages using [Waku Store](https://rfc.vac.dev/spec/13/)
-to illustrate the [Retrieve Messages Using Waku Store With ReactJS guide](https://docs.wakuconnect.dev/docs/guides/08_reactjs_store/).
+A simple app that retrieves chat messages using [Waku Store](https://docs.waku.org/overview/concepts/protocols#store) to illustrate the retrieval of messages with `js-waku` and ReactJS.
 
 - [code](examples/store-reactjs-chat)
 - [website](https://examples.waku.org/store-reactjs-chat)
