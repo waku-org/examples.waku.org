@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { generate } from "server-name-generator";
 import { Message } from "./Message";
-import type {
-  Peer,
-} from "@libp2p/interface-peer-store";
+import type { Peer } from "@libp2p/interface-peer-store";
 import type { LightNode, StoreQueryOptions, Waku } from "@waku/interfaces";
 import type { waku } from "@waku/sdk";
 
@@ -69,7 +67,9 @@ export const useNodePeers = (node: undefined | LightNode) => {
 
     const listener = async (evt: any) => {
       const { peerId } = evt.detail;
-      const tags = Array.from((await node.libp2p.peerStore.get(peerId)).tags.keys());
+      const tags = Array.from(
+        (await node.libp2p.peerStore.get(peerId)).tags.keys()
+      );
       if (tags.includes("peer-exchange")) {
         setPeerExchangePeers((peers) => new Set(peers).add(peerId.toString()));
       } else {
