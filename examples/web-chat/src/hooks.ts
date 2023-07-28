@@ -3,7 +3,6 @@ import { generate } from "server-name-generator";
 import { Message } from "./Message";
 import type {
   Peer,
-  PeerProtocolsChangeData,
 } from "@libp2p/interface-peer-store";
 import type { LightNode, StoreQueryOptions, Waku } from "@waku/interfaces";
 import type { waku } from "@waku/sdk";
@@ -70,9 +69,7 @@ export const useNodePeers = (node: undefined | LightNode) => {
 
     const listener = async (evt: any) => {
       const { peerId } = evt.detail;
-      const tags = (await node.libp2p.peerStore.getTags(peerId)).map(
-        (t) => t.name
-      );
+      const tags = Array.from((await node.libp2p.peerStore.get(peerId)).tags.keys());
       if (tags.includes("peer-exchange")) {
         setPeerExchangePeers((peers) => new Set(peers).add(peerId.toString()));
       } else {
@@ -81,9 +78,9 @@ export const useNodePeers = (node: undefined | LightNode) => {
     };
 
     // Update store peer when new peer connected & identified
-    node.libp2p.peerStore.addEventListener("change:protocols", listener);
+    node.libp2p.addEventListener("peer:identify", listener);
     return () => {
-      node.libp2p.peerStore.removeEventListener("change:protocols", listener);
+      node.libp2p.removeEventListener("peer:identify", listener);
     };
   }, [node]);
 
@@ -128,7 +125,7 @@ export const usePeers = (params: UsePeersParams): UsePeersResults => {
       return;
     }
 
-    const listener = async (_event?: CustomEvent<PeerProtocolsChangeData>) => {
+    const listener = async (_event?: any) => {
       const peers = await Promise.all([
         handleCatch(node?.store?.peers()),
         handleCatch(node?.filter?.peers()),
@@ -143,9 +140,9 @@ export const usePeers = (params: UsePeersParams): UsePeersResults => {
     };
 
     listener(); // populate peers before event is invoked
-    node.libp2p.peerStore.addEventListener("change:protocols", listener);
+    node.libp2p.addEventListener("peer:identify", listener);
     return () => {
-      node.libp2p.peerStore.removeEventListener("change:protocols", listener);
+      node.libp2p.removeEventListener("peer:identify", listener);
     };
   }, [node, setPeers]);
 
