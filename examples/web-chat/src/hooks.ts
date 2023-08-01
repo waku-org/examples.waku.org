@@ -155,9 +155,9 @@ export const usePeers = (params: UsePeersParams): UsePeersResults => {
     };
 
     listener(); // populate peers before event is invoked
-    node.libp2p.addEventListener("peer:update", listener);
+    node.libp2p.addEventListener("peer:identify", listener);
     return () => {
-      node.libp2p.removeEventListener("peer:update", listener);
+      node.libp2p.removeEventListener("peer:identify", listener);
     };
   }, [node, setPeers]);
 

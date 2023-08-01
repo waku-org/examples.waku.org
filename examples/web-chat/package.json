@@ -5,13 +5,13 @@
   "homepage": "/web-chat",
   "dependencies": {
     "@libp2p/bootstrap": "^8.0.0",
-    "@livechat/ui-kit": "^0.5.0-24",
-    "@multiformats/multiaddr": "11.0.7",
     "@waku/react": "^0.0.3-7aeb24a",
-    "@waku/sdk": "^0.0.17",
     "@waku/dns-discovery": "^0.0.15",
     "@waku/interfaces": "^0.0.16",
     "@waku/peer-exchange": "^0.0.14",
+    "@livechat/ui-kit": "^0.5.0-24",
+    "@multiformats/multiaddr": "11.0.7",
+    "@waku/sdk": "^0.0.17",
     "process": "^0.11.10",
     "protons-runtime": "^3.1.0",
     "react": "^17.0.2",
@@ -20,6 +20,7 @@
     "uint8arraylist": "^2.3.3"
   },
   "devDependencies": {
+    "@libp2p/interface-peer-store": "^2.0.4",
     "@types/jest": "^27.5.2",
     "@types/node": "^17.0.45",
     "@types/react": "^18.0.25",
