@@ -18,7 +18,12 @@ export default function Room(props: Props) {
   const { encoder } = useContentPair();
   const { push: onPush } = useLightPush({ node, encoder });
 
-  const { bootstrapPeers, peerExchangePeers } = useNodePeers(node);
+  const {
+    connectedBootstrapPeers,
+    connectedPeerExchangePeers,
+    discoveredBootstrapPeers,
+    discoveredPeerExchangePeers,
+  } = useNodePeers(node);
   const { storePeers, filterPeers, lightPushPeers } = usePeers({ node });
 
   const onSend = async (text: string) => {
@@ -46,7 +51,8 @@ export default function Room(props: Props) {
   const storePeersLength = orZero(storePeers?.length);
 
   const peersMessage = `Peers: ${lightPushPeersLength} light push, ${filterPeersLength} filter, ${storePeersLength} store.`;
-  const bootstrapPeersMessage = `Bootstrap (DNS Discovery): ${bootstrapPeers.size}, Peer exchange: ${peerExchangePeers.size}. `;
+  const bootstrapPeersMessage = `Bootstrap peers: ${connectedBootstrapPeers.length} connected, ${discoveredBootstrapPeers.length} discovered.`;
+  const peerExchangePeersMessage = `Peer exchange peers: ${connectedPeerExchangePeers.length} connected, ${discoveredPeerExchangePeers.length} discovered.`;
 
   return (
     <div
@@ -55,7 +61,7 @@ export default function Room(props: Props) {
     >
       <TitleBar
         leftIcons={[peersMessage]}
-        rightIcons={[bootstrapPeersMessage, "View console for more details."]}
+        rightIcons={[bootstrapPeersMessage, " ", peerExchangePeersMessage]}
         title="Waku v2 chat app"
       />
       <ChatList messages={props.messages} />
