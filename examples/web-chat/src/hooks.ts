@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { generate } from "server-name-generator";
 import { Message } from "./Message";
-import type {
-  Peer,
-  PeerProtocolsChangeData,
-} from "@libp2p/interface-peer-store";
-import type { LightNode, StoreQueryOptions, Waku } from "@waku/interfaces";
+import type { Peer } from "@libp2p/interface-peer-store";
+import {
+  EPeersByDiscoveryEvents,
+  LightNode,
+  StoreQueryOptions,
+  Waku,
+} from "@waku/interfaces";
 import type { waku } from "@waku/sdk";
 
 import { useFilterMessages, useStoreMessages } from "@waku/react";
@@ -62,42 +64,52 @@ export const useMessages = (params: UseMessagesParams): UseMessagesResult => {
 // can be safely ignored
 // this is for experiments on waku side around new discovery options
 export const useNodePeers = (node: undefined | LightNode) => {
-  const [bootstrapPeers, setBootstrapPeers] = useState(new Set<string>());
-  const [peerExchangePeers, setPeerExchangePeers] = useState(new Set<string>());
+  const [discoveredBootstrapPeers, setBootstrapPeers] = useState<Peer[]>([]);
+  const [connectedBootstrapPeers, setConnectedBootstrapPeers] = useState<
+    Peer[]
+  >([]);
+  const [discoveredPeerExchangePeers, setPeerExchangePeers] = useState<Peer[]>(
+    []
+  );
+  const [connectedPeerExchangePeers, setConnectedPeerExchangePeers] = useState<
+    Peer[]
+  >([]);
 
   useEffect(() => {
     if (!node) return;
 
-    const listener = async (evt: any) => {
-      const { peerId } = evt.detail;
-      const tags = (await node.libp2p.peerStore.getTags(peerId)).map(
-        (t) => t.name
-      );
-      if (tags.includes("peer-exchange")) {
-        setPeerExchangePeers((peers) => new Set(peers).add(peerId.toString()));
-      } else {
-        setBootstrapPeers((peers) => new Set(peers).add(peerId.toString()));
+    //TODO: remove any once @waku/sdk is updated
+    (node as any).connectionManager.addEventListener(
+      EPeersByDiscoveryEvents.PEER_DISCOVERY_BOOTSTRAP,
+      (event: CustomEvent<Peer>) => {
+        setBootstrapPeers((prev) => [...prev, event.detail]);
       }
-    };
-
-    // Update store peer when new peer connected & identified
-    node.libp2p.peerStore.addEventListener("change:protocols", listener);
-    return () => {
-      node.libp2p.peerStore.removeEventListener("change:protocols", listener);
-    };
+    );
+    (node as any).connectionManager.addEventListener(
+      EPeersByDiscoveryEvents.PEER_CONNECT_BOOTSTRAP,
+      (event: CustomEvent<Peer>) => {
+        setConnectedBootstrapPeers((prev) => [...prev, event.detail]);
+      }
+    );
+    (node as any).connectionManager.addEventListener(
+      EPeersByDiscoveryEvents.PEER_DISCOVERY_PEER_EXCHANGE,
+      (event: CustomEvent<Peer>) => {
+        setPeerExchangePeers((prev) => [...prev, event.detail]);
+      }
+    );
+    (node as any).connectionManager.addEventListener(
+      EPeersByDiscoveryEvents.PEER_CONNECT_PEER_EXCHANGE,
+      (event: CustomEvent<Peer>) => {
+        setConnectedPeerExchangePeers((prev) => [...prev, event.detail]);
+      }
+    );
   }, [node]);
 
-  useEffect(() => {
-    console.log("Bootstrap Peers:");
-    console.table(bootstrapPeers);
-
-    console.log("Peer Exchange Peers:");
-    console.table(peerExchangePeers);
-  }, [bootstrapPeers, peerExchangePeers]);
-
   return {
-    bootstrapPeers,
-    peerExchangePeers,
+    discoveredBootstrapPeers,
+    connectedBootstrapPeers,
+    discoveredPeerExchangePeers,
+    connectedPeerExchangePeers,
   };
 };
 
@@ -128,7 +140,7 @@ export const usePeers = (params: UsePeersParams): UsePeersResults => {
       return;
     }
 
-    const listener = async (_event?: CustomEvent<PeerProtocolsChangeData>) => {
+    const listener = async () => {
       const peers = await Promise.all([
         handleCatch(node?.store?.peers()),
         handleCatch(node?.filter?.peers()),
@@ -143,9 +155,9 @@ export const usePeers = (params: UsePeersParams): UsePeersResults => {
     };
 
     listener(); // populate peers before event is invoked
-    node.libp2p.peerStore.addEventListener("change:protocols", listener);
+    node.libp2p.addEventListener("peer:update", listener);
     return () => {
-      node.libp2p.peerStore.removeEventListener("change:protocols", listener);
+      node.libp2p.removeEventListener("peer:update", listener);
     };
   }, [node, setPeers]);
 
