@@ -52,31 +52,34 @@ export default function Room(props: Props) {
   const filterPeersLength = orZero(filterPeers?.length);
   const storePeersLength = orZero(storePeers?.length);
 
-  const peersMessage = `Peers Connected: ${allConnectedLength}
-    Store: ${storePeersLength}
-    Filter: ${filterPeersLength}
-    Light Push: ${lightPushPeersLength}
-  `;
-
-  const protocolsPeersMessage = `Peers Discovered: ${
-    discoveredBootstrapPeers.size + discoveredPeerExchangePeers.size
-  }
-    Bootstrap: ${discoveredBootstrapPeers.size}
-    Peer Exchange: ${discoveredPeerExchangePeers.size}; 
-    
-    Peers Connected: ${
-      connectedBootstrapPeers.size + connectedPeerExchangePeers.size
-    }
-    Bootstrap: ${connectedBootstrapPeers.size}
-    Peer Exchange: ${connectedPeerExchangePeers.size}
-  `;
-
   return (
     <div className="h-screen flex flex-col">
       <div className="flex justify-between items-center bg-gray-800 text-white p-4">
-        <div>{peersMessage}</div>
+        <div>
+          <div>Peers Connected: {allConnectedLength}</div>
+          <div className="mt-2">Store: {storePeersLength}</div>
+          <div>Filter: {filterPeersLength}</div>
+          <div>Light Push: {lightPushPeersLength}</div>
+        </div>
         <div>Waku v2 Web Chat</div>
-        <div>{protocolsPeersMessage}</div>
+        <div>
+          <div className="mt-2">
+            Peers Discovered:{" "}
+            {discoveredBootstrapPeers.size + discoveredPeerExchangePeers.size}
+          </div>
+          <div>
+            Bootstrap: {discoveredBootstrapPeers.size} Peer Exchange:{" "}
+            {discoveredPeerExchangePeers.size}
+          </div>
+          <div className="mt-2">
+            Peers Connected:{" "}
+            {connectedBootstrapPeers.size + connectedPeerExchangePeers.size}
+          </div>
+          <div>
+            Bootstrap: {connectedBootstrapPeers.size} Peer Exchange:{" "}
+            {connectedPeerExchangePeers.size}
+          </div>
+        </div>
       </div>
       <ChatList messages={props.messages} />
       <MessageInput hasLightPushPeers={!!lightPushPeers} sendMessage={onSend} />
