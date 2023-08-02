@@ -1,4 +1,3 @@
-import "./App.css";
 import handleCommand from "./command";
 import Room from "./Room";
 import { Message } from "./Message";
