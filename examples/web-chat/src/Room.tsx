@@ -2,7 +2,6 @@ import type { LightNode } from "@waku/interfaces";
 import ChatList from "./ChatList";
 import MessageInput from "./MessageInput";
 import { useWaku, useContentPair, useLightPush } from "@waku/react";
-import { TitleBar } from "@livechat/ui-kit";
 import { Message } from "./Message";
 import { ChatMessage } from "./chat_message";
 import { useNodePeers, usePeers } from "./hooks";
@@ -49,15 +48,11 @@ export default function Room(props: Props) {
   const bootstrapPeersMessage = `Bootstrap (DNS Discovery): ${bootstrapPeers.size}, Peer exchange: ${peerExchangePeers.size}. `;
 
   return (
-    <div
-      className="chat-container"
-      style={{ height: "98vh", display: "flex", flexDirection: "column" }}
-    >
-      <TitleBar
-        leftIcons={[peersMessage]}
-        rightIcons={[bootstrapPeersMessage, "View console for more details."]}
-        title="Waku v2 chat app"
-      />
+    <div className="h-screen flex flex-col">
+      <div className="flex justify-between items-center bg-gray-800 text-white p-4">
+        <div>{peersMessage}</div>
+        <div>{bootstrapPeersMessage} View console for more details.</div>
+      </div>
       <ChatList messages={props.messages} />
       <MessageInput hasLightPushPeers={!!lightPushPeers} sendMessage={onSend} />
     </div>

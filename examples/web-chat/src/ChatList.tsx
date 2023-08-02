@@ -1,9 +1,4 @@
 import { useEffect, useRef } from "react";
-import {
-  Message as LiveMessage,
-  MessageText,
-  MessageList,
-} from "@livechat/ui-kit";
 import { Message } from "./Message";
 
 interface Props {
@@ -12,25 +7,28 @@ interface Props {
 
 export default function ChatList(props: Props) {
   const renderedMessages = props.messages.map((message) => (
-    <LiveMessage
+    <div
       key={
         message.nick +
         message.payloadAsUtf8 +
         message.timestamp.valueOf() +
         message.sentTimestamp?.valueOf()
       }
-      authorName={message.nick}
-      date={formatDisplayDate(message)}
+      className="flex flex-col p-2 border-b border-gray-200"
     >
-      <MessageText>{message.payloadAsUtf8}</MessageText>
-    </LiveMessage>
+      <span className="text-sm text-gray-500">{message.nick}</span>
+      <span className="text-sm text-gray-500">
+        {formatDisplayDate(message)}
+      </span>
+      <p className="text-gray-700">{message.payloadAsUtf8}</p>
+    </div>
   ));
 
   return (
-    <MessageList active containScrollInSubtree>
+    <div className="overflow-y-auto h-full">
       {renderedMessages}
       <AlwaysScrollToBottom messages={props.messages} />
-    </MessageList>
+    </div>
   );
 }
 
@@ -45,13 +43,13 @@ function formatDisplayDate(message: Message): string {
 }
 
 const AlwaysScrollToBottom = (props: { messages: Message[] }) => {
-  const elementRef = useRef<HTMLDivElement>();
+  const elementRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // @ts-ignore
-    elementRef.current.scrollIntoView();
+    if (elementRef.current) {
+      elementRef.current.scrollIntoView();
+    }
   }, [props.messages]);
 
-  // @ts-ignore
   return <div ref={elementRef} />;
 };
