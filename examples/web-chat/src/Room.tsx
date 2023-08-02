@@ -24,7 +24,9 @@ export default function Room(props: Props) {
     discoveredBootstrapPeers,
     discoveredPeerExchangePeers,
   } = useNodePeers(node);
-  const { storePeers, filterPeers, lightPushPeers } = usePeers({ node });
+  const { allConnected, storePeers, filterPeers, lightPushPeers } = usePeers({
+    node,
+  });
 
   const onSend = async (text: string) => {
     if (!onPush || !text) {
@@ -46,13 +48,29 @@ export default function Room(props: Props) {
     }
   };
 
+  const allConnectedLength = orZero(allConnected?.length);
   const lightPushPeersLength = orZero(lightPushPeers?.length);
   const filterPeersLength = orZero(filterPeers?.length);
   const storePeersLength = orZero(storePeers?.length);
 
-  const peersMessage = `Peers: ${lightPushPeersLength} light push, ${filterPeersLength} filter, ${storePeersLength} store.`;
-  const bootstrapPeersMessage = `Bootstrap peers: ${connectedBootstrapPeers.length} connected, ${discoveredBootstrapPeers.length} discovered.`;
-  const peerExchangePeersMessage = `Peer exchange peers: ${connectedPeerExchangePeers.length} connected, ${discoveredPeerExchangePeers.length} discovered.`;
+  const peersMessage = `Peers Connected: ${allConnectedLength}
+    Store: ${storePeersLength}
+    Filter: ${filterPeersLength}
+    Light Push: ${lightPushPeersLength}
+  `;
+
+  const protocolsPeersMessage = `Peers Discovered: ${
+    discoveredBootstrapPeers.size + discoveredPeerExchangePeers.size
+  }
+    Bootstrap: ${discoveredBootstrapPeers.size}
+    Peer Exchange: ${discoveredPeerExchangePeers.size}; 
+    
+    Peers Connected: ${
+      connectedBootstrapPeers.size + connectedPeerExchangePeers.size
+    }
+    Bootstrap: ${connectedBootstrapPeers.size}
+    Peer Exchange: ${connectedPeerExchangePeers.size}
+  `;
 
   return (
     <div
@@ -61,7 +79,7 @@ export default function Room(props: Props) {
     >
       <TitleBar
         leftIcons={[peersMessage]}
-        rightIcons={[bootstrapPeersMessage, " ", peerExchangePeersMessage]}
+        rightIcons={[protocolsPeersMessage]}
         title="Waku v2 chat app"
       />
       <ChatList messages={props.messages} />
