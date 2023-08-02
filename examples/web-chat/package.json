@@ -4,7 +4,6 @@
   "private": true,
   "homepage": "/web-chat",
   "dependencies": {
-    "@livechat/ui-kit": "^0.5.0-24",
     "@multiformats/multiaddr": "11.0.7",
     "@waku/dns-discovery": "^0.0.15",
     "@waku/interfaces": "^0.0.16",
