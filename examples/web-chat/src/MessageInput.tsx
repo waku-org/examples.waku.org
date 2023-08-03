@@ -1,13 +1,9 @@
 import { ChangeEvent, KeyboardEvent, useEffect, useState } from "react";
 import { useWaku } from "@waku/react";
 import { LightNode } from "@waku/interfaces";
+import { MessageInputProps } from "./types";
 
-interface Props {
-  hasLightPushPeers: boolean;
-  sendMessage: ((msg: string) => Promise<void>) | undefined;
-}
-
-export default function MessageInput(props: Props) {
+export default function MessageInput(props: MessageInputProps) {
   const { hasLightPushPeers } = props;
   const { node } = useWaku<LightNode>();
 

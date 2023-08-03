@@ -1,18 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { generate } from "server-name-generator";
 import { Message } from "./Message";
+import { EPeersByDiscoveryEvents, LightNode, Tags } from "@waku/interfaces";
 import type { PeerId } from "@libp2p/interface-peer-id";
-import type { Peer } from "@libp2p/interface-peer-store";
-import {
-  EPeersByDiscoveryEvents,
-  LightNode,
-  StoreQueryOptions,
-  Waku,
-  Tags,
-} from "@waku/interfaces";
-import type { waku } from "@waku/sdk";
 
 import { useFilterMessages, useStoreMessages } from "@waku/react";
+import type {
+  UseMessagesParams,
+  UseMessagesResult,
+  UsePeersParams,
+  UsePeersResults,
+} from "./types";
+import { handleCatch } from "./utils";
 
 export const usePersistentNick = (): [
   string,
@@ -28,14 +27,6 @@ export const usePersistentNick = (): [
 
   return [nick, setNick];
 };
-
-type UseMessagesParams = {
-  node: undefined | LightNode;
-  decoder: undefined | waku.Decoder;
-  options: StoreQueryOptions;
-};
-
-type UseMessagesResult = [Message[], (v: Message[]) => void];
 
 export const useMessages = (params: UseMessagesParams): UseMessagesResult => {
   const { messages: newMessages } = useFilterMessages(params);
@@ -163,17 +154,6 @@ export const useNodePeers = (node: undefined | LightNode) => {
   };
 };
 
-type UsePeersParams = {
-  node: undefined | Waku;
-};
-
-type UsePeersResults = {
-  allConnected?: PeerId[];
-  storePeers?: PeerId[];
-  filterPeers?: PeerId[];
-  lightPushPeers?: PeerId[];
-};
-
 /**
  * Hook returns map of peers for different protocols.
  * If protocol is not implemented on the node peers are undefined.
@@ -216,13 +196,3 @@ export const usePeers = (params: UsePeersParams): UsePeersResults => {
 
   return peers;
 };
-
-function handleCatch(promise?: Promise<Peer[]>): Promise<Peer[] | undefined> {
-  if (!promise) {
-    return Promise.resolve(undefined);
-  }
-
-  return promise.catch((_) => {
-    return undefined;
-  });
-}

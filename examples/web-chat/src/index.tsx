@@ -6,7 +6,8 @@ import { wakuPeerExchangeDiscovery } from "@waku/peer-exchange";
 import "./index.css";
 
 import App from "./App";
-import { CONTENT_TOPIC, PROTOCOLS } from "./config";
+import { CONTENT_TOPIC } from "./config";
+import { Protocols } from "@waku/interfaces";
 
 const NODE_OPTIONS = {
   libp2p: {
@@ -23,7 +24,15 @@ const NODE_OPTIONS = {
 
 ReactDOM.render(
   <React.StrictMode>
-    <LightNodeProvider options={NODE_OPTIONS} protocols={PROTOCOLS}>
+    <LightNodeProvider
+      options={NODE_OPTIONS}
+      protocols={[
+        Protocols.Relay,
+        Protocols.Store,
+        Protocols.Filter,
+        Protocols.LightPush,
+      ]}
+    >
       <ContentPairProvider contentTopic={CONTENT_TOPIC}>
         <App />
       </ContentPairProvider>
