@@ -1,14 +1,6 @@
 import { ChangeEvent, KeyboardEvent, useEffect, useState } from "react";
 import { useWaku } from "@waku/react";
 import { LightNode } from "@waku/interfaces";
-import {
-  TextInput,
-  TextComposer,
-  Row,
-  Fill,
-  Fit,
-  SendButton,
-} from "@livechat/ui-kit";
 
 interface Props {
   hasLightPushPeers: boolean;
@@ -60,20 +52,24 @@ export default function MessageInput(props: Props) {
   }, [node, inputText, hasLightPushPeers]);
 
   return (
-    <TextComposer
-      onKeyDown={onKeyDown}
-      onChange={onChange}
-      active={isActive}
-      onButtonClick={onMessage}
-    >
-      <Row align="center">
-        <Fill>
-          <TextInput />
-        </Fill>
-        <Fit>
-          <SendButton />
-        </Fit>
-      </Row>
-    </TextComposer>
+    <div className="flex p-2">
+      <input
+        type="text"
+        value={inputText}
+        onChange={onChange}
+        onKeyDown={onKeyDown}
+        className="flex-grow p-2 border border-gray-300 rounded-l-md"
+        placeholder="Type your message..."
+      />
+      <button
+        onClick={onMessage}
+        className={`flex-none px-4 py-2 text-white ${
+          isActive ? "bg-blue-500" : "bg-blue-300 cursor-not-allowed"
+        } rounded-r-md`}
+        disabled={!isActive}
+      >
+        Send
+      </button>
+    </div>
   );
 }
