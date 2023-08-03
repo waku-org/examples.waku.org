@@ -26,12 +26,7 @@ ReactDOM.render(
   <React.StrictMode>
     <LightNodeProvider
       options={NODE_OPTIONS}
-      protocols={[
-        Protocols.Relay,
-        Protocols.Store,
-        Protocols.Filter,
-        Protocols.LightPush,
-      ]}
+      protocols={[Protocols.Store, Protocols.Filter, Protocols.LightPush]}
     >
       <ContentPairProvider contentTopic={CONTENT_TOPIC}>
         <App />
