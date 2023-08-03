@@ -1,8 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { generate } from "server-name-generator";
 import { Message } from "./Message";
+import type { PeerId } from "@libp2p/interface-peer-id";
 import type { Peer } from "@libp2p/interface-peer-store";
-import type { LightNode, StoreQueryOptions, Waku } from "@waku/interfaces";
+import {
+  EPeersByDiscoveryEvents,
+  LightNode,
+  StoreQueryOptions,
+  Waku,
+  Tags,
+} from "@waku/interfaces";
 import type { waku } from "@waku/sdk";
 
 import { useFilterMessages, useStoreMessages } from "@waku/react";
@@ -59,42 +66,100 @@ export const useMessages = (params: UseMessagesParams): UseMessagesResult => {
 // can be safely ignored
 // this is for experiments on waku side around new discovery options
 export const useNodePeers = (node: undefined | LightNode) => {
-  const [bootstrapPeers, setBootstrapPeers] = useState(new Set<string>());
-  const [peerExchangePeers, setPeerExchangePeers] = useState(new Set<string>());
+  const [discoveredBootstrapPeers, setBootstrapPeers] = useState<Set<PeerId>>(
+    new Set()
+  );
+  const [connectedBootstrapPeers, setConnectedBootstrapPeers] = useState<
+    Set<PeerId>
+  >(new Set());
+  const [discoveredPeerExchangePeers, setPeerExchangePeers] = useState<
+    Set<PeerId>
+  >(new Set());
+  const [connectedPeerExchangePeers, setConnectedPeerExchangePeers] = useState<
+    Set<PeerId>
+  >(new Set());
 
   useEffect(() => {
     if (!node) return;
 
-    const listener = async (evt: any) => {
-      const { peerId } = evt.detail;
-      const tags = Array.from(
-        (await node.libp2p.peerStore.get(peerId)).tags.keys()
-      );
-      if (tags.includes("peer-exchange")) {
-        setPeerExchangePeers((peers) => new Set(peers).add(peerId.toString()));
-      } else {
-        setBootstrapPeers((peers) => new Set(peers).add(peerId.toString()));
-      }
+    const handleDiscoveryBootstrap = (event: CustomEvent<PeerId>) => {
+      setBootstrapPeers((peers) => new Set([...peers, event.detail]));
     };
 
-    // Update store peer when new peer connected & identified
-    node.libp2p.addEventListener("peer:identify", listener);
+    const handleConnectBootstrap = (event: CustomEvent<PeerId>) => {
+      setConnectedBootstrapPeers((peers) => new Set([...peers, event.detail]));
+    };
+
+    const handleDiscoveryPeerExchange = (event: CustomEvent<PeerId>) => {
+      setPeerExchangePeers((peers) => new Set([...peers, event.detail]));
+    };
+
+    const handleConnectPeerExchange = (event: CustomEvent<PeerId>) => {
+      setConnectedPeerExchangePeers(
+        (peers) => new Set([...peers, event.detail])
+      );
+    };
+
+    const initHookData = async () => {
+      const { CONNECTED, DISCOVERED } =
+        await node.connectionManager.getPeersByDiscovery();
+
+      setConnectedBootstrapPeers(
+        new Set(CONNECTED[Tags.BOOTSTRAP].map((p) => p.id))
+      );
+      setConnectedPeerExchangePeers(
+        new Set(CONNECTED[Tags.PEER_EXCHANGE].map((p) => p.id))
+      );
+      setBootstrapPeers(new Set(DISCOVERED[Tags.BOOTSTRAP].map((p) => p.id)));
+      setPeerExchangePeers(
+        new Set(DISCOVERED[Tags.PEER_EXCHANGE].map((p) => p.id))
+      );
+
+      node.connectionManager.addEventListener(
+        EPeersByDiscoveryEvents.PEER_DISCOVERY_BOOTSTRAP,
+        handleDiscoveryBootstrap
+      );
+      node.connectionManager.addEventListener(
+        EPeersByDiscoveryEvents.PEER_CONNECT_BOOTSTRAP,
+        handleConnectBootstrap
+      );
+      node.connectionManager.addEventListener(
+        EPeersByDiscoveryEvents.PEER_DISCOVERY_PEER_EXCHANGE,
+        handleDiscoveryPeerExchange
+      );
+      node.connectionManager.addEventListener(
+        EPeersByDiscoveryEvents.PEER_CONNECT_PEER_EXCHANGE,
+        handleConnectPeerExchange
+      );
+    };
+
+    initHookData();
+
     return () => {
-      node.libp2p.removeEventListener("peer:identify", listener);
+      node.connectionManager.removeEventListener(
+        EPeersByDiscoveryEvents.PEER_DISCOVERY_BOOTSTRAP,
+        handleDiscoveryBootstrap
+      );
+      node.connectionManager.removeEventListener(
+        EPeersByDiscoveryEvents.PEER_CONNECT_BOOTSTRAP,
+        handleConnectBootstrap
+      );
+      node.connectionManager.removeEventListener(
+        EPeersByDiscoveryEvents.PEER_DISCOVERY_PEER_EXCHANGE,
+        handleDiscoveryPeerExchange
+      );
+      node.connectionManager.removeEventListener(
+        EPeersByDiscoveryEvents.PEER_CONNECT_PEER_EXCHANGE,
+        handleConnectPeerExchange
+      );
     };
   }, [node]);
 
-  useEffect(() => {
-    console.log("Bootstrap Peers:");
-    console.table(bootstrapPeers);
-
-    console.log("Peer Exchange Peers:");
-    console.table(peerExchangePeers);
-  }, [bootstrapPeers, peerExchangePeers]);
-
   return {
-    bootstrapPeers,
-    peerExchangePeers,
+    discoveredBootstrapPeers,
+    connectedBootstrapPeers,
+    discoveredPeerExchangePeers,
+    connectedPeerExchangePeers,
   };
 };
 
@@ -103,9 +168,10 @@ type UsePeersParams = {
 };
 
 type UsePeersResults = {
-  storePeers?: undefined | Peer[];
-  filterPeers?: undefined | Peer[];
-  lightPushPeers?: undefined | Peer[];
+  allConnected?: PeerId[];
+  storePeers?: PeerId[];
+  filterPeers?: PeerId[];
+  lightPushPeers?: PeerId[];
 };
 
 /**
@@ -120,22 +186,24 @@ export const usePeers = (params: UsePeersParams): UsePeersResults => {
   const { node } = params;
   const [peers, setPeers] = React.useState<UsePeersResults>({});
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!node) {
       return;
     }
 
-    const listener = async (_event?: any) => {
+    const listener = async () => {
       const peers = await Promise.all([
+        node?.libp2p.getConnections().map((c) => c.remotePeer),
         handleCatch(node?.store?.peers()),
         handleCatch(node?.filter?.peers()),
         handleCatch(node?.lightPush?.peers()),
       ]);
 
       setPeers({
-        storePeers: peers[0],
-        filterPeers: peers[1],
-        lightPushPeers: peers[2],
+        allConnected: peers[0],
+        storePeers: peers[1]?.map((p) => p.id),
+        filterPeers: peers[2]?.map((p) => p.id),
+        lightPushPeers: peers[3]?.map((p) => p.id),
       });
     };
 

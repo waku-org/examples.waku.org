@@ -11,7 +11,7 @@ import { CONTENT_TOPIC, PROTOCOLS } from "./config";
 const NODE_OPTIONS = {
   libp2p: {
     peerDiscovery: [
-      wakuDnsDiscovery([enrTree.TEST], {
+      wakuDnsDiscovery([enrTree.PROD], {
         store: 1,
         filter: 2,
         lightPush: 2,
