@@ -100,7 +100,7 @@ export const useNodePeers = (node: undefined | LightNode) => {
       );
     };
 
-    const fetchData = async () => {
+    const initHookData = async () => {
       const { CONNECTED, DISCOVERED } =
         await node.connectionManager.getPeersByDiscovery();
 
@@ -133,7 +133,7 @@ export const useNodePeers = (node: undefined | LightNode) => {
       );
     };
 
-    fetchData();
+    initHookData();
 
     return () => {
       node.connectionManager.removeEventListener(
