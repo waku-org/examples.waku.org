@@ -12,7 +12,7 @@ import {
   RLNDecoder,
   RLNEncoder,
   RLNContract,
-} from "https://unpkg.com/@waku/rln@0.1.0/bundle/index.js";
+} from "https://unpkg.com/@waku/rln@0.1.1/bundle/index.js";
 import { ethers } from "https://unpkg.com/ethers@5.7.2/dist/ethers.esm.min.js";
 
 const ContentTopic = "/toy-chat/2/luzhou/proto";
@@ -47,6 +47,7 @@ async function initRLN(ui) {
   const result = {
     encoder: undefined,
     rlnInstance: undefined,
+    contract: undefined,
   };
 
   const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
@@ -55,10 +56,13 @@ async function initRLN(ui) {
   const rlnInstance = await create();
   ui.setRlnStatus("WASM Blob download in progress... done!");
 
-  const rlnContract = new RLNContract({
+  const rlnContract = new RLNContract(
+    rlnInstance, {
     address: rlnAddress,
     provider: provider.getSigner(),
   });
+
+  result.contract = rlnContract;
 
   // Wallet logic
   window.ethereum.on("accountsChanged", ui.setAccount);
@@ -184,7 +188,7 @@ async function initWaku(ui, rln) {
       try {
         console.log("Verifying proof without roots");
         console.time("proof_verify_timer");
-        const res = message.verifyNoRoot();
+        const res = message.verify(rln.contract.roots());
         console.timeEnd("proof_verify_timer");
         console.log("proof verified without roots", res);
         if (res === undefined) {
