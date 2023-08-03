@@ -1,11 +1,8 @@
 import { useEffect, useRef } from "react";
 import { Message } from "./Message";
+import type { ChatListProps } from "./types";
 
-interface Props {
-  messages: Message[];
-}
-
-export default function ChatList(props: Props) {
+export default function ChatList(props: ChatListProps) {
   const renderedMessages = props.messages.map((message) => (
     <div
       key={

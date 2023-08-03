@@ -2,17 +2,11 @@ import type { LightNode } from "@waku/interfaces";
 import ChatList from "./ChatList";
 import MessageInput from "./MessageInput";
 import { useWaku, useContentPair, useLightPush } from "@waku/react";
-import { Message } from "./Message";
 import { ChatMessage } from "./chat_message";
 import { useNodePeers, usePeers } from "./hooks";
+import type { RoomProps } from "./types";
 
-interface Props {
-  messages: Message[];
-  commandHandler: (cmd: string) => void;
-  nick: string;
-}
-
-export default function Room(props: Props) {
+export default function Room(props: RoomProps) {
   const { node } = useWaku<LightNode>();
   const { encoder } = useContentPair();
   const { push: onPush } = useLightPush({ node, encoder });
