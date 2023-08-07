@@ -3,22 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "homepage": "/eth-pm",
-  "dependencies": {
-    "@ethersproject/abstract-signer": "5.7.0",
-    "@ethersproject/providers": "5.7.0",
-    "@material-ui/core": "^4.12.4",
-    "@material-ui/icons": "^4.11.3",
-    "@waku/sdk": "^0.0.16",
-    "@waku/interfaces": "^0.0.15",
-    "@waku/message-encryption": "^0.0.18",
-    "@waku/utils": "0.0.8",
-    "ethers": "5.7.1",
-    "fontsource-roboto": "^4.0.0",
-    "protobufjs": "^7.1.2",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "uint8arrays": "^4.0.2"
-  },
   "scripts": {
     "start": "GENERATE_SOURCEMAP=false PORT=3004 craco start",
     "build": "GENERATE_SOURCEMAP=false craco build",
@@ -52,6 +36,22 @@
   },
   "overrides": {
     "react-refresh": "0.14.0"
+  },
+  "dependencies": {
+    "@ethersproject/abstract-signer": "5.7.0",
+    "@ethersproject/providers": "5.7.0",
+    "@material-ui/core": "^4.12.4",
+    "@material-ui/icons": "^4.11.3",
+    "@waku/interfaces": "^0.0.17",
+    "@waku/message-encryption": "^0.0.20",
+    "@waku/sdk": "^0.0.18",
+    "@waku/utils": "0.0.10",
+    "ethers": "5.7.1",
+    "fontsource-roboto": "^4.0.0",
+    "protobufjs": "^7.1.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "uint8arrays": "^4.0.2"
   },
   "devDependencies": {
     "@craco/craco": "^6.4.5",
