@@ -54,7 +54,7 @@
     "uint8arrays": "^4.0.2"
   },
   "devDependencies": {
-    "@craco/craco": "^6.4.5",
+    "@craco/craco": "^7.0.0",
     "@ethersproject/shims": "^5.7.0",
     "@types/jest": "^27.5.2",
     "@types/node": "^17.0.45",
