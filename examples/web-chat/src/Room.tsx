@@ -5,6 +5,8 @@ import { useWaku, useContentPair, useLightPush } from "@waku/react";
 import { ChatMessage } from "./chat_message";
 import { useNodePeers, usePeers } from "./hooks";
 import type { RoomProps } from "./types";
+import { useEffect } from "react";
+import { getMultiaddrsFromLocalStorage } from "./utils";
 
 export default function Room(props: RoomProps) {
   const { node } = useWaku<LightNode>();
@@ -40,6 +42,23 @@ export default function Room(props: RoomProps) {
       await onPush({ payload, timestamp });
     }
   };
+
+  useEffect(() => {
+    if (!node) return;
+
+    const multiaddrs = getMultiaddrsFromLocalStorage();
+    (async () => {
+      console.log(
+        `Dialing ${multiaddrs.length} multiaddrs found in local storage`
+      );
+
+      try {
+        await Promise.all(multiaddrs.map((multiaddr) => node.dial(multiaddr)));
+      } catch (error) {
+        console.error(error);
+      }
+    })();
+  }, [node]);
 
   const allConnectedLength = orZero(allConnected?.length);
   const lightPushPeersLength = orZero(lightPushPeers?.length);

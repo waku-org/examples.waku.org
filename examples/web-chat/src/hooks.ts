@@ -11,7 +11,7 @@ import type {
   UsePeersParams,
   UsePeersResults,
 } from "./types";
-import { handleCatch } from "./utils";
+import { handleCatch, saveMultiaddrsToLocalStorage } from "./utils";
 
 export const usePersistentNick = (): [
   string,
@@ -86,6 +86,7 @@ export const useNodePeers = (node: undefined | LightNode) => {
     };
 
     const handleConnectPeerExchange = (event: CustomEvent<PeerId>) => {
+      saveMultiaddrsToLocalStorage(node.libp2p.peerStore.get(event.detail));
       setConnectedPeerExchangePeers(
         (peers) => new Set([...peers, event.detail])
       );
