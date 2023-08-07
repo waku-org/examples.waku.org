@@ -5,7 +5,7 @@ import {
   waitForRemotePeer,
   createDecoder,
   createEncoder,
-} from "https://unpkg.com/@waku/sdk@0.0.16/bundle/index.js";
+} from "https://unpkg.com/@waku/sdk@0.0.18/bundle/index.js";
 
 const CONTENT_TOPIC = "/toy-chat/2/huilong/proto";
 

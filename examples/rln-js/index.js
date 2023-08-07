@@ -1,10 +1,10 @@
-import * as utils from "https://unpkg.com/@waku/utils@0.0.8/bundle/bytes.js";
+import * as utils from "https://unpkg.com/@waku/utils@0.0.10/bundle/bytes.js";
 import {
   createEncoder,
   createDecoder,
   waitForRemotePeer,
   createLightNode,
-} from "https://unpkg.com/@waku/sdk@0.0.16/bundle/index.js";
+} from "https://unpkg.com/@waku/sdk@0.0.18/bundle/index.js";
 import { protobuf } from "https://taisukef.github.io/protobuf-es.js/dist/protobuf-es.js";
 import {
   create,

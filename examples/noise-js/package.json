@@ -9,9 +9,9 @@
     "start": "webpack-dev-server"
   },
   "dependencies": {
-    "@waku/sdk": "0.0.16",
+    "@waku/sdk": "0.0.18",
     "@waku/noise": "0.0.3-31510da",
-    "@waku/utils": "0.0.8",
+    "@waku/utils": "0.0.10",
     "protobufjs": "^7.1.2",
     "qrcode": "^1.5.1"
   },

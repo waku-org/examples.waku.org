@@ -17,13 +17,11 @@
       import {
         defaultLibp2p,
         defaultPeerDiscovery,
-      } from "https://unpkg.com/@waku/create@0.0.13/bundle/index.js";
-      import {
-        wakuStore,
         WakuNode,
         waitForRemotePeer,
         createDecoder,
-      } from "https://unpkg.com/@waku/core@0.0.17/bundle/index.js";
+        waku
+      } from "https://unpkg.com/@waku/sdk@0.0.18/bundle/index.js";
 
       /**
        * This example demonstrates how to use the js-waku minified bundle
@@ -39,7 +37,7 @@
       const libp2p = await defaultLibp2p(undefined, {
         peerDiscovery: [defaultPeerDiscovery()],
       });
-      const store = wakuStore();
+      const store = waku.wakuStore();
       const node = new WakuNode({}, libp2p, store);
 
       timestampDiv.innerHTML = "<p>Starting waku.</p>";
