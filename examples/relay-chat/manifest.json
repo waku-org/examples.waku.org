@@ -1,6 +1,6 @@
 {
-  "name": "Light JS",
-  "description": "Send messages between several users (or just one) using light client targeted protocols.",
+  "name": "Waku Relay WebRTC JS",
+  "description": "Send messages between several users (or just one) using Relay with direct WebRTC connection.",
   "icons": [
     {
       "src": "favicon.ico",
