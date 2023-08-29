@@ -20,6 +20,7 @@ jobs:
             web-chat,
             noise-js,
             noise-rtc,
+            relay-chat
           ]
     runs-on: ubuntu-latest
     steps:
