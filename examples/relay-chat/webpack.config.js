@@ -13,7 +13,13 @@ module.exports = {
   mode: "development",
   plugins: [
     new CopyWebpackPlugin({
-      patterns: ["index.html", "favicon.ico", "favicon.png", "manifest.json"],
+      patterns: [
+        "index.html",
+        "favicon.ico",
+        "favicon.png",
+        "manifest.json",
+        "style.css",
+      ],
     }),
   ],
 };
