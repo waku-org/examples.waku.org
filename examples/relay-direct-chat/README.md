@@ -1,15 +1,15 @@
-# Using Waku Relay WebRTC
+# Direct WebRTC connection for Waku Relay
 
 **Demonstrates**:
 
 - Waku Relay node with direct WebRTC connection 
 - Pure Javascript/HTML.
 
-This example uses Waku Filter to listen to messages and Waku Light Push to send messages.
+This example uses WebRTC transport and Waku Relay to exchange messages.
 
 To test the example run `npm install` and then `npm start`.
 
-The `master` branch's HEAD is deployed at https://examples.waku.org/relay-chat/.
+The `master` branch's HEAD is deployed at https://examples.waku.org/relay-direct-chat/.
 
 ### Steps to run an example: 
 1. Get a Waku node that implements `/libp2p/circuit/relay/0.2.0/hop` and `/libp2p/circuit/relay/0.2.0/stop`
