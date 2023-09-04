@@ -173,7 +173,7 @@ export const usePeers = (params: UsePeersParams): UsePeersResults => {
 
     const listener = async () => {
       const peers = await Promise.all([
-        node?.libp2p.getConnections().map((c) => c.remotePeer),
+        node?.libp2p.getPeers(),
         handleCatch(node?.store?.peers()),
         handleCatch(node?.filter?.peers()),
         handleCatch(node?.lightPush?.peers()),
