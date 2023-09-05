@@ -3,6 +3,7 @@ import { generate } from "server-name-generator";
 import { Message } from "./Message";
 import { EPeersByDiscoveryEvents, LightNode, Tags } from "@waku/interfaces";
 import type { PeerId } from "@libp2p/interface-peer-id";
+import { waku } from "@waku/sdk";
 
 import { useFilterMessages, useStoreMessages } from "@waku/react";
 import type {
@@ -11,7 +12,6 @@ import type {
   UsePeersParams,
   UsePeersResults,
 } from "./types";
-import { handleCatch } from "./utils";
 
 export const usePersistentNick = (): [
   string,
@@ -106,6 +106,13 @@ export const useNodePeers = (node: undefined | LightNode) => {
         new Set(DISCOVERED[Tags.PEER_EXCHANGE].map((p) => p.id))
       );
 
+      node.libp2p.addEventListener("peer:disconnect", (evt) => {
+        const peerId = evt.detail;
+        setConnectedBootstrapPeers((peers) => {
+          peers.delete(peerId);
+          return peers;
+        });
+      });
       node.connectionManager.addEventListener(
         EPeersByDiscoveryEvents.PEER_DISCOVERY_BOOTSTRAP,
         handleDiscoveryBootstrap
@@ -172,18 +179,26 @@ export const usePeers = (params: UsePeersParams): UsePeersResults => {
     }
 
     const listener = async () => {
-      const peers = await Promise.all([
-        node?.libp2p.getConnections().map((c) => c.remotePeer),
-        handleCatch(node?.store?.peers()),
-        handleCatch(node?.filter?.peers()),
-        handleCatch(node?.lightPush?.peers()),
-      ]);
+      // find all the peers that are connected for diff protocols
+      const peerIds = node.libp2p.getPeers();
+      const peers = await Promise.all(
+        peerIds.map((id) => node.libp2p.peerStore.get(id))
+      );
 
       setPeers({
-        allConnected: peers[0],
-        storePeers: peers[1]?.map((p) => p.id),
-        filterPeers: peers[2]?.map((p) => p.id),
-        lightPushPeers: peers[3]?.map((p) => p.id),
+        allConnected: peers.map((p) => p.id),
+        storePeers: peers
+          .filter((p) => p.protocols.includes(waku.StoreCodec))
+          .map((p) => p.id),
+        //TODO: use from import
+        filterPeers: peers
+          .filter((p) =>
+            p.protocols.includes("/vac/waku/filter-subscribe/2.0.0-beta1")
+          )
+          .map((p) => p.id), // hardcoding codec since we don't export it currently
+        lightPushPeers: peers
+          .filter((p) => p.protocols.includes(waku.LightPushCodec))
+          .map((p) => p.id),
       });
     };
 
