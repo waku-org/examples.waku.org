@@ -6,9 +6,7 @@
   "dependencies": {
     "@libp2p/bootstrap": "^8.0.0",
     "@waku/react": "^0.0.5-effaf55",
-    "@waku/dns-discovery": "^0.0.17",
     "@waku/interfaces": "^0.0.18",
-    "@waku/peer-exchange": "^0.0.16",
     "@livechat/ui-kit": "^0.5.0-24",
     "@multiformats/multiaddr": "12.1.5",
     "@waku/sdk": "^0.0.19",
