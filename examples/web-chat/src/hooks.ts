@@ -188,7 +188,7 @@ export const usePeers = (params: UsePeersParams): UsePeersResults => {
       setPeers({
         allConnected: peers.map((p) => p.id),
         storePeers: peers
-          .filter((p) => p.protocols.includes(waku.StoreCodec))
+          .filter((p) => p.protocols.includes(waku.waku_store.StoreCodec))
           .map((p) => p.id),
         //TODO: use from import
         filterPeers: peers
@@ -197,7 +197,7 @@ export const usePeers = (params: UsePeersParams): UsePeersResults => {
           )
           .map((p) => p.id), // hardcoding codec since we don't export it currently
         lightPushPeers: peers
-          .filter((p) => p.protocols.includes(waku.LightPushCodec))
+          .filter((p) => p.protocols.includes(waku.waku_store.StoreCodec))
           .map((p) => p.id),
       });
     };
