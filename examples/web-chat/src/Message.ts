@@ -11,6 +11,18 @@ export class Message {
     this.sentTimestamp = sentTimestamp;
   }
 
+  static cmp(left: Message, right: Message): boolean {
+    return left.timestamp.getTime() < right.timestamp.getTime();
+  }
+
+  static isEqual(left: Message, right: Message): boolean {
+    return (
+      left.timestamp.valueOf() === right.timestamp.valueOf() &&
+      left.chatMessage.nick === right.chatMessage.nick &&
+      left.chatMessage.payloadAsUtf8 === right.chatMessage.payloadAsUtf8
+    );
+  }
+
   static fromWakuMessage(wakuMsg: IDecodedMessage): Message | undefined {
     if (wakuMsg.payload) {
       try {

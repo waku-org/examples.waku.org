@@ -12,6 +12,7 @@ import type {
   UsePeersParams,
   UsePeersResults,
 } from "./types";
+import { OrderedSet } from "./ordered_array";
 
 export const usePersistentNick = (): [
   string,
@@ -40,15 +41,22 @@ export const useMessages = (params: UseMessagesParams): UseMessagesResult => {
     setLocalMessages((prev) => [...prev, ...msgs]);
   };
 
-  const allMessages = React.useMemo((): Message[] => {
-    return [...storedMessages, ...newMessages]
+  const allMessages = React.useMemo((): OrderedSet<Message> => {
+    const allMessages = new OrderedSet(Message.cmp, Message.isEqual);
+
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const _msgs = [...storedMessages, ...newMessages]
       .map(Message.fromWakuMessage)
-      .concat(localMessages)
       .filter((v): v is Message => !!v)
       .filter((v) => v.payloadAsUtf8 !== "")
-      .sort(
-        (left, right) => left.timestamp.getTime() - right.timestamp.getTime()
-      );
+      // Filter out messages that are "sent" tomorrow are they are likely to be flukes
+      .filter((m) => m.timestamp.valueOf() < tomorrow.valueOf());
+    allMessages.push(..._msgs);
+    allMessages.push(...localMessages);
+
+    return allMessages;
   }, [storedMessages, newMessages, localMessages]);
 
   return [allMessages, pushMessages];

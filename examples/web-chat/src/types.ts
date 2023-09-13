@@ -2,6 +2,7 @@ import type { PeerId } from "@libp2p/interface-peer-id";
 import type { LightNode, StoreQueryOptions, Waku } from "@waku/interfaces";
 import type { Decoder } from "@waku/sdk";
 import type { Message } from "./Message";
+import { OrderedSet } from "./ordered_array";
 
 export type UsePeersParams = {
   node: undefined | Waku;
@@ -20,10 +21,10 @@ export type UseMessagesParams = {
   options: StoreQueryOptions;
 };
 
-export type UseMessagesResult = [Message[], (v: Message[]) => void];
+export type UseMessagesResult = [OrderedSet<Message>, (v: Message[]) => void];
 
 export interface ChatListProps {
-  messages: Message[];
+  messages: OrderedSet<Message>;
 }
 
 export interface MessageInputProps {
@@ -32,7 +33,7 @@ export interface MessageInputProps {
 }
 
 export interface RoomProps {
-  messages: Message[];
+  messages: OrderedSet<Message>;
   commandHandler: (cmd: string) => void;
   nick: string;
 }
