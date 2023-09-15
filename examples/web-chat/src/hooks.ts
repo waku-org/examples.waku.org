@@ -3,7 +3,6 @@ import { generate } from "server-name-generator";
 import { Message } from "./Message";
 import { EPeersByDiscoveryEvents, LightNode, Tags } from "@waku/interfaces";
 import type { PeerId } from "@libp2p/interface-peer-id";
-import { waku } from "@waku/sdk";
 
 import { useFilterMessages, useStoreMessages } from "@waku/react";
 import type {
@@ -196,16 +195,13 @@ export const usePeers = (params: UsePeersParams): UsePeersResults => {
       setPeers({
         allConnected: peers.map((p) => p.id),
         storePeers: peers
-          .filter((p) => p.protocols.includes(waku.waku_store.StoreCodec))
+          .filter((p) => p.protocols.includes(node.store?.multicodec || ""))
           .map((p) => p.id),
-        //TODO: use from import
         filterPeers: peers
-          .filter((p) =>
-            p.protocols.includes("/vac/waku/filter-subscribe/2.0.0-beta1")
-          )
+          .filter((p) => p.protocols.includes(node.filter?.multicodec || ""))
           .map((p) => p.id), // hardcoding codec since we don't export it currently
         lightPushPeers: peers
-          .filter((p) => p.protocols.includes(waku.waku_store.StoreCodec))
+          .filter((p) => p.protocols.includes(node.lightPush?.multicodec || ""))
           .map((p) => p.id),
       });
     };
