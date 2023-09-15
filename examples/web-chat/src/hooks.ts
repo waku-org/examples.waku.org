@@ -12,6 +12,7 @@ import type {
   UsePeersResults,
 } from "./types";
 import { OrderedSet } from "./ordered_array";
+import { getPeerIdsForProtocol } from "./utils";
 
 export const usePersistentNick = (): [
   string,
@@ -194,15 +195,9 @@ export const usePeers = (params: UsePeersParams): UsePeersResults => {
 
       setPeers({
         allConnected: peers.map((p) => p.id),
-        storePeers: peers
-          .filter((p) => p.protocols.includes(node.store?.multicodec || ""))
-          .map((p) => p.id),
-        filterPeers: peers
-          .filter((p) => p.protocols.includes(node.filter?.multicodec || ""))
-          .map((p) => p.id), // hardcoding codec since we don't export it currently
-        lightPushPeers: peers
-          .filter((p) => p.protocols.includes(node.lightPush?.multicodec || ""))
-          .map((p) => p.id),
+        storePeers: getPeerIdsForProtocol(node.store, peers),
+        filterPeers: getPeerIdsForProtocol(node.filter, peers),
+        lightPushPeers: getPeerIdsForProtocol(node.lightPush, peers),
       });
     };
 
