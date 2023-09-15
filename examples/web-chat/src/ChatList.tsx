@@ -3,7 +3,7 @@ import { Message } from "./Message";
 import type { ChatListProps } from "./types";
 
 export default function ChatList(props: ChatListProps) {
-  const renderedMessages = props.messages.map((message) => (
+  const renderedMessages = props.messages.array.map((message) => (
     <div
       key={
         message.nick +
@@ -24,7 +24,7 @@ export default function ChatList(props: ChatListProps) {
   return (
     <div className="overflow-y-auto h-full">
       {renderedMessages}
-      <AlwaysScrollToBottom messages={props.messages} />
+      <AlwaysScrollToBottom messages={props.messages.array} />
     </div>
   );
 }
