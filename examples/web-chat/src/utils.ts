@@ -1,5 +1,5 @@
 import type { Peer } from "@libp2p/interface-peer-store";
-import { IFilter, ILightPush, IStore } from "@waku/interfaces";
+import type { IFilter, ILightPush, IStore } from "@waku/interfaces";
 
 export async function handleCatch(
   promise?: Promise<Peer[]>
