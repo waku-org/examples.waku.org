@@ -9,7 +9,7 @@ import { useMessages, usePersistentNick } from "./hooks";
 
 const startTime = new Date();
 // Only retrieve a week of history
-startTime.setTime(Date.now() - 1000 * 60 * 60 * 24 * 7);
+startTime.setTime(Date.now() - 1000 * 60 * 30);
 const endTime = new Date();
 
 export default function App() {
