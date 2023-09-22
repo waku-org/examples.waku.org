@@ -35,7 +35,7 @@
     "url": "^0.11.0"
   },
   "scripts": {
-    "start": "cross-env GENERATE_SOURCEMAP=false PORT=3003 react-scripts start",
+    "start": "GENERATE_SOURCEMAP=false PORT=3003 react-scripts start",
     "build": "react-scripts build",
     "test:unit": "exit 0",
     "fix": "run-s fix:*",
