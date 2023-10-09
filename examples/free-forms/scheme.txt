@@ -1,0 +1,15 @@
+App root content topic
+    /free-form/0.0.1/{content-topic-for-particular-use}/proto
+
+
+1. User logs in with his wallet
+    1.1 User's preferences are fetched from following content topic
+        id = waller-or-uuid-or-pubkey
+        /fee-form/{version}/user:{id}/proto
+2. User creates new form
+    2.1 Form topic is set up
+        id = uuid
+        /free-form/0/form:{id}/proto
+    2.2 User sets form scheme, version, signature
+    2.3 Scheme is sent
+3.
