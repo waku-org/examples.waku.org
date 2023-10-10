@@ -127,8 +127,8 @@
     },
     {
       "name": "enrtree",
-      "pattern": "/enrtree:\/\/.*/"
+      "pattern": "/enrtree://.*/"
     }
   ],
-  "ignoreRegExpList": ["import"]
+  "ignoreRegExpList": ["import", "enrtree"]
 }
