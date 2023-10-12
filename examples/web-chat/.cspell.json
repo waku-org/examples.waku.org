@@ -3,7 +3,6 @@
   "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/master/cspell.schema.json",
   "language": "en",
   "words": [
-    "AOGECG2SPND25EEFMAJ5WF3KSGJNSGV356DSTL2YVLLZWIV6SAYBM",
     "asym",
     "backoff",
     "backoffs",
@@ -125,7 +124,11 @@
     {
       "name": "import",
       "pattern": "/import .*/"
+    },
+    {
+      "name": "enrtree",
+      "pattern": "/enrtree://.*/"
     }
   ],
-  "ignoreRegExpList": ["import"]
+  "ignoreRegExpList": ["import", "enrtree"]
 }
