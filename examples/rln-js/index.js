@@ -13,7 +13,7 @@ import {
   RLNEncoder,
   RLNContract,
   SEPOLIA_CONTRACT,
-} from "https://unpkg.com/@waku/rln@0.1.1/bundle/index.js";
+} from "https://unpkg.com/@waku/rln@0.1.1-fa49e29/bundle/index.js";
 import { ethers } from "https://unpkg.com/ethers@5.7.2/dist/ethers.esm.min.js";
 
 const ContentTopic = "/toy-chat/2/luzhou/proto";
