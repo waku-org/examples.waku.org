@@ -49,7 +49,6 @@ async function initRLN(ui) {
   };
 
   const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
-  window.tmp = provider;
 
   ui.setRlnStatus("WASM Blob download in progress...");
   const rlnInstance = await create();
