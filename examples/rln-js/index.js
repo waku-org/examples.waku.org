@@ -8,10 +8,11 @@ import {
 import { protobuf } from "https://taisukef.github.io/protobuf-es.js/dist/protobuf-es.js";
 import {
   create,
-  IdentityCredential,
+  Keystore,
   RLNDecoder,
   RLNEncoder,
   RLNContract,
+  SEPOLIA_CONTRACT,
 } from "https://unpkg.com/@waku/rln@0.1.1/bundle/index.js";
 import { ethers } from "https://unpkg.com/ethers@5.7.2/dist/ethers.esm.min.js";
 
@@ -22,9 +23,6 @@ const ProtoChatMessage = new protobuf.Type("ChatMessage")
   .add(new protobuf.Field("timestamp", 1, "uint64"))
   .add(new protobuf.Field("nick", 2, "string"))
   .add(new protobuf.Field("text", 3, "bytes"));
-
-const rlnDeployBlk = 3193048;
-const rlnAddress = "0x9C09146844C1326c2dBC41c451766C7138F88155";
 
 const SIGNATURE_MESSAGE =
   "The signature of this message will be used to generate your RLN credentials. Anyone accessing it may send messages on your behalf, please only share with the RLN dApp";
@@ -51,18 +49,42 @@ async function initRLN(ui) {
   };
 
   const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+  window.tmp = provider;
 
   ui.setRlnStatus("WASM Blob download in progress...");
   const rlnInstance = await create();
   ui.setRlnStatus("WASM Blob download in progress... done!");
 
-  const rlnContract = new RLNContract(
-    rlnInstance, {
-    address: rlnAddress,
+  const rlnContract = await RLNContract.init(rlnInstance, {
+    registryAddress: SEPOLIA_CONTRACT.address,
     provider: provider.getSigner(),
   });
 
   result.contract = rlnContract;
+
+  // Keystore logic
+  let keystore = initKeystore(ui);
+  ui.createKeystoreOptions(keystore);
+
+  ui.onKeystoreImport(async (text) => {
+    try {
+      keystore = Keystore.fromString(text);
+      ui.setKeystoreStatus("Imported keystore from json");
+    } catch (err) {
+      console.error("Failed to import keystore:", err);
+      ui.setKeystoreStatus("Failed to import, fallback to current keystore");
+    }
+    ui.createKeystoreOptions(keystore);
+    saveLocalKeystore(keystore);
+  });
+
+  ui.onKeystoreExport(async () => {
+    return keystore.toString();
+  });
+
+  ui.onKeystoreRead(async (hash, password) => {
+    return keystore.readCredential(hash, password);
+  });
 
   // Wallet logic
   window.ethereum.on("accountsChanged", ui.setAccount);
@@ -85,7 +107,7 @@ async function initRLN(ui) {
     const filter = rlnContract.contract.filters.MemberRegistered();
 
     ui.disableRetrieveButton();
-    await rlnContract.fetchMembers(rlnInstance, { fromBlock: rlnDeployBlk });
+    await rlnContract.fetchMembers(rlnInstance);
     ui.enableRetrieveButton();
 
     rlnContract.subscribeToMembers(rlnInstance);
@@ -93,12 +115,12 @@ async function initRLN(ui) {
     const last = rlnContract.members.at(-1);
 
     if (last) {
-      ui.setLastMember(last.index, last.pubkey);
+      ui.setLastMember(last.index, last.idCommitment);
     }
 
     // make sure we have subscriptions to keep updating last item
-    rlnContract.contract.on(filter, (_pubkey, _index, event) => {
-      ui.setLastMember(event.args.index, event.args.pubkey);
+    rlnContract.contract.on(filter, (_idCommitment, _index, event) => {
+      ui.setLastMember(event.args.index, event.args.idCommitment);
     });
   });
 
@@ -106,31 +128,18 @@ async function initRLN(ui) {
   let membershipId;
   let credentials;
 
-  ui.onManualImport((membershipId, credentials) => {
-    result.encoder = new RLNEncoder(
-      createEncoder({
-        ephemeral: false,
-        contentTopic: ContentTopic,
-      }),
-      rlnInstance,
-      membershipId,
-      credentials
-    );
-
-    ui.setMembershipInfo(membershipId, credentials);
-    ui.enableDialButton();
-  });
-
   ui.onWalletImport(async () => {
     const signer = provider.getSigner();
 
-    signature = await signer.signMessage(SIGNATURE_MESSAGE);
+    signature = await signer.signMessage(
+      `${SIGNATURE_MESSAGE}. Nonce: ${Math.ceil(Math.random() * 1000)}`
+    );
     credentials = await rlnInstance.generateSeededIdentityCredential(signature);
 
     const idCommitment = ethers.utils.hexlify(credentials.IDCommitment);
 
     rlnContract.members.forEach((m) => {
-      if (m.pubkey._hex === idCommitment) {
+      if (m.idCommitment === idCommitment) {
         membershipId = m.index.toString();
       }
     });
@@ -155,20 +164,42 @@ async function initRLN(ui) {
 
   ui.onRegister(async () => {
     ui.setRlnStatus("Trying to register...");
-    const event = signature
+    const memberInfo = signature
       ? await rlnContract.registerWithSignature(rlnInstance, signature)
       : await rlnContract.registerWithKey(credentials);
 
-    // Update membershipId
-    membershipId = event.args.index.toNumber();
+    membershipId = memberInfo.index.toNumber();
 
     console.log(
       "Obtained index for current membership credentials",
       membershipId
     );
 
+    const password = ui.getKeystorePassword();
+
+    if (!password) {
+      ui.setKeystoreStatus("Cannot add credentials, no password.");
+    }
+
+    const keystoreHash = await keystore.addCredential(
+      {
+        membership: {
+          treeIndex: membershipId,
+          chainId: SEPOLIA_CONTRACT.chainId,
+          address: SEPOLIA_CONTRACT.address,
+        },
+        identity:
+          credentials ||
+          rlnInstance.generateSeededIdentityCredential(signature),
+      },
+      password
+    );
+    saveLocalKeystore(keystore);
+    ui.addKeystoreOption(keystoreHash);
+    ui.setKeystoreStatus(`Added credential to Keystore`);
+
     ui.setRlnStatus("Successfully registered.");
-    ui.setMembershipInfo(membershipId, credentials);
+    ui.setMembershipInfo(membershipId, credentials, keystoreHash);
     ui.enableDialButton();
   });
 
@@ -284,17 +315,11 @@ function initUI() {
     "retrieve-rln-details"
   );
 
-  // Credentials Elements
-  const membershipIdInput = document.getElementById("membership-id");
-  const idSecretHashInput = document.getElementById("id-secret-hash");
-  const commitmentKeyInput = document.getElementById("commitment-key");
-  const idTrapdoorInput = document.getElementById("id-trapdoor");
-  const idNullifierInput = document.getElementById("id-nullifier");
-  const importManually = document.getElementById("import-manually-button");
   const importFromWalletButton = document.getElementById(
     "import-from-wallet-button"
   );
 
+  const keystoreHashDiv = document.getElementById("keystoreHash");
   const idDiv = document.getElementById("id");
   const secretHashDiv = document.getElementById("secret-hash");
   const commitmentDiv = document.getElementById("commitment");
@@ -313,35 +338,24 @@ function initUI() {
   const sendingStatusSpan = document.getElementById("sending-status");
   const messagesList = document.getElementById("messagesList");
 
+  // Keystore
+  const importKeystoreBtn = document.getElementById("importKeystore");
+  const importKeystoreInput = document.getElementById("importKeystoreInput");
+  const exportKeystore = document.getElementById("exportKeystore");
+  const keystoreStatus = document.getElementById("keystoreStatus");
+  const keystorePassword = document.getElementById("keystorePassword");
+  const keystoreOptions = document.getElementById("keystoreOptions");
+  const readKeystoreButton = document.getElementById("readKeystore");
+
   // set initial state
+  keystoreHashDiv.innerText = "not registered yet";
   idDiv.innerText = "not registered yet";
   registerButton.disabled = true;
-  importManually.disabled = true;
   textInput.disabled = true;
   sendButton.disabled = true;
   dialButton.disabled = true;
   retrieveRLNDetailsButton.disabled = true;
   nicknameInput.disabled = true;
-
-  // monitor & enable buttons if needed
-  membershipIdInput.onchange = enableManualImportIfNeeded;
-  idSecretHashInput.onchange = enableManualImportIfNeeded;
-  commitmentKeyInput.onchange = enableManualImportIfNeeded;
-  idNullifierInput.onchange = enableManualImportIfNeeded;
-  idTrapdoorInput.onchange = enableManualImportIfNeeded;
-
-  function enableManualImportIfNeeded() {
-    const isValuesPresent =
-      idSecretHashInput.value &&
-      commitmentKeyInput.value &&
-      idNullifierInput.value &&
-      idTrapdoorInput.value &&
-      membershipIdInput.value;
-
-    if (isValuesPresent) {
-      importManually.disabled = false;
-    }
-  }
 
   nicknameInput.onchange = enableChatIfNeeded;
   nicknameInput.onblur = enableChatIfNeeded;
@@ -353,22 +367,32 @@ function initUI() {
     }
   }
 
+  // Keystore
+  keystorePassword.onchange = enableRegisterIfNeeded;
+  keystorePassword.onblur = enableRegisterIfNeeded;
+  function enableRegisterIfNeeded() {
+    if (keystorePassword.value && commitmentDiv.innerText !== "none") {
+      registerButton.disabled = false;
+    }
+  }
+
   return {
     // UI for RLN
     setRlnStatus(text) {
       statusSpan.innerText = text;
     },
-    setMembershipInfo(id, credential) {
+    setMembershipInfo(id, credential, keystoreHash) {
+      keystoreHashDiv.innerText = keystoreHash || "not registered yet";
       idDiv.innerText = id || "not registered yet";
       secretHashDiv.innerText = utils.bytesToHex(credential.IDSecretHash);
       commitmentDiv.innerText = utils.bytesToHex(credential.IDCommitment);
       nullifierDiv.innerText = utils.bytesToHex(credential.IDNullifier);
       trapdoorDiv.innerText = utils.bytesToHex(credential.IDTrapdoor);
     },
-    setLastMember(index, pubkey) {
+    setLastMember(index, _idCommitment) {
       try {
         const idCommitment = ethers.utils.zeroPad(
-          ethers.utils.arrayify(pubkey),
+          ethers.utils.arrayify(_idCommitment),
           32
         );
         const indexInt = index.toNumber();
@@ -399,7 +423,15 @@ function initUI() {
       retrieveRLNDetailsButton.disabled = true;
     },
     enableRegisterButtonForSepolia(chainId) {
-      registerButton.disabled = isSepolia(chainId) ? false : true;
+      registerButton.disabled =
+        isSepolia(chainId) &&
+        keystorePassword.value &&
+        commitmentDiv.innerText !== "none"
+          ? false
+          : true;
+    },
+    getKeystorePassword() {
+      return keystorePassword.value;
     },
     setAccount(accounts) {
       addressDiv.innerText = accounts.length ? accounts[0] : "";
@@ -413,24 +445,6 @@ function initUI() {
     onRetrieveDetails(fn) {
       retrieveRLNDetailsButton.addEventListener("click", async () => {
         await fn();
-      });
-    },
-    onManualImport(fn) {
-      importManually.addEventListener("click", () => {
-        const idTrapdoor = utils.hexToBytes(idTrapdoorInput.value);
-        const idNullifier = utils.hexToBytes(idNullifierInput.value);
-        const idCommitment = utils.hexToBytes(commitmentKeyInput.value);
-        const idSecretHash = utils.hexToBytes(idSecretHashInput.value);
-
-        const membershipId = membershipIdInput.value;
-        const credentials = new IdentityCredential(
-          idTrapdoor,
-          idNullifier,
-          idSecretHash,
-          idCommitment
-        );
-
-        fn(membershipId, credentials);
       });
     },
     onWalletImport(fn) {
@@ -448,6 +462,68 @@ function initUI() {
           alert(err);
           registerButton.disabled = false;
         }
+      });
+    },
+    // Keystore
+    addKeystoreOption(id) {
+      const option = document.createElement("option");
+      option.innerText = id;
+      option.setAttribute("value", id);
+      keystoreOptions.appendChild(option);
+    },
+    createKeystoreOptions(keystore) {
+      const ids = Object.keys(keystore.toObject().credentials || {});
+      keystoreOptions.innerHTML = "";
+      ids.forEach((v) => this.addKeystoreOption(v));
+    },
+    onKeystoreRead(fn) {
+      readKeystoreButton.addEventListener("click", async (event) => {
+        event.preventDefault();
+        if (!keystoreOptions.value) {
+          throw Error("No value selected to read from Keystore");
+        }
+        const credentials = await fn(
+          keystoreOptions.value,
+          keystorePassword.value
+        );
+        this.setMembershipInfo(
+          credentials.membership.treeIndex,
+          credentials.identity,
+          keystoreOptions.value
+        );
+      });
+    },
+    setKeystoreStatus(text) {
+      keystoreStatus.innerText = text;
+    },
+    onKeystoreImport(fn) {
+      importKeystoreBtn.addEventListener("click", (event) => {
+        event.preventDefault();
+        importKeystoreInput.click();
+      });
+      importKeystoreInput.addEventListener("change", async (event) => {
+        const file = event.target.files[0];
+        if (!file) {
+          console.error("No file selected");
+          return;
+        }
+        const text = await file.text();
+        fn(text);
+      });
+    },
+    onKeystoreExport(fn) {
+      exportKeystore.addEventListener("click", async (event) => {
+        event.preventDefault();
+        const filename = "keystore.json";
+        const text = await fn();
+        const file = new File([text], filename, {
+          type: "application/json",
+        });
+
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(file);
+        link.download = filename;
+        link.click();
       });
     },
     // UI for Waku
@@ -500,4 +576,32 @@ function initUI() {
 
 function isSepolia(id) {
   return id === 11155111;
+}
+
+function initKeystore(ui) {
+  try {
+    const text = readLocalKeystore();
+    if (!text) {
+      ui.setKeystoreStatus("Initialized empty keystore");
+      return Keystore.create();
+    }
+    const keystore = Keystore.fromString(text);
+    if (!keystore) {
+      throw Error("Failed to create from string");
+    }
+    ui.setKeystoreStatus("Loaded from localStorage");
+    return keystore;
+  } catch (err) {
+    console.error("Failed to init keystore:", err);
+    ui.setKeystoreStatus("Initialized empty keystore");
+    return Keystore.create();
+  }
+}
+
+function readLocalKeystore() {
+  return localStorage.getItem("keystore");
+}
+
+function saveLocalKeystore(keystore) {
+  localStorage.setItem("keystore", keystore.toString());
 }

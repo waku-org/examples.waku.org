@@ -42,45 +42,69 @@
       <code class="value" id="latest-membership-id">Not loaded yet</code>
     </div>
 
-    <h2 class="mu1">Credentials</h2>
+    <div class="row rcenter mu1">
+      <div>
+        <h2>Keystore</h2>
+        <span id="keystoreStatus"></span>
+      </div>
+      <div>
+        <button id="importKeystore" type="button">Import json</button>
+        <input type="file" id="importKeystoreInput" style="display: none" />
+
+        <button id="exportKeystore" type="button">Download json</button>
+      </div>
+    </div>
     <hr />
+
+    <div class="row mu1">
+      <label for="keystorePassword"
+        >Password(used for reading/saving into Keystore):</label
+      >
+      <input
+        id="keystorePassword"
+        name="keystorePassword"
+        type="text"
+        style="width: 100%"
+      />
+    </div>
 
     <div class="row">
       <div class="w50">
-        <h4>Generate new, or import existing, credentials from wallet:</h4>
+        <h4>Generate new credentials from wallet:</h4>
         <br />
-        <div id="import-from-wallet">
-          <button id="import-from-wallet-button" type="button">
-            Generate RLN Credentials
-          </button>
-        </div>
+        <button
+          id="import-from-wallet-button"
+          type="button"
+          style="width: 100%"
+        >
+          Generate new credentials
+        </button>
         <br />
         <button disabled id="register-button" type="button">
-          Register Credentials in Contract
+          Register credentials
         </button>
       </div>
       <div class="w50">
-        <h4>Import existing credentials manually:</h4>
-        <div>
-          <label for="membership-id"
-            >Membership ID (your index in the RLN smart contract):</label
-          >
-          <input id="membership-id" name="membership-id" type="text" />
-          <label for="id-secret-hash">RLN Secret Hash (hex string):</label>
-          <input id="id-secret-hash" name="id-secret-hash" type="text" />
-          <label for="commitment-key">RLN Commitment Key (hex string):</label>
-          <input id="commitment-key" name="commitment-key" type="text" />
-          <label for="id-trapdoor">RLN ID Trapdoor (hex string):</label>
-          <input id="id-trapdoor" name="id-trapdoor" type="text" />
-          <label for="id-nullifier">RLN ID Nullifier (hex string):</label>
-          <input id="id-nullifier" name="id-nullifier" type="text" />
-          <button disabled id="import-manually-button" type="button">
-            Import RLN Credentials
-          </button>
-        </div>
+        <h4>Read from Keystore:</h4>
+        <br />
+        <select
+          id="keystoreOptions"
+          style="
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+          "
+        ></select>
+        <br />
+        <button id="readKeystore" type="button">Read credentials</button>
       </div>
     </div>
     <div class="row rcenter mu1">
+      <h4>Keystore Hash</h4>
+      <code class="value" id="keystoreHash">none</code>
+    </div>
+    <div class="row rcenter">
       <h4>Membership id</h4>
       <code class="value" id="id">none</code>
     </div>
