@@ -1,3 +1,36 @@
+/*
+to crate form:
+-> generate pubkey/private key (maybe derived from wallet)
+-> create scheme
+-> sign scheme and send
+creating form {
+  id(pubkey),
+  scheme: { nonce, scheme },
+  signature: "",
+}
+
+updating form {
+  id(pubkey),
+  nonce: 0,
+  scheme: { nonce, scheme },
+  signature: "",
+}
+
+fetching form:
+-> get form by pubkey
+-> is signature valid
+-> encrypt answers
+-> send update
+
+answering form {
+  id(pubkey),
+  answers: encrypted({ nonce, answers }),
+}
+
+reading answers:
+-> is possible to decrypt
+-> 
+*/
 import {
   createDecoder,
   createEncoder,
@@ -7,7 +40,7 @@ import {
 import { enrTree, wakuDnsDiscovery } from "@waku/dns-discovery";
 import * as utils from "@waku/utils/bytes";
 
-const VERSION = `0.0.00001`;
+const VERSION = `0.0.1-rc-1`;
 
 export class Waku {
   constructor(node) {
@@ -20,9 +53,9 @@ export class Waku {
       libp2p: {
         peerDiscovery: [
           wakuDnsDiscovery([enrTree["PROD"]], {
-            lightPush: 1,
-            store: 1,
-            filter: 1,
+            lightPush: 6,
+            store: 6,
+            filter: 6,
           }),
         ],
       },
@@ -32,27 +65,21 @@ export class Waku {
 
     return new Waku(node);
   }
-
-  fetchForm(id) {
-    return Form.fetch(this.node, id);
-  }
-
-  createForm({ id, scheme }) {
-    return Form.create(this.node, { id, scheme });
-  }
 }
 
 class Form {
-  constructor(id, waku) {
+  constructor({ pubKey, privateKey, waku }) {
     this.waku = waku;
     this.history = [];
-    this.contentTopic = `/free-form/${VERSION}/definition:${id}/proto`;
+    this.pubKey = pubKey;
+    this.privateKey = privateKey;
     this.decoder = createDecoder(this.contentTopic);
+    this.contentTopic = `/free-form/${VERSION}/definition/proto`;
     this.encoder = createEncoder({ contentTopic: this.contentTopic });
   }
 
   // Initiates new form
-  static async create(waku, { id, scheme }) {
+  static async create(waku, { scheme }) {
     const form = new Form(id, waku);
     await form.createNew({ scheme });
     return form;
