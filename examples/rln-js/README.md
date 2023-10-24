@@ -1,30 +1,36 @@
-# Using [RLN](https://rfc.vac.dev/spec/32/) in JavaScript
+This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-> Rate limiting nullifier (RLN) is a construct based on zero-knowledge proofs
-> that provides an anonymous rate-limited signaling/messaging framework
-> suitable for decentralized (and centralized) environments
+## Getting Started
 
-**Demonstrates**:
+First, run the development server:
 
-- RLN:
-  - Generate credentials
-  - Insert membership to smart contract (Goerli testnet)
-  - Retrieve smart contract state
-  - Generate and send proofs
-  - Verify incoming proofs
-- Pure Javascript/HTML.
-- Use minified bundle of js from unpkg.com, no import, no package manager.
-
-To test the example:
-
-```shell
-git clone https://github.com/waku-org/js-waku-examples
-cd js-waku-examples/examples/rln-js
-npm install
-npm run start
-# open  http://127.0.0.1:8080 In your browser
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-**There are a known issue using this webapp with Firefox + MetaMask. Try Chrome or Brave if you encounter any issue**.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-The `master` branch's HEAD is deployed at https://examples.waku.org/rln-js/.
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+
+This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
