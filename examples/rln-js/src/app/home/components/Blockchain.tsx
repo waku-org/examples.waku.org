@@ -4,8 +4,8 @@ import { Subtitle } from "@/components/Subtitle";
 
 export const Blockchain: React.FunctionComponent<{}> = () => {
   return (
-    <Block top="10">
-      <Block bottom="3" type={BlockTypes.FlexHorizontal}>
+    <Block className="mt-10">
+      <Block className="mb-3" type={BlockTypes.FlexHorizontal}>
         <Subtitle>Contract</Subtitle>
         <Button>Fetch state</Button>
       </Block>

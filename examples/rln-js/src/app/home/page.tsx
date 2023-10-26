@@ -7,7 +7,7 @@ import { KeystoreDetails } from "./components/KeystoreDetails";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col p-24 font-mono">
+    <main className="flex min-h-screen flex-col p-24 font-mono max-w-screen-lg m-auto">
       <Header />
       <Blockchain />
       <Keystore />

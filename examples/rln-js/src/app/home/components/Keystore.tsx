@@ -8,18 +8,18 @@ export const Keystore: React.FunctionComponent<{}> = () => {
   const { keystoreStatus } = useStore();
 
   return (
-    <Block top="10">
+    <Block className="mt-10">
       <Block type={BlockTypes.FlexHorizontal}>
         <Subtitle>Keystore</Subtitle>
         <div>
           <Button>Import</Button>
-          <Button left="2">Export</Button>
+          <Button className="ml-2">Export</Button>
         </div>
       </Block>
 
       <Status text="Keystore status" mark={keystoreStatus} />
 
-      <Block top="4">
+      <Block className="mt-4">
         <label
           htmlFor="keystore-input"
           className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -33,13 +33,13 @@ export const Keystore: React.FunctionComponent<{}> = () => {
         />
       </Block>
 
-      <Block top="4">
+      <Block className="mt-4">
         <p className="text-s">Generate new credentials from wallet</p>
         <Button>Generate new credentials</Button>
         <Button>Register credentials</Button>
       </Block>
 
-      <Block top="4">
+      <Block className="mt-4">
         <p className="text-s">Read from Keystore</p>
         <select id="keystoreOptions"></select>
         <Button>Read credentials</Button>

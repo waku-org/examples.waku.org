@@ -9,7 +9,7 @@ export const Header: React.FunctionComponent<{}> = () => {
 
   return (
     <>
-      <Block bottom="5" type={BlockTypes.FlexHorizontal}>
+      <Block className="mb-5" type={BlockTypes.FlexHorizontal}>
         <Title>Waku RLN</Title>
         <Button>Connect Wallet</Button>
       </Block>

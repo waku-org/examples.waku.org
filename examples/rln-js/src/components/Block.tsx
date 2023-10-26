@@ -4,8 +4,6 @@ export enum BlockTypes {
 
 type BlockProps = {
   children: any;
-  top?: string;
-  bottom?: string;
   type?: BlockTypes;
   className?: string;
 };
@@ -18,11 +16,7 @@ export const Block: React.FunctionComponent<BlockProps> = (props) => {
   const restClassNames = props.className || "";
 
   return (
-    <div
-      className={`mt-${props.top || 0} mb-${
-        props.bottom || 0
-      } ${flexClassNames} ${restClassNames}`}
-    >
+    <div className={`${flexClassNames} ${restClassNames}`}>
       {props.children}
     </div>
   );
