@@ -10,7 +10,7 @@ import {
 } from "@waku/rln";
 import { isBrowserProviderValid } from "@/utils/ethereum";
 
-enum RLNEventsNames {
+export enum RLNEventsNames {
   Status = "status",
 }
 
@@ -19,11 +19,15 @@ enum StatusEventPayload {
   WASM_FAILED = "Failed to download WASM, check console",
   CONTRACT_LOADING = "Connecting to RLN contract",
   CONTRACT_FAILED = "Failed to connect to RLN contract",
+  RLN_INITIALIZED = "RLN dependencies initialized",
 }
 
-type EmitterProps = Pick<EventTarget, "addEventListener"> &
-  Pick<EventTarget, "removeEventListener">;
-type IRLN = EmitterProps & {};
+type EventListener = (event: CustomEvent) => void;
+
+type IRLN = {
+  addEventListener: (name: RLNEventsNames, fn: EventListener) => void;
+  removeEventListener: (name: RLNEventsNames, fn: EventListener) => void;
+};
 
 export class RLN implements IRLN {
   private readonly emitter = new EventTarget();
@@ -74,23 +78,21 @@ export class RLN implements IRLN {
       this.emitStatusEvent(StatusEventPayload.CONTRACT_FAILED);
       throw error;
     }
+
+    this.emitStatusEvent(StatusEventPayload.RLN_INITIALIZED);
   }
 
-  public addEventListener(
-    name: RLNEventsNames,
-    fn: EventListenerOrEventListenerObject
-  ) {
-    return this.emitter.addEventListener(name, fn);
+  public addEventListener(name: RLNEventsNames, fn: EventListener) {
+    return this.emitter.addEventListener(name, fn as any);
   }
 
-  public removeEventListener(
-    name: RLNEventsNames,
-    fn: EventListenerOrEventListenerObject
-  ) {
-    return this.emitter.removeEventListener(name, fn);
+  public removeEventListener(name: RLNEventsNames, fn: EventListener) {
+    return this.emitter.removeEventListener(name, fn as any);
   }
 
   private emitStatusEvent(payload: StatusEventPayload) {
-    this.emitter.dispatchEvent(new Event(payload));
+    this.emitter.dispatchEvent(
+      new CustomEvent(RLNEventsNames.Status, { detail: payload })
+    );
   }
 }
