@@ -59,14 +59,13 @@ export class RLN implements IRLN {
       return;
     }
 
-    const rlnInstance = await this.initRLNWasm();
-    await this.initRLNContract(rlnInstance);
+    // const rlnInstance = await this.initRLNWasm();
+    // await this.initRLNContract(rlnInstance);
 
     this.emitStatusEvent(StatusEventPayload.RLN_INITIALIZED);
 
     this.initKeystore();
 
-    // add keystore initialization
     this.initialized = true;
   }
 

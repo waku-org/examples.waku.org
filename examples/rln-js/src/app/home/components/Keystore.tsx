@@ -1,3 +1,4 @@
+import React from "react";
 import { Block, BlockTypes } from "@/components/Block";
 import { Button } from "@/components/Button";
 import { Status } from "@/components/Status";
@@ -5,7 +6,17 @@ import { Subtitle } from "@/components/Subtitle";
 import { useStore } from "@/hooks";
 
 export const Keystore: React.FunctionComponent<{}> = () => {
-  const { keystoreStatus } = useStore();
+  const { keystoreStatus, keystoreCredentials } = useStore();
+
+  const credentialsNodes = React.useMemo(
+    () =>
+      keystoreCredentials.map((v) => (
+        <option key={v} value={v}>
+          {v}
+        </option>
+      )),
+    [keystoreCredentials]
+  );
 
   return (
     <Block className="mt-10">
@@ -34,15 +45,19 @@ export const Keystore: React.FunctionComponent<{}> = () => {
       </Block>
 
       <Block className="mt-4">
-        <p className="text-s">Generate new credentials from wallet</p>
+        <p className="text-s mb-2">Generate new credentials from wallet</p>
         <Button>Generate new credentials</Button>
-        <Button>Register credentials</Button>
+        <Button className="ml-5">Register credentials</Button>
       </Block>
 
       <Block className="mt-4">
         <p className="text-s">Read from Keystore</p>
-        <select id="keystoreOptions"></select>
-        <Button>Read credentials</Button>
+        <Block type={BlockTypes.FlexHorizontal}>
+          <select className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-3/4 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            {credentialsNodes}
+          </select>
+          <Button>Read credentials</Button>
+        </Block>
       </Block>
     </Block>
   );

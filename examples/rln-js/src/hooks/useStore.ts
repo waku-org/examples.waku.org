@@ -34,7 +34,7 @@ export const useStore = create<StoreResult>((set) => {
     setKeystoreStatus: (v: string) =>
       set((state) => ({ ...state, keystoreStatus: v })),
     activeCredential: DEFAULT_VALUE,
-    keystoreCredentials: [],
+    keystoreCredentials: [], // ["277026D55D6F3988FB4E4695F1DCA2F59B012581A854FEE6035EE1566F898908", "59FDF2A610545099326E736269EA2E297BCA0B2BA4D68D245130BF10F9FFAC43", "FC98D3EDD1CCB2AA4C25CCDDD18ADADC8C4BBA9BA11B9F652B2E5E9732D531D3"],
     setActiveCredential: (v: string) =>
       set((state) => ({ ...state, activeCredential: v })),
     setKeystoreCredentials: (v: string[]) =>
