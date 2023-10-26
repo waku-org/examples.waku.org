@@ -55,6 +55,16 @@ export class RLN implements IRLN {
       return;
     }
 
+    await this.initRLNWasm();
+    await this.initRLNContract();
+
+    this.emitStatusEvent(StatusEventPayload.RLN_INITIALIZED);
+
+    // add keystore initialization
+    this.initialized = true;
+  }
+
+  private async initRLNWasm(): Promise<void> {
     this.emitStatusEvent(StatusEventPayload.WASM_LOADING);
     try {
       this.rlnInstance = await create();
@@ -66,9 +76,14 @@ export class RLN implements IRLN {
       this.emitStatusEvent(StatusEventPayload.WASM_FAILED);
       throw error;
     }
+  }
 
+  private async initRLNContract(): Promise<void> {
     this.emitStatusEvent(StatusEventPayload.CONTRACT_LOADING);
     try {
+      if (!this.rlnInstance) {
+        throw Error("No RLN instance is found.");
+      }
       this.rlnContract = await RLNContract.init(this.rlnInstance, {
         registryAddress: SEPOLIA_CONTRACT.address,
         provider: this.ethProvider.getSigner(),
@@ -78,8 +93,6 @@ export class RLN implements IRLN {
       this.emitStatusEvent(StatusEventPayload.CONTRACT_FAILED);
       throw error;
     }
-
-    this.emitStatusEvent(StatusEventPayload.RLN_INITIALIZED);
   }
 
   public addEventListener(name: RLNEventsNames, fn: EventListener) {
