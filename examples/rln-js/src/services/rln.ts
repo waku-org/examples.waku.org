@@ -12,6 +12,7 @@ import { isBrowserProviderValid } from "@/utils/ethereum";
 
 export enum RLNEventsNames {
   Status = "status",
+  Keystore = "keystore",
 }
 
 enum StatusEventPayload {
@@ -20,6 +21,8 @@ enum StatusEventPayload {
   CONTRACT_LOADING = "Connecting to RLN contract",
   CONTRACT_FAILED = "Failed to connect to RLN contract",
   RLN_INITIALIZED = "RLN dependencies initialized",
+  KEYSTORE_LOCAL = "Keystore initialized from localStore",
+  KEYSTORE_NEW = "New Keystore was initialized",
 }
 
 type EventListener = (event: CustomEvent) => void;
@@ -35,6 +38,7 @@ export class RLN implements IRLN {
 
   private rlnInstance: undefined | RLNInstance;
   private rlnContract: undefined | RLNContract;
+  private keystore: undefined | Keystore;
 
   private initialized = false;
 
@@ -55,19 +59,22 @@ export class RLN implements IRLN {
       return;
     }
 
-    await this.initRLNWasm();
-    await this.initRLNContract();
+    const rlnInstance = await this.initRLNWasm();
+    await this.initRLNContract(rlnInstance);
 
     this.emitStatusEvent(StatusEventPayload.RLN_INITIALIZED);
+
+    this.initKeystore();
 
     // add keystore initialization
     this.initialized = true;
   }
 
-  private async initRLNWasm(): Promise<void> {
+  private async initRLNWasm(): Promise<RLNInstance> {
     this.emitStatusEvent(StatusEventPayload.WASM_LOADING);
     try {
       this.rlnInstance = await create();
+      return this.rlnInstance;
     } catch (error) {
       console.error(
         "Failed at fetching WASM and creating RLN instance: ",
@@ -78,13 +85,10 @@ export class RLN implements IRLN {
     }
   }
 
-  private async initRLNContract(): Promise<void> {
+  private async initRLNContract(rlnInstance: RLNInstance): Promise<void> {
     this.emitStatusEvent(StatusEventPayload.CONTRACT_LOADING);
     try {
-      if (!this.rlnInstance) {
-        throw Error("No RLN instance is found.");
-      }
-      this.rlnContract = await RLNContract.init(this.rlnInstance, {
+      this.rlnContract = await RLNContract.init(rlnInstance, {
         registryAddress: SEPOLIA_CONTRACT.address,
         provider: this.ethProvider.getSigner(),
       });
@@ -93,6 +97,19 @@ export class RLN implements IRLN {
       this.emitStatusEvent(StatusEventPayload.CONTRACT_FAILED);
       throw error;
     }
+  }
+
+  private initKeystore(): void {
+    const localKeystoreString = localStorage.getItem("keystore");
+    const _keystore = Keystore.fromString(localKeystoreString || "");
+
+    if (localKeystoreString) {
+      this.emitKeystoreStatusEvent(StatusEventPayload.KEYSTORE_LOCAL);
+    } else {
+      this.emitKeystoreStatusEvent(StatusEventPayload.KEYSTORE_NEW);
+    }
+
+    this.keystore = _keystore || Keystore.create();
   }
 
   public addEventListener(name: RLNEventsNames, fn: EventListener) {
@@ -106,6 +123,12 @@ export class RLN implements IRLN {
   private emitStatusEvent(payload: StatusEventPayload) {
     this.emitter.dispatchEvent(
       new CustomEvent(RLNEventsNames.Status, { detail: payload })
+    );
+  }
+
+  private emitKeystoreStatusEvent(payload: StatusEventPayload) {
+    this.emitter.dispatchEvent(
+      new CustomEvent(RLNEventsNames.Keystore, { detail: payload })
     );
   }
 }

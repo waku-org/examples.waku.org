@@ -7,7 +7,7 @@ type RLNResult = {
 };
 
 export const useRLN = (): RLNResult => {
-  const { setAppStatus } = useStore();
+  const { setAppStatus, setKeystoreStatus } = useStore();
   const rlnRef = React.useRef<undefined | RLN>(undefined);
 
   React.useEffect(() => {
@@ -19,10 +19,14 @@ export const useRLN = (): RLNResult => {
     const statusListener = (event: CustomEvent) => {
       setAppStatus(event?.detail);
     };
+    const keystoreListener = (event: CustomEvent) => {
+      setKeystoreStatus(event?.detail);
+    };
 
     const rln = new RLN();
 
     rln.addEventListener(RLNEventsNames.Status, statusListener);
+    rln.addEventListener(RLNEventsNames.Keystore, keystoreListener);
 
     const run = async () => {
       if (terminate) {
@@ -36,6 +40,7 @@ export const useRLN = (): RLNResult => {
     return () => {
       terminate = true;
       rln.removeEventListener(RLNEventsNames.Status, statusListener);
+      rln.removeEventListener(RLNEventsNames.Keystore, keystoreListener);
     };
   }, [rlnRef, setAppStatus]);
 
