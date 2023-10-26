@@ -2,7 +2,7 @@ import { Block, BlockTypes } from "@/components/Block";
 import { Subtitle } from "@/components/Subtitle";
 import { Status } from "@/components/Status";
 import { Button } from "@/components/Button";
-import { useStore } from "@/store";
+import { useStore } from "@/hooks";
 
 export const Waku: React.FunctionComponent<{}> = () => {
   const { wakuStatus } = useStore();

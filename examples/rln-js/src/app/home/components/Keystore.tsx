@@ -2,7 +2,7 @@ import { Block, BlockTypes } from "@/components/Block";
 import { Button } from "@/components/Button";
 import { Status } from "@/components/Status";
 import { Subtitle } from "@/components/Subtitle";
-import { useStore } from "@/store";
+import { useStore } from "@/hooks";
 
 export const Keystore: React.FunctionComponent<{}> = () => {
   const { keystoreStatus } = useStore();
