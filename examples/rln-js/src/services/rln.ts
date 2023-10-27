@@ -42,7 +42,7 @@ export class RLN implements IRLN {
 
   public rlnInstance: undefined | RLNInstance;
   public rlnContract: undefined | RLNContract;
-  public readonly keystore: Keystore;
+  public keystore: Keystore;
 
   private initialized = false;
   private initializing = false;
@@ -135,8 +135,13 @@ export class RLN implements IRLN {
   }
 
   public async saveKeystore() {
-    localStorage.setItem("keystore", this.keystore.toString());
+    // localStorage.setItem("keystore", this.keystore.toString());
     this.emitKeystoreKeys();
+  }
+
+  public importKeystore(value: string) {
+    this.keystore = Keystore.fromString(value) || Keystore.create();
+    this.saveKeystore();
   }
 }
 

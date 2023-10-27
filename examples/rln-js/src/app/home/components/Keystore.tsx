@@ -2,7 +2,7 @@ import React from "react";
 import { Block, BlockTypes } from "@/components/Block";
 import { Button } from "@/components/Button";
 import { Subtitle } from "@/components/Subtitle";
-import { useStore, useWallet } from "@/hooks";
+import { useRLN, useStore, useWallet } from "@/hooks";
 import { useKeystore } from "@/hooks/useKeystore";
 
 export const Keystore: React.FunctionComponent<{}> = () => {
@@ -12,6 +12,8 @@ export const Keystore: React.FunctionComponent<{}> = () => {
 
   const { password, onPasswordChanged } = usePassword();
   const { selectedKeystore, onKeystoreChanged } = useSelectedKeystore();
+  const { onExportKeystore, onImportKeystoreFileChange } =
+    useImportExportKeystore();
 
   const credentialsNodes = React.useMemo(
     () =>
@@ -28,8 +30,20 @@ export const Keystore: React.FunctionComponent<{}> = () => {
       <Block type={BlockTypes.FlexHorizontal}>
         <Subtitle>Keystore</Subtitle>
         <div>
-          <Button>Import</Button>
-          <Button className="ml-2">Export</Button>
+          <Button>
+            <label htmlFor="keystore-import" className="cursor-pointer">
+              Import
+            </label>
+          </Button>
+          <input
+            id="keystore-import"
+            type="file"
+            className="hidden"
+            onChange={onImportKeystoreFileChange}
+          />
+          <Button className="ml-2" onClick={onExportKeystore}>
+            Export
+          </Button>
         </div>
       </Block>
 
@@ -103,5 +117,42 @@ function useSelectedKeystore() {
   return {
     selectedKeystore,
     onKeystoreChanged,
+  };
+}
+
+function useImportExportKeystore() {
+  const { rln } = useRLN();
+
+  const onExportKeystore = () => {
+    if (!rln) {
+      return;
+    }
+
+    const filename = "keystore.json";
+    const text = rln.keystore.toString();
+    const file = new File([text], filename, {
+      type: "application/json",
+    });
+
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(file);
+    link.download = filename;
+    link.click();
+  };
+
+  const onImportKeystoreFileChange = async (
+    event: React.FormEvent<HTMLInputElement>
+  ) => {
+    const file = event.currentTarget?.files?.[0];
+    if (!file || !rln) {
+      return;
+    }
+    const text = await file.text();
+    rln.importKeystore(text);
+  };
+
+  return {
+    onExportKeystore,
+    onImportKeystoreFileChange,
   };
 }
