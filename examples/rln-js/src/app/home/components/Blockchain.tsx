@@ -21,9 +21,7 @@ export const Blockchain: React.FunctionComponent<{}> = () => {
 
       <Block type={BlockTypes.FlexHorizontal}>
         <p>Latest membership ID on contract</p>
-        <code>
-          {lastMembershipID === -1 ? "Not loaded yet" : lastMembershipID}
-        </code>
+        <code>{lastMembershipID || "Not loaded yet"}</code>
       </Block>
     </Block>
   );

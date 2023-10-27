@@ -1,13 +1,13 @@
 import React from "react";
 import { Block, BlockTypes } from "@/components/Block";
 import { Button } from "@/components/Button";
-import { Status } from "@/components/Status";
 import { Subtitle } from "@/components/Subtitle";
 import { useStore, useWallet } from "@/hooks";
 
 export const Keystore: React.FunctionComponent<{}> = () => {
-  const { keystoreStatus, keystoreCredentials } = useStore();
-  const { onGenerateCredentials } = useWallet();
+  const { keystorePassword, setKeystorePassword, keystoreCredentials } =
+    useStore();
+  const { onGenerateCredentials, onRegisterCredentials } = useWallet();
 
   const credentialsNodes = React.useMemo(
     () =>
@@ -17,6 +17,13 @@ export const Keystore: React.FunctionComponent<{}> = () => {
         </option>
       )),
     [keystoreCredentials]
+  );
+
+  const onPasswordChanged = React.useCallback(
+    (event: React.FormEvent<HTMLInputElement>) => {
+      setKeystorePassword(event.currentTarget.value);
+    },
+    [setKeystorePassword]
   );
 
   return (
@@ -29,8 +36,6 @@ export const Keystore: React.FunctionComponent<{}> = () => {
         </div>
       </Block>
 
-      <Status text="Keystore status" mark={keystoreStatus} />
-
       <Block className="mt-4">
         <label
           htmlFor="keystore-input"
@@ -41,6 +46,8 @@ export const Keystore: React.FunctionComponent<{}> = () => {
         <input
           type="text"
           id="keystore-input"
+          value={keystorePassword || ""}
+          onChange={onPasswordChanged}
           className="bg-gray-50 border border-gray-300 text-gray-900 text-sm w-full rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
         />
       </Block>
@@ -50,7 +57,9 @@ export const Keystore: React.FunctionComponent<{}> = () => {
         <Button onClick={onGenerateCredentials}>
           Generate new credentials
         </Button>
-        <Button className="ml-5">Register credentials</Button>
+        <Button className="ml-5" onClick={onRegisterCredentials}>
+          Register credentials
+        </Button>
       </Block>
 
       <Block className="mt-4">

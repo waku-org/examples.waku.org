@@ -3,18 +3,18 @@ import { useStore } from "@/hooks";
 import { bytesToHex } from "@waku/utils/bytes";
 
 export const KeystoreDetails: React.FunctionComponent<{}> = () => {
-  const { credentials } = useStore();
+  const { credentials, activeCredential, activeMembershipID } = useStore();
 
   return (
     <Block className="mt-5">
       <Block className="mt-3" type={BlockTypes.FlexHorizontal}>
         <p>Keystore hash</p>
-        <code>none</code>
+        <code>{activeCredential || "none"}</code>
       </Block>
 
       <Block className="mt-3" type={BlockTypes.FlexHorizontal}>
         <p>Membership ID</p>
-        <code>none</code>
+        <code>{activeMembershipID || "none"}</code>
       </Block>
 
       <Block className="mt-3" type={BlockTypes.FlexHorizontal}>

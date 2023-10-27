@@ -3,15 +3,27 @@ import { useStore } from "./useStore";
 import { isEthereumEvenEmitterValid } from "@/utils/ethereum";
 import { useRLN } from "./useRLN";
 import { SIGNATURE_MESSAGE } from "@/constants";
+import { SEPOLIA_CONTRACT } from "@waku/rln";
+import { StatusEventPayload } from "@/services/rln";
 
 type UseWalletResult = {
   onConnectWallet: () => void;
   onGenerateCredentials: () => void;
+  onRegisterCredentials: () => void;
 };
 
 export const useWallet = (): UseWalletResult => {
   const { rln } = useRLN();
-  const { setEthAccount, setChainID, setCredentials } = useStore();
+  const {
+    keystorePassword,
+    credentials,
+    setEthAccount,
+    setChainID,
+    setCredentials,
+    setActiveCredential,
+    setActiveMembershipID,
+    setAppStatus,
+  } = useStore();
 
   React.useEffect(() => {
     const ethereum = window.ethereum;
@@ -69,9 +81,48 @@ export const useWallet = (): UseWalletResult => {
     setCredentials(credentials);
   }, [rln, setCredentials]);
 
+  const onRegisterCredentials = React.useCallback(async () => {
+    if (!credentials || !rln?.rlnContract || !keystorePassword) {
+      return;
+    }
+
+    try {
+      setAppStatus(StatusEventPayload.CREDENTIALS_REGISTERING);
+      const membershipInfo = await rln.rlnContract.registerWithKey(credentials);
+      const membershipID = membershipInfo!.index.toNumber();
+      const keystoreHash = await rln.keystore.addCredential(
+        {
+          membership: {
+            treeIndex: membershipID,
+            chainId: SEPOLIA_CONTRACT.chainId,
+            address: SEPOLIA_CONTRACT.address,
+          },
+          identity: credentials,
+        },
+        keystorePassword
+      );
+      setActiveCredential(keystoreHash);
+      setActiveMembershipID(membershipID);
+      rln.saveKeystore();
+      setAppStatus(StatusEventPayload.CREDENTIALS_REGISTERED);
+    } catch (error) {
+      setAppStatus(StatusEventPayload.CREDENTIALS_FAILURE);
+      console.error("Failed to register to RLN Contract: ", error);
+      return;
+    }
+  }, [
+    credentials,
+    rln,
+    keystorePassword,
+    setActiveCredential,
+    setActiveMembershipID,
+    setAppStatus,
+  ]);
+
   return {
     onConnectWallet,
     onGenerateCredentials,
+    onRegisterCredentials,
   };
 };
 

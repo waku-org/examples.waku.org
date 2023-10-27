@@ -12,10 +12,10 @@ import { isBrowserProviderValid } from "@/utils/ethereum";
 
 export enum RLNEventsNames {
   Status = "status",
-  Keystore = "keystore",
+  Keystore = "keystore-changed",
 }
 
-enum StatusEventPayload {
+export enum StatusEventPayload {
   WASM_LOADING = "WASM Blob download in progress...",
   WASM_FAILED = "Failed to download WASM, check console",
   CONTRACT_LOADING = "Connecting to RLN contract",
@@ -23,11 +23,15 @@ enum StatusEventPayload {
   RLN_INITIALIZED = "RLN dependencies initialized",
   KEYSTORE_LOCAL = "Keystore initialized from localStore",
   KEYSTORE_NEW = "New Keystore was initialized",
+  CREDENTIALS_REGISTERING = "Registering credentials...",
+  CREDENTIALS_REGISTERED = "Registered credentials",
+  CREDENTIALS_FAILURE = "Failed to register credentials, check console",
 }
 
 type EventListener = (event: CustomEvent) => void;
 
 type IRLN = {
+  saveKeystore: () => void;
   addEventListener: (name: RLNEventsNames, fn: EventListener) => void;
   removeEventListener: (name: RLNEventsNames, fn: EventListener) => void;
 };
@@ -38,7 +42,7 @@ export class RLN implements IRLN {
 
   public rlnInstance: undefined | RLNInstance;
   public rlnContract: undefined | RLNContract;
-  public keystore: undefined | Keystore;
+  public readonly keystore: Keystore;
 
   private initialized = false;
   private initializing = false;
@@ -52,6 +56,7 @@ export class RLN implements IRLN {
       );
     }
     this.ethProvider = new ethers.providers.Web3Provider(ethereum, "any");
+    this.keystore = this.initKeystore();
   }
 
   public async init(): Promise<void> {
@@ -65,7 +70,8 @@ export class RLN implements IRLN {
 
     this.emitStatusEvent(StatusEventPayload.RLN_INITIALIZED);
 
-    this.initKeystore();
+    // emit keystore keys once app is ready
+    this.emitKeystoreKeys();
 
     this.initialized = true;
     this.initializing = false;
@@ -100,17 +106,11 @@ export class RLN implements IRLN {
     }
   }
 
-  private initKeystore(): void {
+  private initKeystore(): Keystore {
     const localKeystoreString = localStorage.getItem("keystore");
     const _keystore = Keystore.fromString(localKeystoreString || "");
 
-    if (localKeystoreString) {
-      this.emitKeystoreStatusEvent(StatusEventPayload.KEYSTORE_LOCAL);
-    } else {
-      this.emitKeystoreStatusEvent(StatusEventPayload.KEYSTORE_NEW);
-    }
-
-    this.keystore = _keystore || Keystore.create();
+    return _keystore || Keystore.create();
   }
 
   public addEventListener(name: RLNEventsNames, fn: EventListener) {
@@ -127,11 +127,17 @@ export class RLN implements IRLN {
     );
   }
 
-  private emitKeystoreStatusEvent(payload: StatusEventPayload) {
+  private emitKeystoreKeys() {
+    const credentials = Object.keys(this.keystore.toObject().credentials || {});
     this.emitter.dispatchEvent(
-      new CustomEvent(RLNEventsNames.Keystore, { detail: payload })
+      new CustomEvent(RLNEventsNames.Keystore, { detail: credentials })
     );
+  }
+
+  public async saveKeystore() {
+    localStorage.setItem("keystore", this.keystore.toString());
+    this.emitKeystoreKeys();
   }
 }
 
-export const rln = new RLN();
+export const rln = typeof window === "undefined" ? undefined : new RLN();
