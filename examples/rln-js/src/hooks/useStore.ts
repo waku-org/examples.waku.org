@@ -1,8 +1,17 @@
 import { create } from "zustand";
+import { IdentityCredential } from "@waku/rln";
 
 type StoreResult = {
   appStatus: string;
   setAppStatus: (v: string) => void;
+  ethAccount: string;
+  setEthAccount: (v: string) => void;
+  chainID: number;
+  setChainID: (v: number) => void;
+  lastMembershipID: number;
+  setLastMembershipID: (v: number) => void;
+  credentials: undefined | IdentityCredential;
+  setCredentials: (v: undefined | IdentityCredential) => void;
 
   keystoreStatus: string;
   setKeystoreStatus: (v: string) => void;
@@ -21,6 +30,17 @@ export const useStore = create<StoreResult>((set) => {
   const generalModule = {
     appStatus: DEFAULT_VALUE,
     setAppStatus: (v: string) => set((state) => ({ ...state, appStatus: v })),
+
+    ethAccount: "",
+    setEthAccount: (v: string) => set((state) => ({ ...state, ethAccount: v })),
+    chainID: -1,
+    setChainID: (v: number) => set((state) => ({ ...state, chainID: v })),
+    lastMembershipID: -1,
+    setLastMembershipID: (v: number) =>
+      set((state) => ({ ...state, lastMembershipID: v })),
+    credentials: undefined,
+    setCredentials: (v: undefined | IdentityCredential) =>
+      set((state) => ({ ...state, credentials: v })),
   };
 
   const wakuModule = {

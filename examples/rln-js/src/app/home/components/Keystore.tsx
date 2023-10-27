@@ -3,10 +3,11 @@ import { Block, BlockTypes } from "@/components/Block";
 import { Button } from "@/components/Button";
 import { Status } from "@/components/Status";
 import { Subtitle } from "@/components/Subtitle";
-import { useStore } from "@/hooks";
+import { useStore, useWallet } from "@/hooks";
 
 export const Keystore: React.FunctionComponent<{}> = () => {
   const { keystoreStatus, keystoreCredentials } = useStore();
+  const { onGenerateCredentials } = useWallet();
 
   const credentialsNodes = React.useMemo(
     () =>
@@ -46,7 +47,9 @@ export const Keystore: React.FunctionComponent<{}> = () => {
 
       <Block className="mt-4">
         <p className="text-s mb-2">Generate new credentials from wallet</p>
-        <Button>Generate new credentials</Button>
+        <Button onClick={onGenerateCredentials}>
+          Generate new credentials
+        </Button>
         <Button className="ml-5">Register credentials</Button>
       </Block>
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { RLN, RLNEventsNames } from "@/services/rln";
+import { rln, RLN, RLNEventsNames } from "@/services/rln";
 import { useStore } from "./useStore";
 
 type RLNResult = {
@@ -22,8 +22,6 @@ export const useRLN = (): RLNResult => {
     const keystoreListener = (event: CustomEvent) => {
       setKeystoreStatus(event?.detail);
     };
-
-    const rln = new RLN();
 
     rln.addEventListener(RLNEventsNames.Status, statusListener);
     rln.addEventListener(RLNEventsNames.Keystore, keystoreListener);

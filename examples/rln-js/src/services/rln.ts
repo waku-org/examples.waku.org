@@ -34,17 +34,18 @@ type IRLN = {
 
 export class RLN implements IRLN {
   private readonly emitter = new EventTarget();
-  private readonly ethProvider: ethers.providers.Web3Provider;
+  public readonly ethProvider: ethers.providers.Web3Provider;
 
-  private rlnInstance: undefined | RLNInstance;
-  private rlnContract: undefined | RLNContract;
-  private keystore: undefined | Keystore;
+  public rlnInstance: undefined | RLNInstance;
+  public rlnContract: undefined | RLNContract;
+  public keystore: undefined | Keystore;
 
   private initialized = false;
+  private initializing = false;
 
   public constructor() {
-    const ethereum = (<any>window)
-      .ethereum as ethers.providers.ExternalProvider;
+    const ethereum =
+      window.ethereum as unknown as ethers.providers.ExternalProvider;
     if (!isBrowserProviderValid(ethereum)) {
       throw Error(
         "Invalid Ethereum provider present on the page. Check if MetaMask is connected."
@@ -54,19 +55,20 @@ export class RLN implements IRLN {
   }
 
   public async init(): Promise<void> {
-    if (this.initialized) {
-      console.info("RLN is initialized.");
+    if (this.initialized || this.initializing) {
       return;
     }
 
-    // const rlnInstance = await this.initRLNWasm();
-    // await this.initRLNContract(rlnInstance);
+    this.initializing = true;
+    const rlnInstance = await this.initRLNWasm();
+    await this.initRLNContract(rlnInstance);
 
     this.emitStatusEvent(StatusEventPayload.RLN_INITIALIZED);
 
     this.initKeystore();
 
     this.initialized = true;
+    this.initializing = false;
   }
 
   private async initRLNWasm(): Promise<RLNInstance> {
@@ -131,3 +133,5 @@ export class RLN implements IRLN {
     );
   }
 }
+
+export const rln = new RLN();
