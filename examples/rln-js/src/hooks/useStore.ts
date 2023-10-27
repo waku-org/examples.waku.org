@@ -13,8 +13,6 @@ type StoreResult = {
   credentials: undefined | IdentityCredential;
   setCredentials: (v: undefined | IdentityCredential) => void;
 
-  keystorePassword: undefined | string;
-  setKeystorePassword: (v: string) => void;
   activeCredential: string;
   keystoreCredentials: string[];
   setKeystoreCredentials: (v: string[]) => void;
@@ -52,9 +50,6 @@ export const useStore = create<StoreResult>((set) => {
   };
 
   const keystoreModule = {
-    keystorePassword: undefined,
-    setKeystorePassword: (v: string) =>
-      set((state) => ({ ...state, keystorePassword: v })),
     activeCredential: DEFAULT_VALUE,
     setActiveCredential: (v: string) =>
       set((state) => ({ ...state, activeCredential: v })),
