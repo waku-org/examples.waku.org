@@ -45,8 +45,7 @@ export const useStore = create<StoreResult>((set) => {
 
   const wakuModule = {
     wakuStatus: DEFAULT_VALUE,
-    setWakuStatus: (v: string) =>
-      set((state) => ({ ...state, keystoreStatus: v })),
+    setWakuStatus: (v: string) => set((state) => ({ ...state, wakuStatus: v })),
   };
 
   const keystoreModule = {

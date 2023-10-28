@@ -1,18 +1,14 @@
 import React from "react";
-import { Block, BlockTypes } from "@/components/Block";
+import { Block } from "@/components/Block";
 import { Subtitle } from "@/components/Subtitle";
 import { Status } from "@/components/Status";
 import { Button } from "@/components/Button";
 import { useStore, useWaku } from "@/hooks";
 
-const DEFAULT_MA =
-  "/dns4/node-01.ac-cn-hongkong-c.wakuv2.test.statusim.net/tcp/443/wss/p2p/16Uiu2HAkvWiyFsgRhuJEb9JfjYxEkoHLgnUQmr1N5mKWnYjxYRVm";
-
 export const Waku: React.FunctionComponent<{}> = () => {
   const { wakuStatus } = useStore();
-  const { onDial, onSend, messages } = useWaku();
+  const { onSend, messages } = useWaku();
 
-  const { multiaddr, onMultiaddrChange } = useMultiaddr();
   const { nick, message, onNickChange, onMessageChange } = useMessage();
 
   const renderedMessages = React.useMemo(
@@ -24,27 +20,6 @@ export const Waku: React.FunctionComponent<{}> = () => {
     <Block className="mt-10">
       <Subtitle>Waku</Subtitle>
       <Status text="Waku status" mark={wakuStatus} />
-
-      <Block className="mt-4">
-        <label
-          htmlFor="remote-multiaddr"
-          className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-        >
-          Password(used for reading/saving into Keystore)
-        </label>
-        <Block type={BlockTypes.FlexHorizontal}>
-          <input
-            type="text"
-            value={multiaddr}
-            id="remote-multiaddr"
-            onChange={onMultiaddrChange}
-            className="w-full mb-2 mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-          />
-          <Button className="mb-2" onClick={() => onDial(multiaddr)}>
-            Dial
-          </Button>
-        </Block>
-      </Block>
 
       <Block className="mt-4">
         <label
@@ -92,19 +67,6 @@ export const Waku: React.FunctionComponent<{}> = () => {
     </Block>
   );
 };
-
-function useMultiaddr() {
-  const [multiaddr, setMultiaddr] = React.useState<string>(DEFAULT_MA);
-
-  const onMultiaddrChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    setMultiaddr(e.currentTarget.value || "");
-  };
-
-  return {
-    multiaddr,
-    onMultiaddrChange,
-  };
-}
 
 function useMessage() {
   const [nick, setNick] = React.useState<string>("");

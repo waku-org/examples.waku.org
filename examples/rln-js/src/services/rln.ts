@@ -145,4 +145,5 @@ export class RLN implements IRLN {
   }
 }
 
+// Next.js sometimes executes code in server env where there is no window object
 export const rln = typeof window === "undefined" ? undefined : new RLN();

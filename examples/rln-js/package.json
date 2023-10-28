@@ -9,8 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@waku/rln": "0.1.1-fa49e29",
+    "@waku/rln": "0.1.1-7e8cb89",
+    "@waku/sdk": "^0.0.20",
+    "@waku/utils": "^0.0.12",
     "ethers": "^5.7.2",
+    "multiaddr": "^10.0.1",
     "next": "13.5.6",
     "protobufjs": "^7.2.5",
     "react": "^18",
