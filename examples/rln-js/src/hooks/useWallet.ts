@@ -5,7 +5,6 @@ import { useRLN } from "./useRLN";
 import { SIGNATURE_MESSAGE } from "@/constants";
 
 type UseWalletResult = {
-  onConnectWallet: () => void;
   onGenerateCredentials: () => void;
 };
 
@@ -37,22 +36,6 @@ export const useWallet = (): UseWalletResult => {
     };
   }, [setEthAccount, setChainID]);
 
-  const onConnectWallet = React.useCallback(async () => {
-    if (!rln?.ethProvider) {
-      console.log("Cannot connect wallet, no provider found.");
-      return;
-    }
-
-    try {
-      const accounts = await rln.ethProvider.send("eth_requestAccounts", []);
-      setEthAccount(accounts[0] || "");
-      const network = await rln.ethProvider.getNetwork();
-      setChainID(network.chainId);
-    } catch (error) {
-      console.error("Failed to connect to account: ", error);
-    }
-  }, [rln, setEthAccount, setChainID]);
-
   const onGenerateCredentials = React.useCallback(async () => {
     if (!rln?.ethProvider) {
       console.log("Cannot generate credentials, no provider found.");
@@ -70,7 +53,6 @@ export const useWallet = (): UseWalletResult => {
   }, [rln, setCredentials]);
 
   return {
-    onConnectWallet,
     onGenerateCredentials,
   };
 };
