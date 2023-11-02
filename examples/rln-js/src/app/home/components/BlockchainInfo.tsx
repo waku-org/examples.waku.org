@@ -3,7 +3,7 @@ import { Button } from "@/components/Button";
 import { Subtitle } from "@/components/Subtitle";
 import { useContract, useStore } from "@/hooks";
 
-export const Blockchain: React.FunctionComponent<{}> = () => {
+export const BlockchainInfo: React.FunctionComponent<{}> = () => {
   const { ethAccount, lastMembershipID } = useStore();
   const { onFetchContract } = useContract();
 
