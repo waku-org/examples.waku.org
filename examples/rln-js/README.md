@@ -1,21 +1,30 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Using [RLN](https://rfc.vac.dev/spec/32/) in JavaScript
 
-## Getting Started
+> Rate limiting nullifier (RLN) is a construct based on zero-knowledge proofs
+> that provides an anonymous rate-limited signaling/messaging framework
+> suitable for decentralized (and centralized) environments
 
-First, run the development server:
+**Demonstrates**:
 
-```bash
+- RLN:
+  - Generate credentials
+  - Insert membership to smart contract (Goerli testnet)
+  - Retrieve smart contract state
+  - Generate and send proofs
+  - Verify incoming proofs
+- Pure Javascript/HTML.
+- Use minified bundle of js from unpkg.com, no import, no package manager.
+
+# Getting Started
+
+```shell
+git clone https://github.com/waku-org/js-waku-examples
+cd js-waku-examples/examples/rln-js
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# open  http://127.0.0.1:3000 In your browser
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**There are a known issue using this webapp with Firefox + MetaMask. Try Chrome or Brave if you encounter any issue**.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+The `master` branch's HEAD is deployed at https://examples.waku.org/rln-js/.
