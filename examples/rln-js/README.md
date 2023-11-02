@@ -12,8 +12,8 @@
   - Retrieve smart contract state
   - Generate and send proofs
   - Verify incoming proofs
-- Pure Javascript/HTML.
-- Use minified bundle of js from unpkg.com, no import, no package manager.
+  - Keystore
+- Next.js framework
 
 # Getting Started
 
