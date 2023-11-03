@@ -81,8 +81,12 @@ export const useNodePeers = (node: undefined | LightNode) => {
   useEffect(() => {
     if (!node) return;
 
-    const handleDiscoveryBootstrap = (event: CustomEvent<PeerId>) => {
-      setBootstrapPeers((peers) => new Set([...peers, event.detail]));
+    const handleDiscoveryBootstrap = async (event: CustomEvent<PeerId>) => {
+      (async () => {
+        if (!(await isPeerDialable(event.detail, node))) return;
+
+        setBootstrapPeers((peers) => new Set([...peers, event.detail]));
+      })().catch((error) => console.error(error));
     };
 
     const handleConnectBootstrap = (event: CustomEvent<PeerId>) => {
@@ -90,7 +94,11 @@ export const useNodePeers = (node: undefined | LightNode) => {
     };
 
     const handleDiscoveryPeerExchange = (event: CustomEvent<PeerId>) => {
-      setPeerExchangePeers((peers) => new Set([...peers, event.detail]));
+      (async () => {
+        if (!(await isPeerDialable(event.detail, node))) return;
+
+        setPeerExchangePeers((peers) => new Set([...peers, event.detail]));
+      })().catch((error) => console.error(error));
     };
 
     const handleConnectPeerExchange = (event: CustomEvent<PeerId>) => {
@@ -209,4 +217,21 @@ export const usePeers = (params: UsePeersParams): UsePeersResults => {
   }, [node, setPeers]);
 
   return peers;
+};
+
+// we only support websocket connections for now
+const isPeerDialable = async (peerId: PeerId, node: LightNode) => {
+  const peer = await node.libp2p.peerStore.get(peerId);
+  if (!peer) return false;
+  if (peer.addresses.length === 0) return false;
+  const connectableMultiaddrs = peer.addresses.filter(({ multiaddr }) =>
+    isMultiaddrConnectable(multiaddr.toString())
+  );
+  if (connectableMultiaddrs.length === 0) return false;
+
+  return true;
+};
+
+const isMultiaddrConnectable = (multiaddr: string) => {
+  return multiaddr.includes("wss") || multiaddr.includes("/tls/ws");
 };
