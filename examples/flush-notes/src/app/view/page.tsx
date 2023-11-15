@@ -1,4 +1,9 @@
+"use client";
+
+import React from "react";
 import Markdown from "react-markdown";
+import { useRouter } from "next/navigation";
+import { useViewHash } from "@/hooks/useViewHash";
 
 const t = `
 ### Problem
@@ -27,6 +32,17 @@ Spec of the Fetch API - https://fetch.spec.whatwg.org/#concept-filtered-response
 Considering we expect REST API to be run only on localhost we should add following HTTP header to allow web apps run on different port to be able to talk to the API.
 `;
 
-export default function Home() {
+const View = () => {
+  const router = useRouter();
+  const noteHash = useViewHash();
+
+  React.useEffect(() => {
+    if (!noteHash) {
+      router.replace("/404");
+    }
+  }, [noteHash]);
+
   return <Markdown>{t}</Markdown>;
-}
+};
+
+export default View;
