@@ -2,30 +2,16 @@ import { ethers } from "ethers";
 import {
   create,
   Keystore,
-  RLNDecoder,
-  RLNEncoder,
   RLNContract,
   SEPOLIA_CONTRACT,
   RLNInstance,
 } from "@waku/rln";
 import { isBrowserProviderValid } from "@/utils/ethereum";
+import { StatusEventPayload } from "@/constants";
 
 export enum RLNEventsNames {
   Status = "status",
   Keystore = "keystore-changed",
-}
-
-export enum StatusEventPayload {
-  WASM_LOADING = "WASM Blob download in progress...",
-  WASM_FAILED = "Failed to download WASM, check console",
-  CONTRACT_LOADING = "Connecting to RLN contract",
-  CONTRACT_FAILED = "Failed to connect to RLN contract",
-  RLN_INITIALIZED = "RLN dependencies initialized",
-  KEYSTORE_LOCAL = "Keystore initialized from localStore",
-  KEYSTORE_NEW = "New Keystore was initialized",
-  CREDENTIALS_REGISTERING = "Registering credentials...",
-  CREDENTIALS_REGISTERED = "Registered credentials",
-  CREDENTIALS_FAILURE = "Failed to register credentials, check console",
 }
 
 type EventListener = (event: CustomEvent) => void;
@@ -135,7 +121,7 @@ export class RLN implements IRLN {
   }
 
   public async saveKeystore() {
-    // localStorage.setItem("keystore", this.keystore.toString());
+    localStorage.setItem("keystore", this.keystore.toString());
     this.emitKeystoreKeys();
   }
 

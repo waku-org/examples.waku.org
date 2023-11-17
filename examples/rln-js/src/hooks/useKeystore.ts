@@ -2,7 +2,7 @@ import React from "react";
 import { useStore } from "./useStore";
 import { useRLN } from "./useRLN";
 import { SEPOLIA_CONTRACT } from "@waku/rln";
-import { StatusEventPayload } from "@/services/rln";
+import { StatusEventPayload } from "@/constants";
 
 type UseKeystoreResult = {
   onReadCredentials: (hash: string, password: string) => void;
