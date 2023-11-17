@@ -1,13 +1,11 @@
-import type { Metadata } from "next";
+"use client";
+
+import React from "react";
 import { Inter } from "next/font/google";
+import { WakuProvider } from "@/app/WakuProvider";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
-
-export const metadata: Metadata = {
-  title: "Flush notes",
-  description: "An app to share notes",
-};
 
 export default function RootLayout({
   children,
@@ -16,7 +14,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <WakuProvider>{children}</WakuProvider>
+      </body>
     </html>
   );
 }
