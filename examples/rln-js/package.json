@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "start": "npm run open && next dev",
+    "lint": "next lint",
+    "open": "npx open-cli http://localhost:3000/rln-js"
   },
   "dependencies": {
     "@waku/rln": "0.1.1-7e8cb89",
@@ -28,6 +28,7 @@
     "autoprefixer": "^10",
     "eslint": "^8",
     "eslint-config-next": "13.5.6",
+    "open-cli": "^7.2.0",
     "postcss": "^8",
     "tailwindcss": "^3",
     "typescript": "^5"
