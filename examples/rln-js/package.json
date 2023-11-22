@@ -9,7 +9,7 @@
     "open": "npx open-cli http://localhost:3000/rln-js"
   },
   "dependencies": {
-    "@waku/rln": "0.1.1-7e8cb89",
+    "@waku/rln": "0.1.1-0fbf6be",
     "@waku/sdk": "^0.0.20",
     "@waku/utils": "^0.0.12",
     "ethers": "^5.7.2",
