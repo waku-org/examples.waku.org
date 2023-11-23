@@ -65,16 +65,14 @@ function App() {
           }
         )) {
           const messages = await Promise.all(
-            messagesPromises
-              .map(async (p) => {
-                const msg = await p;
-                return decodeMessage(msg);
-              })
-              .filter(Boolean)
+            messagesPromises.map(async (p) => {
+              const msg = await p;
+              return decodeMessage(msg);
+            })
           );
 
           setMessages((currentMessages) => {
-            return currentMessages.concat(messages.reverse());
+            return currentMessages.concat(messages.filter(Boolean).reverse());
           });
         }
       } catch (e) {
