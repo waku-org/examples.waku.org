@@ -93,6 +93,6 @@ def buildNextJSExample(example=STAGE_NAME) {
     sh 'npm install --silent'
     sh 'npm run build'
     sh "mkdir -p ${dest}"
-    sh "cp -r out/. ${dest}"
+    sh "cp -r out/* ${dest}"
   }
 }
