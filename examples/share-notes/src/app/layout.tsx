@@ -14,6 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <title>Share notes</title>
       <body className={inter.className}>
         <WakuProvider>{children}</WakuProvider>
       </body>
