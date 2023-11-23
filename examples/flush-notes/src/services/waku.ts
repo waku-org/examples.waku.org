@@ -23,7 +23,6 @@ export class Waku {
     }
 
     this.initializing = true;
-    console.log("Waku");
     try {
       this.emitStatusEvent("Initializing...");
       const node = await createLightNode({ defaultBootstrap: true });
@@ -49,7 +48,6 @@ export class Waku {
   }
 
   private emitStatusEvent(payload: string) {
-    console.log(payload);
     this.emitter.dispatchEvent(
       new CustomEvent(WakuEvents.Status, { detail: payload })
     );
