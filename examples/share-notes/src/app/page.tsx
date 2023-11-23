@@ -4,10 +4,6 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { notes } from "@/services/notes";
 
-// EgeLwHNbSwIzIz3M
-// 3gxFeAHa8sOvTymg
-
-// encrypted nkt698RhpWory0yT
 export default function Create() {
   const router = useRouter();
   const { note, onNoteChange } = useEditNote();
