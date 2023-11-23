@@ -2,13 +2,17 @@
 
 import React from "react";
 import { waku, Waku, WakuEvents } from "@/services/waku";
+import { WakuStatus } from "@/const";
+import { Loading } from "./Loading";
 
 type WakuContextProps = {
-  status: string;
+  status: WakuStatus;
+  waku?: Waku;
 };
 
 const WakuContext = React.createContext<WakuContextProps>({
-  status: "",
+  status: WakuStatus.Initializing,
+  waku: undefined,
 });
 
 type WakuProviderProps = {
@@ -16,14 +20,16 @@ type WakuProviderProps = {
 };
 
 export const useWaku = () => {
-  const { status } = React.useContext(WakuContext);
+  const { status, waku } = React.useContext(WakuContext);
 
-  return { status };
+  return { status, waku };
 };
 
 export const WakuProvider = (props: WakuProviderProps) => {
   const wakuRef = React.useRef<Waku>();
-  const [status, setStatus] = React.useState<string>("");
+  const [status, setStatus] = React.useState<WakuStatus>(
+    WakuStatus.Initializing
+  );
 
   React.useEffect(() => {
     if (wakuRef.current) {
@@ -43,8 +49,16 @@ export const WakuProvider = (props: WakuProviderProps) => {
     };
   }, [wakuRef, setStatus]);
 
+  if (status === WakuStatus.Failed) {
+    return <>{status}</>;
+  }
+
+  if (status !== WakuStatus.Connected) {
+    return <Loading />;
+  }
+
   return (
-    <WakuContext.Provider value={{ status }}>
+    <WakuContext.Provider value={{ status, waku: wakuRef.current }}>
       {props.children}
     </WakuContext.Provider>
   );

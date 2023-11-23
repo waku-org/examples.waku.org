@@ -10,7 +10,10 @@
   },
   "dependencies": {
     "@waku/interfaces": "^0.0.20",
+    "@waku/message-encryption": "^0.0.23",
     "@waku/sdk": "^0.0.21",
+    "@waku/utils": "^0.0.13",
+    "ethereum-cryptography": "^2.1.2",
     "next": "14.0.2",
     "react": "^18",
     "react-dom": "^18",
