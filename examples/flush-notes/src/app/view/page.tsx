@@ -3,23 +3,23 @@
 import React from "react";
 import Markdown from "react-markdown";
 import { useRouter } from "next/navigation";
-import { useNoteHash } from "@/hooks/useNoteHash";
+import { useNoteURL } from "@/hooks/useNoteURL";
 import { notes } from "@/services/notes";
 import { Loading } from "../Loading";
 
 const View = () => {
   const router = useRouter();
-  const noteHash = useNoteHash();
+  const { id, password } = useNoteURL();
   const [note, setNote] = React.useState<string>("");
 
   React.useEffect(() => {
-    if (!noteHash) {
+    if (!id) {
       router.replace("/404");
       return;
     }
 
-    notes.readNote(noteHash).then((note) => setNote(note || ""));
-  }, [noteHash, setNote]);
+    notes.readNote(id, password).then((note) => setNote(note || ""));
+  }, [id, password, setNote]);
 
   if (!note) {
     return <Loading />;

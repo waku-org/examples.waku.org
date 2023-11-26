@@ -54,7 +54,10 @@ export class Notes {
     return note.id;
   }
 
-  public async readNote(id: string): Promise<string | undefined> {
+  public async readNote(
+    id: string,
+    password?: string
+  ): Promise<string | undefined> {
     await this.initMessages();
 
     const message = this.messages
@@ -75,14 +78,15 @@ export class Notes {
       return message?.content;
     }
 
-    const password = window.prompt("This note is encrypted, need password:");
+    const passwordReceived =
+      password || window.prompt("This note is encrypted, need password:");
 
-    if (!password) {
+    if (!passwordReceived) {
       console.log("No password was provided, stopping reading a note.");
       return;
     }
 
-    return this.decryptNote(message, password);
+    return this.decryptNote(message, passwordReceived);
   }
 
   private async initMessages() {
