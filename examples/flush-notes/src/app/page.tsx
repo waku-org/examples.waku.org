@@ -7,7 +7,7 @@ import { notes } from "@/services/notes";
 export default function Create() {
   const router = useRouter();
   const { note, onNoteChange } = useEditNote();
-  const { password, onPasswordChange } = usePassword();
+  const { toEncrypt, onEncryptChange } = useEncryptedState();
 
   const onSave = async () => {
     if (!note) {
@@ -15,10 +15,12 @@ export default function Create() {
     }
 
     try {
-      const id = await notes.createNote(note, password);
-      router.push(`/view/${id}`);
+      const { id, password } = await notes.createNote(note, toEncrypt);
+      const passwordParam = password ? `?password=${password}` : "";
+
+      router.push(`/view/${id}${passwordParam}`);
     } catch (error) {
-      console.log("Failed to create a note:", error);
+      console.error("Failed to create a note:", error);
     }
   };
 
@@ -28,13 +30,17 @@ export default function Create() {
         Your record will be stored for couple of days. Markdown is supported.
       </p>
       <div className="create-header">
-        <input
-          className="password-value"
-          type="password"
-          onChange={onPasswordChange}
-          placeholder="Optional password"
-          autoComplete="off"
-        />
+        <div>
+          <input
+            type="checkbox"
+            id="isEncrypted"
+            name="isEncrypted"
+            onChange={onEncryptChange}
+          />
+          <label htmlFor="isEncrypted" className="to-encrypt">
+            Private (only those that have link will read the note)
+          </label>
+        </div>
         <button onClick={onSave} className="save-note">
           Save note
         </button>
@@ -61,15 +67,15 @@ const useEditNote = () => {
   };
 };
 
-const usePassword = () => {
-  const [password, setPassword] = React.useState<string>();
+const useEncryptedState = () => {
+  const [toEncrypt, setToEncrypt] = React.useState<string>();
 
-  const onPasswordChange = (event: React.FormEvent<HTMLInputElement>) => {
-    setPassword(event?.currentTarget?.value);
+  const onEncryptChange = (event: React.FormEvent<HTMLSelectElement>) => {
+    setToEncrypt(event?.currentTarget?.value);
   };
 
   return {
-    password,
-    onPasswordChange,
+    toEncrypt,
+    onEncryptChange,
   };
 };

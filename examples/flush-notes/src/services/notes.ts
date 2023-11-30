@@ -2,9 +2,10 @@
 
 import { waku } from "@/services/waku";
 import { CONTENT_TOPIC } from "@/const";
-import { encrypt, decrypt } from "ethereum-cryptography/aes";
-import { getRandomBytes } from "ethereum-cryptography/random";
-import { pbkdf2 } from "ethereum-cryptography/pbkdf2";
+import {
+  symmetric,
+  generateSymmetricKey,
+} from "@waku/message-encryption/crypto";
 import {
   createDecoder,
   createEncoder,
@@ -21,14 +22,12 @@ import { bytesToHex, hexToBytes } from "@waku/utils/bytes";
 type Note = {
   id: string;
   content: string;
-  kdf:
-    | undefined
-    | {
-        iv: string;
-        dklen: number;
-        c: number;
-        salt: string;
-      };
+  iv: string;
+};
+
+type NoteResult = {
+  id: string;
+  password?: string;
 };
 
 export class Notes {
@@ -42,16 +41,23 @@ export class Notes {
     this.encoder = createEncoder({ contentTopic: CONTENT_TOPIC });
   }
 
-  public async createNote(content: string, password?: string): Promise<string> {
-    const note = password
-      ? await this.encryptNote(content, password)
-      : { id: generateRandomString(), content, kdf: undefined };
+  public async createNote(
+    content: string,
+    toEncrypt?: boolean
+  ): Promise<NoteResult> {
+    const symmetricKey = toEncrypt ? generateSymmetricKey() : undefined;
+    const note = toEncrypt
+      ? await this.encryptNote(content, symmetricKey)
+      : { id: generateRandomString(), content, iv: undefined };
 
     await waku.send(this.encoder, {
       payload: utf8ToBytes(JSON.stringify(note)),
     });
 
-    return note.id;
+    return {
+      id: note.id,
+      password: symmetricKey ? bytesToHex(symmetricKey) : undefined,
+    };
   }
 
   public async readNote(
@@ -74,7 +80,7 @@ export class Notes {
         }
       });
 
-    if (!message?.kdf) {
+    if (!message?.iv) {
       return message?.content;
     }
 
@@ -100,48 +106,36 @@ export class Notes {
     });
   }
 
-  private async encryptNote(content: string, password: string): Promise<Note> {
-    const iv = await getRandomBytes(16);
-    const salt = await getRandomBytes(32);
-    const c = 131072;
-    const dklen = 16;
-    const kdf = await pbkdf2(
-      utf8ToBytes(password.normalize("NFKC")),
-      salt,
-      c,
-      dklen,
-      "sha256"
+  private async encryptNote(
+    content: string,
+    symmetricKey: Uint8Array
+  ): Promise<Note> {
+    const iv = symmetric.generateIv();
+    const encryptedContent = await symmetric.encrypt(
+      iv,
+      symmetricKey,
+      utf8ToBytes(content)
     );
-    const encryptedContent = await encrypt(utf8ToBytes(content), kdf, iv);
 
     return {
       id: generateRandomString(),
       content: bytesToHex(encryptedContent),
-      kdf: {
-        c,
-        dklen,
-        iv: bytesToHex(iv),
-        salt: bytesToHex(salt),
-      },
+      iv: bytesToHex(iv),
     };
   }
 
   private async decryptNote(note: Note, password: string): Promise<string> {
-    if (!note?.kdf) {
-      throw Error("Failed to decrypt a note, no kdf params found.");
+    if (!note?.iv) {
+      throw Error("Failed to decrypt a note, no IV params found.");
     }
 
-    const iv = hexToBytes(note.kdf.iv);
-    const salt = hexToBytes(note.kdf.salt);
-
-    const kdf = await pbkdf2(
-      utf8ToBytes(password.normalize("NFKC")),
-      salt,
-      note.kdf.c,
-      note.kdf.dklen,
-      "sha256"
+    const iv = hexToBytes(note.iv);
+    const symmetricKey = hexToBytes(password);
+    const decryptedContent = await symmetric.decrypt(
+      iv,
+      symmetricKey,
+      hexToBytes(note.content)
     );
-    const decryptedContent = await decrypt(hexToBytes(note.content), kdf, iv);
 
     return bytesToUtf8(decryptedContent);
   }

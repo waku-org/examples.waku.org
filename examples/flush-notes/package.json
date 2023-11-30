@@ -8,11 +8,10 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@waku/interfaces": "^0.0.20",
-    "@waku/message-encryption": "^0.0.23",
-    "@waku/sdk": "^0.0.21",
-    "@waku/utils": "^0.0.13",
-    "ethereum-cryptography": "^2.1.2",
+    "@waku/interfaces": "0.0.21-7eb3375.0",
+    "@waku/message-encryption": "0.0.24-7eb3375.0",
+    "@waku/sdk": "0.0.22-7eb3375.0",
+    "@waku/utils": "0.0.14-7eb3375.0",
     "next": "14.0.2",
     "react": "^18",
     "react-dom": "^18",

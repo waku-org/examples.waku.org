@@ -3,7 +3,7 @@
 import React from "react";
 import { waku, Waku, WakuEvents } from "@/services/waku";
 import { WakuStatus } from "@/const";
-import { Loading } from "./Loading";
+import { Loading } from "@/components/Loading";
 
 type WakuContextProps = {
   status: WakuStatus;

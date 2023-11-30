@@ -5,7 +5,7 @@ import Markdown from "react-markdown";
 import { useRouter } from "next/navigation";
 import { useNoteURL } from "@/hooks/useNoteURL";
 import { notes } from "@/services/notes";
-import { Loading } from "../Loading";
+import { Loading } from "@/components/Loading";
 
 const View = () => {
   const router = useRouter();

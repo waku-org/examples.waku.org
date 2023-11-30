@@ -21,10 +21,8 @@
   align-items: center;
 }
 
-.password-value {
+.to-encrypt {
   font-size: 1rem;
-  height: 2rem;
-  width: 250px;
   padding: 5px;
 }
 

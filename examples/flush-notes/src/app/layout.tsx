@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Inter } from "next/font/google";
-import { WakuProvider } from "@/app/WakuProvider";
+import { WakuProvider } from "@/components/WakuProvider";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
