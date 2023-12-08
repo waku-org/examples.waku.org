@@ -44,6 +44,7 @@ pipeline {
         stage('noise-rtc') { steps { script { buildExample() } } }
         stage('relay-direct-rtc') { steps { script { buildExample() } } }
         stage('rln-js') { steps { script { buildNextJSExample() } } }
+        stage('tictactoe') { steps { script { buildNextJSExample() } } }
       }
     }
 
