@@ -12,6 +12,12 @@ See https://examples.waku.org/ for more examples.
 - [website](https://examples.waku.org/web-chat)
 - Demonstrates: Group chat, React/TypeScript, Relay, Store.
 
+### Tic Tac Toe
+
+- [code](examples/tictactoe)
+- [website](https://examples.waku.org/tictactoe)
+- Demonstrates: Gaming, Light Client, Store, NextJS, Waku React.
+
 ### Ethereum Private Messaging
 
 End-to-end encrypted communication between two Ethereum addresses.
