@@ -9,7 +9,7 @@ import { Loading } from "@/components/Loading";
 
 const View = () => {
   const router = useRouter();
-  const { id, password } = useNoteURL();
+  const { id, key } = useNoteURL();
   const [note, setNote] = React.useState<string>("");
 
   React.useEffect(() => {
@@ -18,8 +18,8 @@ const View = () => {
       return;
     }
 
-    notes.readNote(id, password).then((note) => setNote(note || ""));
-  }, [id, password, setNote]);
+    notes.readNote(id, key).then((note) => setNote(note || ""));
+  }, [id, key, setNote]);
 
   if (!note) {
     return <Loading />;

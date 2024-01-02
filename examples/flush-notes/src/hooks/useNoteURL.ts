@@ -1,16 +1,15 @@
 "use client";
 import { usePathname, useSearchParams } from "next/navigation";
 
-export const useNoteURL = (): undefined | string => {
+export const useNoteURL = (): { id: string; key: string } => {
   const pathname = usePathname();
   const params = useSearchParams();
 
   const segments = pathname.split("/");
   const viewIndex = segments.indexOf("view");
-  const password = params.get("password");
+  const key = params.get("key");
 
-  return {
-    password,
-    id: segments[viewIndex + 1] || undefined,
-  };
+  const id = segments[viewIndex + 1];
+
+  return { key, id };
 };

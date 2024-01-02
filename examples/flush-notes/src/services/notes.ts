@@ -3,73 +3,64 @@
 import { waku } from "@/services/waku";
 import { CONTENT_TOPIC } from "@/const";
 import {
-  symmetric,
-  generateSymmetricKey,
-} from "@waku/message-encryption/crypto";
-import {
-  createDecoder,
   createEncoder,
-  Decoder,
-  Encoder,
-  IDecodedMessage,
-  Unsubscribe,
-  utf8ToBytes,
-  bytesToUtf8,
-} from "@waku/sdk";
-import { generateRandomString } from "@/utils";
+  createDecoder,
+  DecodedMessage,
+  generateSymmetricKey,
+} from "@waku/message-encryption/symmetric";
+import { Unsubscribe, utf8ToBytes, bytesToUtf8 } from "@waku/sdk";
 import { bytesToHex, hexToBytes } from "@waku/utils/bytes";
+
+const UUID_V4_STR_LEN = 8 + 1 + 4 + 1 + 4 + 1 + 4 + 1 + 12; // 8-4-4-4-12 format
 
 type Note = {
   id: string;
   content: string;
-  iv: string;
 };
 
 type NoteResult = {
   id: string;
-  password?: string;
+  key: string;
 };
 
 export class Notes {
-  private decoder: Decoder;
-  private encoder: Encoder;
-  private messages: IDecodedMessage[] = [];
+  private messages: DecodedMessage[] = [];
   private subscription: undefined | Unsubscribe;
 
-  constructor() {
-    this.decoder = createDecoder(CONTENT_TOPIC);
-    this.encoder = createEncoder({ contentTopic: CONTENT_TOPIC });
-  }
+  constructor() {}
 
-  public async createNote(
-    content: string,
-    toEncrypt?: boolean
-  ): Promise<NoteResult> {
-    const symmetricKey = toEncrypt ? generateSymmetricKey() : undefined;
-    const note = toEncrypt
-      ? await this.encryptNote(content, symmetricKey)
-      : { id: generateRandomString(), content, iv: undefined };
+  public async createNote(content: string): Promise<NoteResult> {
+    const symKey = generateSymmetricKey();
 
-    await waku.send(this.encoder, {
-      payload: utf8ToBytes(JSON.stringify(note)),
+    const encoder = createEncoder({ contentTopic: CONTENT_TOPIC, symKey });
+    const id = self.crypto.randomUUID();
+
+    if (id.length !== UUID_V4_STR_LEN) {
+      throw "Unexpected uuid length";
+    }
+
+    await waku.send(encoder, {
+      payload: utf8ToBytes(id + content),
     });
 
     return {
-      id: note.id,
-      password: symmetricKey ? bytesToHex(symmetricKey) : undefined,
+      id,
+      key: bytesToHex(symKey),
     };
   }
 
-  public async readNote(
-    id: string,
-    password?: string
-  ): Promise<string | undefined> {
-    await this.initMessages();
+  public async readNote(id: string, key: string): Promise<string | undefined> {
+    await this.initMessages(hexToBytes(key));
 
     const message = this.messages
       .map((m) => {
         try {
-          return JSON.parse(bytesToUtf8(m.payload)) as Note;
+          const str = bytesToUtf8(m.payload);
+
+          const id = str.substring(0, UUID_V4_STR_LEN);
+          const content = str.substring(UUID_V4_STR_LEN);
+
+          return { id, content } as Note;
         } catch (error) {
           console.log("Failed to read message:", error);
         }
@@ -80,64 +71,20 @@ export class Notes {
         }
       });
 
-    if (!message?.iv) {
-      return message?.content;
-    }
-
-    const passwordReceived =
-      password || window.prompt("This note is encrypted, need password:");
-
-    if (!passwordReceived) {
-      console.log("No password was provided, stopping reading a note.");
-      return;
-    }
-
-    return this.decryptNote(message, passwordReceived);
+    return message?.content;
   }
 
-  private async initMessages() {
+  private async initMessages(key: Uint8Array) {
     if (this.subscription) {
       return;
     }
 
-    this.messages = await waku.getHistory(this.decoder);
-    this.subscription = await waku.subscribe(this.decoder, (message) => {
+    const decoder = createDecoder(CONTENT_TOPIC, key);
+
+    this.messages = await waku.getHistory(decoder);
+    this.subscription = await waku.subscribe(decoder, (message) => {
       this.messages.push(message);
     });
-  }
-
-  private async encryptNote(
-    content: string,
-    symmetricKey: Uint8Array
-  ): Promise<Note> {
-    const iv = symmetric.generateIv();
-    const encryptedContent = await symmetric.encrypt(
-      iv,
-      symmetricKey,
-      utf8ToBytes(content)
-    );
-
-    return {
-      id: generateRandomString(),
-      content: bytesToHex(encryptedContent),
-      iv: bytesToHex(iv),
-    };
-  }
-
-  private async decryptNote(note: Note, password: string): Promise<string> {
-    if (!note?.iv) {
-      throw Error("Failed to decrypt a note, no IV params found.");
-    }
-
-    const iv = hexToBytes(note.iv);
-    const symmetricKey = hexToBytes(password);
-    const decryptedContent = await symmetric.decrypt(
-      iv,
-      symmetricKey,
-      hexToBytes(note.content)
-    );
-
-    return bytesToUtf8(decryptedContent);
   }
 }
 

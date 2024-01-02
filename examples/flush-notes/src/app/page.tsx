@@ -7,7 +7,6 @@ import { notes } from "@/services/notes";
 export default function Create() {
   const router = useRouter();
   const { note, onNoteChange } = useEditNote();
-  const { toEncrypt, onEncryptChange } = useEncryptedState();
 
   const onSave = async () => {
     if (!note) {
@@ -15,8 +14,8 @@ export default function Create() {
     }
 
     try {
-      const { id, password } = await notes.createNote(note, toEncrypt);
-      const passwordParam = password ? `?password=${password}` : "";
+      const { id, key } = await notes.createNote(note);
+      const passwordParam = `?key=${key}`;
 
       router.push(`/view/${id}${passwordParam}`);
     } catch (error) {
@@ -30,17 +29,7 @@ export default function Create() {
         Your record will be stored for couple of days. Markdown is supported.
       </p>
       <div className="create-header">
-        <div>
-          <input
-            type="checkbox"
-            id="isEncrypted"
-            name="isEncrypted"
-            onChange={onEncryptChange}
-          />
-          <label htmlFor="isEncrypted" className="to-encrypt">
-            Private (only those that have link will read the note)
-          </label>
-        </div>
+        <div></div>
         <button onClick={onSave} className="save-note">
           Save note
         </button>
@@ -64,18 +53,5 @@ const useEditNote = () => {
   return {
     note: state,
     onNoteChange,
-  };
-};
-
-const useEncryptedState = () => {
-  const [toEncrypt, setToEncrypt] = React.useState<string>();
-
-  const onEncryptChange = (event: React.FormEvent<HTMLSelectElement>) => {
-    setToEncrypt(event?.currentTarget?.value);
-  };
-
-  return {
-    toEncrypt,
-    onEncryptChange,
   };
 };
