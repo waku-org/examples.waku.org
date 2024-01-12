@@ -19,6 +19,7 @@ import {
   RLNContract,
 } from "@waku/rln";
 import { RLN } from "@/services/rln";
+import { contentTopicToShardIndex } from "@waku/utils";
 
 type InitOptions = {
   membershipID: number;
@@ -84,12 +85,15 @@ export class Waku implements IWaku {
     this.initEncoder(options);
     this.decoder = new RLNDecoder(
       options.rln.rlnInstance,
-      createDecoder(this.contentTopic)
+      createDecoder(this.contentTopic, { clusterId: 1 })
     );
 
     if (!this.node) {
       this.emitStatusEvent(WakuStatusEventPayload.INITIALIZING);
-      this.node = await createLightNode({ defaultBootstrap: true });
+      this.node = await createLightNode({
+        defaultBootstrap: true,
+        shardInfo: { clusterId: 1, contentTopics: [CONTENT_TOPIC] },
+      });
       this.emitStatusEvent(WakuStatusEventPayload.STARTING);
       await this.node.start();
       this.emitStatusEvent(WakuStatusEventPayload.WAITING_FOR_PEERS);
@@ -119,6 +123,7 @@ export class Waku implements IWaku {
       createEncoder({
         ephemeral: false,
         contentTopic: this.contentTopic,
+        pubsubTopicShardInfo: { clusterId: 1 },
       }),
       rln.rlnInstance,
       membershipID,
@@ -145,7 +150,11 @@ export class Waku implements IWaku {
   }
 
   private async subscribeToMessages(options: SubscribeOptions) {
-    await options.node.filter.subscribe(options.decoder, (message) => {
+    const subscription = await options.node.filter.createSubscription({
+      clusterId: 1,
+      shard: contentTopicToShardIndex(CONTENT_TOPIC),
+    });
+    await subscription.subscribe(options.decoder, (message) => {
       try {
         const { timestamp, nick, text } = ProtoChatMessage.decode(
           message.payload
