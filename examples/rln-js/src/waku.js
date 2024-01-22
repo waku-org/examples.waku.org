@@ -1,6 +1,6 @@
 import { createLightNode, waitForRemotePeer } from "@waku/sdk";
 
-import { ProtoChatMessage } from "./const";
+import { CLUSTER_ID, ProtoChatMessage } from "./const";
 
 export async function initWaku({
   encoder,
@@ -11,6 +11,7 @@ export async function initWaku({
   onStatusChange("Initializing Waku...");
   const node = await createLightNode({
     defaultBootstrap: true,
+    shardInfo: { clusterId: CLUSTER_ID, contentTopics: [CONTENT_TOPIC] },
   });
   onStatusChange("Waiting for peers");
   await node.start();
@@ -31,7 +32,10 @@ export async function initWaku({
   };
 
   onStatusChange("Subscribing to content topic...");
-  const subscription = await node.filter.createSubscription();
+  const subscription = await node.filter.createSubscription({
+    clusterId: CLUSTER_ID,
+    shard: contentTopicToShardIndex(CONTENT_TOPIC),
+  });
   const onSubscribe = async (cb) => {
     await subscription.subscribe(decoder, (message) => {
       try {

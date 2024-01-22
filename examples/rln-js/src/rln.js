@@ -9,7 +9,12 @@ import {
 } from "@waku/rln";
 import { createEncoder, createDecoder } from "@waku/sdk";
 
-import { CONTENT_TOPIC, MEMBERSHIP_ID, RLN_CREDENTIALS } from "./const";
+import {
+  CONTENT_TOPIC,
+  MEMBERSHIP_ID,
+  RLN_CREDENTIALS,
+  CLUSTER_ID,
+} from "./const";
 
 export async function initRLN(onStatusChange) {
   onStatusChange("Connecting to wallet...");
@@ -40,16 +45,21 @@ export async function initRLN(onStatusChange) {
     onStatusChange("Failed to initialize RLN", "error");
     throw Error(err);
   }
+
   const encoder = new RLNEncoder(
     createEncoder({
       ephemeral: false,
       contentTopic: CONTENT_TOPIC,
+      pubsubTopicShardInfo: { clusterId: CLUSTER_ID },
     }),
     rlnInstance,
     MEMBERSHIP_ID,
     RLN_CREDENTIALS
   );
-  const decoder = new RLNDecoder(rlnInstance, createDecoder(CONTENT_TOPIC));
+  const decoder = new RLNDecoder(
+    rlnInstance,
+    createDecoder(CONTENT_TOPIC, { clusterId: CLUSTER_ID })
+  );
 
   onStatusChange("RLN initialized", "success");
 
