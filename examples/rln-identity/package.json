@@ -7,12 +7,11 @@
     "start": "webpack-dev-server"
   },
   "dependencies": {
-    "@waku/rln": "0.1.1-0fbf6be",
+    "@waku/rln": "0.1.1-bafbe01",
     "@waku/sdk": "^0.0.22",
     "@waku/utils": "^0.0.14",
     "ethers": "^5.7.2",
-    "multiaddr": "^10.0.1",
-    "protobufjs": "^7.2.5"
+    "multiaddr": "^10.0.1"
   },
   "devDependencies": {
     "eslint": "^8",

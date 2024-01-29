@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>RLN Chat</title>
+    <title>RLN Credential management</title>
     <link rel="apple-touch-icon" href="./favicon.png" />
     <link rel="manifest" href="./manifest.json" />
     <link rel="icon" href="./favicon.ico" />
@@ -76,6 +76,19 @@
         color: #c84740;
       }
 
+      input {
+        padding: 0.5rem;
+      }
+
+      select {
+        padding: 0.5rem;
+        max-width: 150px;
+      }
+
+      button {
+        padding: 0.5rem;
+      }
+
       button.progress {
         color: white;
         background-color: #9ea13b;
@@ -91,55 +104,23 @@
         background-color: #c84740;
       }
 
-      .pairingInfo {
+      .mb-1 {
+        margin-bottom: 1rem;
+      }
+      .mb-2 {
+        margin-bottom: 2rem;
+      }
+      .mb-3 {
+        margin-bottom: 3rem;
+      }
+      .mt-1 {
+        margin-top: 1rem;
+      }
+
+      .block {
         display: flex;
-        flex-direction: column;
+        justify-content: space-between;
         align-items: center;
-      }
-
-      .pairingInfo input {
-        display: block;
-        min-width: 250px;
-        width: 100%;
-        max-width: 600px;
-        font-size: 1.1rem;
-        line-height: 1.5rem;
-        padding: 5px;
-        margin-bottom: 10px;
-      }
-
-      .pairingInfo button {
-        flex-grow: 1;
-        cursor: pointer;
-        padding: 10px;
-      }
-
-      .pairingInfo button + button {
-        margin-left: 5px;
-      }
-
-      .chatArea {
-      }
-
-      .chatArea ul {
-        margin-bottom: 30px;
-        list-style: none;
-      }
-
-      .chatArea ul li + li {
-        margin-top: 5px;
-      }
-
-      .chatArea div {
-        display: flex;
-        flex-direction: column;
-      }
-
-      .chatArea div > * {
-        font-size: 1.1rem;
-        line-height: 1.5rem;
-        padding: 5px;
-        margin-bottom: 10px;
       }
     </style>
   </head>
@@ -152,18 +133,65 @@
         </h3>
       </div>
 
-      <div class="chatArea" id="chat-area" style="display: none">
-        <h2>Chat</h2>
-        <ul id="messages"></ul>
+      <div class="block mb-1">
+        <h2>Wallet</h2>
+        <button id="connect">Connect</button>
+      </div>
 
+      <div class="block mb-1">
+        <h2>Keystore</h2>
         <div>
-          <input id="nick" placeholder="Choose a nickname" type="text" />
-          <textarea
-            id="text"
-            placeholder="Type your message here"
-            type="text"
-          ></textarea>
-          <button id="send" type="button">Send message</button>
+          <button id="import">Import</button>
+          <button id="export">Export</button>
+        </div>
+      </div>
+
+      <hr />
+
+      <h3 class="mt-1">Existing credentials</h3>
+
+      <div class="block mb-2">
+        <select id="keystore"></select>
+        <div>
+          <input id="password" placeholder="password" />
+          <button id="read-credential">Read</button>
+        </div>
+      </div>
+
+      <div class="block mb-3">
+        <h3>Create new (will use the password)</h3>
+        <button id="register-new">Register</button>
+      </div>
+
+      <div id="current-credentials">
+        <div class="block mb-1">
+          <p>Keystore hash</p>
+          <code>none</code>
+        </div>
+
+        <div class="block mb-1">
+          <p>Membership ID</p>
+          <code>none</code>
+        </div>
+
+        <div class="block mb-1">
+          <p>Secret Hash</p>
+          <code>none</code>
+        </div>
+
+        <div class="block mb-1">
+          <p>Commitment</p>
+          <code>none</code>
+        </div>
+
+        <div class="block mb-1">
+          <p>Nullifier</p>
+          <code>none</code>
+        </div>
+
+        <div class="block mb-1">
+          <p>Trapdoor</p>
+          <code>none</code>
         </div>
       </div>
     </div>
