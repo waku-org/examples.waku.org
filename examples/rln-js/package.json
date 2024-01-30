@@ -7,10 +7,9 @@
     "start": "webpack-dev-server"
   },
   "dependencies": {
-    "@waku/rln": "0.1.1-0fbf6be",
-    "@waku/sdk": "^0.0.22",
+    "@waku/rln": "0.1.1-77ba0a6",
+    "@waku/sdk": "^0.0.21",
     "@waku/utils": "^0.0.14",
-    "ethers": "^5.7.2",
     "multiaddr": "^10.0.1",
     "protobufjs": "^7.2.5"
   },

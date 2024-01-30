@@ -1,13 +1,14 @@
 import { createLightNode, waitForRemotePeer } from "@waku/sdk";
 
-import { ProtoChatMessage } from "./const";
+import { ProtoChatMessage, CONTENT_TOPIC } from "./const";
 
-export async function initWaku({
-  encoder,
-  decoder,
-  rlnContract,
-  onStatusChange,
-}) {
+export async function initWaku({ rln, onStatusChange }) {
+  const encoder = rln.createEncoder({
+    ephemeral: false,
+    contentTopic: CONTENT_TOPIC,
+  });
+  const decoder = rln.createDecoder(CONTENT_TOPIC);
+
   onStatusChange("Initializing Waku...");
   const node = await createLightNode({
     defaultBootstrap: true,
@@ -45,7 +46,7 @@ export async function initWaku({
 
           try {
             console.time("Proof verification took:");
-            const res = message.verify(rlnContract.roots());
+            const res = message.verify(rln.contract.roots());
             console.timeEnd("Proof verification took:");
             proofStatus = res ? "verified" : "not verified";
           } catch (error) {

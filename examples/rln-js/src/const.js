@@ -1,152 +1,34 @@
 import protobuf from "protobufjs";
-import { concat } from "@waku/utils/bytes";
-import { IdentityCredential, Keystore } from "@waku/rln";
+
+export const KEYSTORE = `{
+  "application": "waku-rln-relay",
+  "appIdentifier": "0.2",
+  "version": "01234567890abcdef",
+  "credentials": {
+    "740AF0B31F2DCC5C09264019BE6910FFB9C3CA575A25CC9E378BF67965AF48B4": {
+      "crypto": {
+        "cipher": "aes-128-ctr",
+        "cipherparams": {
+          "iv": "2089221b325414adcbbc926cc8cec6dc"
+        },
+        "ciphertext": "b3acbe5dc51dc2d67e7e08852577d1d538d5967f632ef097e9887852ea5aac541b4755ed5d4945f61e45437c3f9006836bb4e44d8580524cfb363775c250cb4509f15a0665b16874c9e66fe4a12fd2678002d4bf881806946dd31e510edae962e21a4bc15284442460aa843c630127b9fb46309f403f2480160c56ab9f024e394ba22c5de668e14c2500556a35f8e152d78c18a13faf1dc0542f0ff673f659daf7e8c863339f69e412b22cc83358fea684b61f1c5184ead0004854014f9dbe70b555d91d37b18b12b65ae5860ad67f81dc259f781077b18e226470ce6ae40370db0a32f9d245587dc741212ff636ddbe9fcf0bc68e8c5a9e02bbf35b359b5f5a315cb5a699283121bdde8b2093512aa8d7cef82803a7f2d84d250cb218d34c8a077c566ff7628be42e2ab50d5c115984f54640db0a861917fdaf7391b386c7ff27b48740ce90ede2f025a90fef8f1cf6b02f7c791f83950c53aced5909fef64de2e4c5160880a49b797092abad45acb58986051258628a4c994fe69282aad949d287c4d8efe4cd1ad5863edd71779dffc57ea27b817e8610730223e2b382d3f80f8d51dcb04226a1df0b344de55ff71780b750a0ab58af4360bcbc3b885bb49eb7fa2300464c97d7fda26795f853facdace48251ff6bfdb318747920499c88a68a0a00bb04d39b4357bd543778cf083c1ba38ad43d4c2fb54ee75f8707a02d5fd5b9b36a2298d999d4f008e2b2ae4fc58775d4fb0f7e8db58a6a7cb1feecdda458518916e5c359f953e71a172981efb6dd7ab81aa1b6bb87ebbb81513f19af25525214c15112728e0dd7786459c7c4d9c0ea1df62cd7be42253ab484cc9c8b2b7bfaae4216b26b53b86eb691a4dc91615fcf804f95c50ee8b88ab2ccada1e3633d13cea753258e225e98c3ffbe86ee2327bcf6b540730047da79ffa3661a8783f590470d058454be5d261a77d966105cd8f1560d64635b5ec9882733502a46044d9eabb909acee18a60ade210d26af8eb6007142471174d30b8410df90d667089a28c1ef487dcfe58f14132580fd1a3f771f0e10d19f110c8a54ee5936e395227dcb5d4b895f5d6f9b04118c07671dda3942a9c6836339011e297ef2ca034d0bdc1f44693ea7ee621c532ec3893626f92addafb8518a284873c42a17274da519592a967bf8ad2f646650f39c3e4d4d014f3ff54e4088012b01244cf1dfcd2396d4c36d4f210805f167ec7533254d3a3cdefad7e9d531d6d67fbc497ba0c38036263402489b64d766ea11f4df4b3fe1f4e70b8e8fc708de6fb976fe1fbfae81b1ccb3bc3dc65f61d0b92e8bf39189f5bf2fc727777e3728963cc6163169fc8a0ed72723b506d659f9b2c3048261e295876a88db139c8c15429d9a1e2bb1d3587379e2c504ae384d7563d26dab99fc12069211d6f037e513eb749ad48de58bceb95dcc860abcb0f4c1336e8025a402197434b620d1ec5c8f23230a1d75fff8353259cefc1c837faa335e48be1a49db5a7da89d490cff5f6fbf80c00ecc497ba59cbb69d4ebb57a922e646e66184b41286ceed34ec76be8326f48d66fc79c21512dc847f8b01e0253a469b351beb1288f157348da319856b892448d0b269dafd84c14e1436938e7f322f084207d421d8f5587284c021ac0607524bc29d52be2ce7f3263a237f9b319d5a26349069cf588f8f17e05021bc9bdd6edf90722bf91fb57cc67f9125aa39d09563278bea7acff25bad4968d731501f2ae62a3529d223b88aae57f2670",
+        "kdf": "pbkdf2",
+        "kdfparams": {
+          "dklen": 32,
+          "c": 262144,
+          "prf": "hmac-sha256",
+          "salt": "ff41c018bae51f6cd20e96739a46b4724c854dc6f7d4e741526b2be71f8dc572"
+        },
+        "mac": "4b98784366b4dd610e5bc0f672bd91c9410c3d271cd1bd48ca7db2ffe889d9eb"
+      }
+    }
+  }
+}`;
+export const MEMBERSHIP_HASH =
+  "740AF0B31F2DCC5C09264019BE6910FFB9C3CA575A25CC9E378BF67965AF48B4";
+export const MEMBERSHIP_PASSWORD = "qweqwe";
 
 export const CONTENT_TOPIC = "/toy-chat/2/luzhou/proto";
-export const CLUSTER_ID = 1;
-
-export const MEMBERSHIP_ID = 14;
-export const RLN_CREDENTIALS = IdentityCredential.fromBytes(
-  concat([
-    /* IDTrapdoor */ Keystore.fromArraylikeToBytes({
-      0: 182,
-      1: 79,
-      2: 126,
-      3: 47,
-      4: 227,
-      5: 67,
-      6: 22,
-      7: 100,
-      8: 128,
-      9: 168,
-      10: 33,
-      11: 164,
-      12: 240,
-      13: 233,
-      14: 91,
-      15: 245,
-      16: 75,
-      17: 156,
-      18: 224,
-      19: 189,
-      20: 174,
-      21: 19,
-      22: 104,
-      23: 69,
-      24: 190,
-      25: 34,
-      26: 222,
-      27: 244,
-      28: 119,
-      29: 236,
-      30: 43,
-      31: 29,
-    }),
-    /* IDNullifier */ Keystore.fromArraylikeToBytes({
-      0: 99,
-      1: 194,
-      2: 251,
-      3: 229,
-      4: 115,
-      5: 41,
-      6: 207,
-      7: 215,
-      8: 31,
-      9: 155,
-      10: 237,
-      11: 129,
-      12: 119,
-      13: 201,
-      14: 241,
-      15: 178,
-      16: 76,
-      17: 227,
-      18: 87,
-      19: 145,
-      20: 151,
-      21: 94,
-      22: 213,
-      23: 40,
-      24: 232,
-      25: 163,
-      26: 3,
-      27: 145,
-      28: 2,
-      29: 34,
-      30: 209,
-      31: 37,
-    }),
-    /* IDSecretHash */ Keystore.fromArraylikeToBytes({
-      0: 35,
-      1: 167,
-      2: 89,
-      3: 158,
-      4: 35,
-      5: 198,
-      6: 187,
-      7: 240,
-      8: 114,
-      9: 76,
-      10: 220,
-      11: 111,
-      12: 245,
-      13: 76,
-      14: 201,
-      15: 187,
-      16: 30,
-      17: 53,
-      18: 94,
-      19: 175,
-      20: 16,
-      21: 73,
-      22: 65,
-      23: 92,
-      24: 156,
-      25: 189,
-      26: 153,
-      27: 66,
-      28: 60,
-      29: 91,
-      30: 235,
-      31: 30,
-    }),
-    /* IDCommitment */ Keystore.fromArraylikeToBytes({
-      0: 181,
-      1: 107,
-      2: 5,
-      3: 148,
-      4: 160,
-      5: 49,
-      6: 176,
-      7: 143,
-      8: 203,
-      9: 53,
-      10: 127,
-      11: 44,
-      12: 190,
-      13: 133,
-      14: 75,
-      15: 42,
-      16: 96,
-      17: 153,
-      18: 78,
-      19: 63,
-      20: 205,
-      21: 66,
-      22: 9,
-      23: 72,
-      24: 127,
-      25: 210,
-      26: 22,
-      27: 133,
-      28: 37,
-      29: 28,
-      30: 91,
-      31: 4,
-    }),
-  ])
-);
-
 export const ProtoChatMessage = new protobuf.Type("ChatMessage")
   .add(new protobuf.Field("timestamp", 1, "uint64"))
   .add(new protobuf.Field("nick", 2, "string"))

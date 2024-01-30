@@ -4,16 +4,14 @@ import { initWaku } from "./waku";
 
 async function run() {
   const { onLoaded, onStatusChange, registerEvents } = initUI();
-  const { encoder, decoder, rlnContract } = await initRLN(onStatusChange);
+  const { rln, connectWallet } = await initRLN(onStatusChange);
   const { onSend, onSubscribe } = await initWaku({
-    encoder,
-    decoder,
-    rlnContract,
+    rln,
     onStatusChange,
   });
 
   onLoaded();
-  registerEvents({ onSend, onSubscribe });
+  registerEvents({ onSend, onSubscribe, connectWallet });
 }
 
 run();
