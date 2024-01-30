@@ -1,4 +1,4 @@
-import { createRLN, Keystore } from "@waku/rln";
+import { createRLN, Keystore, extractMetaMaskSigner } from "@waku/rln";
 import { randomNumber } from "./utils";
 import { SIGNATURE_MESSAGE } from "./const";
 
@@ -70,7 +70,7 @@ export async function initRLN({ onStatusChange }) {
   };
 
   const importLocalKeystore = (keystoreStr) => {
-    rln.keystore = Keystore.fromString(keystoreStr);
+    rln.keystore = Keystore.fromString(keystoreStr) || Keystore.create();
   };
 
   return {

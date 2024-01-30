@@ -2,8 +2,9 @@ import { renderBytes } from "./utils";
 
 const status = document.getElementById("status");
 const connectWalletButton = document.getElementById("connect");
-const importKeystore = document.getElementById("import");
-const exportKeystore = document.getElementById("export");
+const importKeystoreButton = document.getElementById("import");
+const importFileInput = document.getElementById("import-file");
+const exportKeystoreButton = document.getElementById("export");
 const keystoreOptions = document.getElementById("keystore");
 const keystorePassword = document.getElementById("password");
 const readCredentialButton = document.getElementById("read-credential");
@@ -104,6 +105,37 @@ export function initUI() {
 
       const credential = await readCredential(currentHash, password);
       _renderCredential(currentHash, credential);
+    });
+
+    importFileInput.addEventListener("change", async (event) => {
+      const file = event.currentTarget.files[0];
+
+      if (!file) {
+        return;
+      }
+
+      const text = await file.text();
+      importLocalKeystore(text);
+
+      const keystoreOptions = readKeystoreOptions();
+      _renderKeystoreOptions(keystoreOptions);
+    });
+
+    importKeystoreButton.addEventListener("click", async () => {
+      importFileInput.click();
+    });
+
+    exportKeystoreButton.addEventListener("click", () => {
+      const filename = "keystore.json";
+      const text = saveLocalKeystore();
+      const file = new File([text], filename, {
+        type: "application/json",
+      });
+
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(file);
+      link.download = filename;
+      link.click();
     });
   };
 

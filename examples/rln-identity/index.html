@@ -122,6 +122,10 @@
         justify-content: space-between;
         align-items: center;
       }
+
+      .hidden {
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -142,6 +146,7 @@
         <h2>Keystore</h2>
         <div>
           <button id="import">Import</button>
+          <input id="import-file" class="hidden" type="file" />
           <button id="export">Export</button>
         </div>
       </div>
