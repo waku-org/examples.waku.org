@@ -37,7 +37,6 @@ pipeline {
       parallel {
         stage('eth-pm') { steps { script { buildExample() } } }
         stage('store-reactjs-chat') { steps { script { buildExample() } } }
-        stage('rln-js') { steps { script { buildNextJSExample() } } }
       }
     }
 
@@ -77,14 +76,4 @@ def copyExample(example=STAGE_NAME) {
   def dest = "build/docs/${example}"
   sh "mkdir -p ${dest}"
   sh "cp -r ${source}/. ${dest}"
-}
-
-def buildNextJSExample(example=STAGE_NAME) {
-  def dest = "${WORKSPACE}/build/docs/${example}"
-  dir("examples/${example}") {
-    sh 'npm install --silent'
-    sh 'npm run build'
-    sh "mkdir -p ${dest}"
-    sh "cp -r out/* ${dest}"
-  }
 }
