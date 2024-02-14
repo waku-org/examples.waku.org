@@ -14,13 +14,7 @@ jobs:
         example:
           [
             eth-pm,
-            relay-angular-chat,
-            relay-reactjs-chat,
-            store-reactjs-chat,
-            web-chat,
-            noise-js,
-            noise-rtc,
-            relay-direct-rtc
+            store-reactjs-chat
           ]
     runs-on: ubuntu-latest
     steps:

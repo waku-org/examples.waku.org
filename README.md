@@ -6,12 +6,6 @@ Here is the list of the examples using [`js-waku`](https://www.npmjs.com/package
 
 See https://examples.waku.org/ for more examples.
 
-### Web Chat App
-
-- [code](examples/web-chat)
-- [website](https://examples.waku.org/web-chat)
-- Demonstrates: Group chat, React/TypeScript, Relay, Store.
-
 ### Ethereum Private Messaging
 
 End-to-end encrypted communication between two Ethereum addresses.
@@ -19,38 +13,6 @@ End-to-end encrypted communication between two Ethereum addresses.
 - [code](examples/eth-pm)
 - [website](https://examples.waku.org/eth-pm)
 - Demonstrates: Private Messaging, React/TypeScript, Light Client, Signature with Web3, Asymmetric Encryption.
-
-### Waku Light Client in JavaScript
-
-Send messages between several users (or just one) using light client targetted protocols.
-
-- [code](examples/light-js)
-- [website](https://examples.waku.org/light-js)
-- Demonstrates: Waku Light node: Filter + Light Push, Pure Javascript/HTML using ESM/unpkg bundle.
-
-### Minimal Angular (v13) Waku Relay
-
-A barebone messaging app to illustrate the seamless integration of `js-waku` into AngularJS.
-
-- [code](examples/relay-angular-chat)
-- [website](https://examples.waku.org/relay-angular-chat)
-- Demonstrates: Group messaging, Angular, Waku Relay, Protobuf using `protobufjs`, No async/await syntax.
-
-### Waku Relay in JavaScript
-
-This example uses Waku Relay to send and receive simple text messages.
-
-- [code](examples/relay-js)
-- [website](https://examples.waku.org/relay-js)
-- Demonstrates: Waku Relay, Pure Javascript/HTML using ESM/unpkg bundle.
-
-### Waku Relay in ReactJS
-
-A barebone chat app to illustrate the seamless integration of `js-waku` into ReactJS.
-
-- [code](examples/relay-reactjs-chat)
-- [website](https://examples.waku.org/relay-reactjs-chat)
-- Demonstrates: Group chat, React/JavaScript, Waku Relay, Protobuf using `protobufjs`.
 
 ### Using [RLN](https://rfc.vac.dev/spec/32/) in JavaScript
 
