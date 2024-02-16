@@ -14,25 +14,6 @@ End-to-end encrypted communication between two Ethereum addresses.
 - [website](https://examples.waku.org/eth-pm)
 - Demonstrates: Private Messaging, React/TypeScript, Light Client, Signature with Web3, Asymmetric Encryption.
 
-### Using [RLN](https://rfc.vac.dev/spec/32/) in JavaScript
-
-> Rate limiting nullifier (RLN) is a construct based on zero-knowledge proofs
-> that provides an anonymous rate-limited signaling/messaging framework
-> suitable for decentralized (and centralized) environments
-
-Use RLN in the browser, compatible with nwaku chat2 and go-waku chat2 RLN implementations.
-
-- [code](examples/rln-js)
-- [website](https://examples.waku.org/rln-js)
-- Demonstrates: 
-  - RLN:
-    - Generate credentials
-    - Insert membership to smart contract (Goerli testnet)
-    - Retrieve smart contract state
-    - Generate and send proofs
-    - Verify incoming proofs
-- Pure Javascript/HTML using ESM/unpkg bundle.
-
 ### Using Waku Store in JavaScript
 
 This example uses Waku Store to retrieve the latest ping relay message (used for keep alive purposes) and displays its timestamp.
