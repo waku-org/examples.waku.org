@@ -1,7 +1,7 @@
 pipeline {
   agent {
     dockerfile {
-      label 'linux'
+      label 'linuxcontainer'
       dir 'ci'
     }
   }
