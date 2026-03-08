@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "gh-pages": "^4.0.0"
+    "gh-pages": "^5.0.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.46.0",
